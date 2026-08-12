@@ -97,6 +97,49 @@ and pushes it to the device end-to-end: `FILE_START` -> raw 4096-byte bulk chunk
 theme install and reconstructing the transferred bytes byte-for-byte from the capture (see
 below).
 
+### Building/editing themes without hand-writing JSON
+
+`Mk20Control.Protocol.Theme.Building` provides a fluent API for exactly this - "set a
+picture on button N and make it type X", "set the background", "add a CPU-usage gauge" -
+without touching raw JSON:
+
+```csharp
+using Mk20Control.Protocol.Theme.Building;
+using Mk20Control.Protocol.Codecs;
+
+var theme = new ThemeBuilder()
+    .AddPage(page => page
+        .SetCanvas(640, 656)
+        .AddBackground(bg => bg.MainScreen("bg.png", File.ReadAllBytes("bg.png")))
+        .AddKey(row: 0, column: 0, key => key
+            .Icon("icon_01.png", File.ReadAllBytes("icon_01.png"))
+            .Action(KeyActions.Keyboard(0x1E, "1"))) // USB HID keycode for '1'
+        .AddKey(row: 0, column: 1, key => key
+            .Icon("icon_02.png", File.ReadAllBytes("icon_02.png"))
+            .Action(KeyActions.OpenWeb("https://example.com"))))
+    .Build();
+
+byte[] themeBytes = ThemeFileCodec.Encode(theme);
+await client.UploadThemeFileAsync("/data/theme/MK20/mytheme/mytheme.Theme", themeBytes);
+```
+
+To edit an existing theme (e.g. one just downloaded from the device or loaded from disk)
+rather than building from scratch, use `ThemeEditor`:
+
+```csharp
+var editor = new ThemeEditor(ThemeFileCodec.Decode(existingThemeBytes));
+editor.Page(0).SetKeyIcon(row: 0, column: 2, "new_icon.png", File.ReadAllBytes("new_icon.png"));
+editor.Page(0).SetKeyAction(row: 0, column: 2, KeyActions.TypeText("hello"));
+byte[] updatedBytes = ThemeFileCodec.Encode(editor.Save());
+```
+
+`KeyActions` covers every confirmed action variant from the `.Theme` file format spec
+(keyboard, URL, mouse, page navigation, typed text, audio volume, keyboard-layout switch,
+encoder functions) - see PROTOCOL_WAVESHARE_MK20.md §7.3 for the full list and the
+cross-check performed against real theme files (`CaptureAnalyzer --builder-byte-diff
+<file.Theme>` decodes a real theme, rebuilds it purely through this API from the
+interpreted data, and reports both a byte diff and a structured field-level comparison).
+
 ## Real wire format (confirmed via USBPcap capture)
 
 Capturing the vendor **ScreenKeyWindows** app talking to a physical MK20 (USB device
@@ -444,6 +487,19 @@ dotnet run -- "C:\path\to\capture.pcapng"
   again, and compares structure/asset bytes end-to-end - useful for verifying
   `ThemeFileCodec` against a real file rather than only synthetic self-test data. All 18
   real `.Theme` files shipped with ScreenKeyWindows_v1_1 pass this check.
+- `--builder-byte-diff <file.Theme>` decodes a real theme, rebuilds its Background+Key
+  items purely through the `Mk20Control.Protocol.Theme.Building` API from the
+  *interpreted* data (not by reusing each item's original raw JSON), re-encodes, and
+  reports both a raw byte diff (expected to differ - see below) and a structured
+  field-level comparison of every key's icon path and action. Confirms 0 mismatches
+  across every physical (row/col-addressable) key in both `时尚按键.Theme` (39/39 keys)
+  and `defaultTheme.Theme` (80/80 non-encoder-slot keys - encoder-function key entries
+  share a fixed row=0,col=0 sentinel and aren't uniquely addressable by row/col, which
+  this diagnostic script doesn't disambiguate; that's a script limitation, not a builder
+  defect). Exact byte-for-byte equality is intentionally not required - only the
+  confirmed-required JSON fields and their decoded meaning need to match; extra
+  ScreenKeyWindows-only bookkeeping fields (`itemName`, `backupX`/`backupY`, JSON key
+  ordering) are not reproduced by the builder and don't affect device behavior.
 - `--selftest` verifies the frame/variant-map/system-data encode-decode round-trip against
   synthetic data, with no capture file needed.
 - `--hex` prints the full wire bytes (`DeviceFrame.Encode()`) alongside each decoded frame -

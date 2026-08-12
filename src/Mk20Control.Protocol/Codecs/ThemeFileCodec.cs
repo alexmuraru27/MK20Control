@@ -635,7 +635,10 @@ public static class ThemeFileCodec
         if (value is null) { obj.Remove(key); return; }
         obj[key] = value switch
         {
-            bool b => b,
+            // Real device theme JSON always encodes item-level booleans as "0"/"1" strings
+            // (confirmed via --dump-raw-json against real hardware themes, e.g. "lock":"1"),
+            // never as native JSON true/false - match that convention exactly.
+            bool b => b ? "1" : "0",
             double d => d.ToString(System.Globalization.CultureInfo.InvariantCulture),
             string s => s,
             _ => value.ToString(),

@@ -356,6 +356,17 @@ quoted-string escapes) — the reserved field preceding it is not a trustworthy 
 | 114 | Dynamic image | Animated GIF | `path` → embedded `.gif` asset |
 | 115 | Key | Physical key definition | `row`, `col`, `path` (icon), `controlData` (base64, see §7.2) |
 
+**Confirmed required fields for a type-115 Key item** (observed on every real key item;
+omitting several of these caused a real device to hang indefinitely on `SET_DEVICE_RELOAD`
+during testing — see §10 note): `id`, `x`, `y`, `z`, `rotate`, `scale`, `lock`, `row`, `col`,
+`path`, `controlData`, `maxWidth`, `maxHeight`, `scaledWidthTo`, `scaledHeightTo`, `opacity`,
+`paths` (usually empty string), `soundFile` (usually empty string), `title` (usually empty
+string), `titleParam` (a JSON-string-encoded object with `FontFamily`/`FontSize`/etc.).
+**Key items never carry `w`/`h`** — unlike Background items (type 100), which carry `w`/`h`
+*and* `maxWidth`/`maxHeight` together. All boolean-looking fields (e.g. `lock`) are encoded
+as the strings `"0"`/`"1"`, not JSON `true`/`false`, consistent with the numeric-string
+convention noted above.
+
 ### 7.2 Key actions (`controlData`, base64 of a Tagged-Value Map)
 
 | `type` | Purpose | Key fields |
@@ -372,6 +383,45 @@ quoted-string escapes) — the reserved field preceding it is not a trustworthy 
 | `ControlFlow` | Multi-step macro | `controlDataList` (bytes) — populated-step schema not yet observed |
 | `encoder_system_volume` / `encoder_system_media` / `encoder_device_brightness` | Encoder function | `category`="encoder", optional `relatedTheme` (a `.Theme` path shown on the encoder's mini-display) |
 | `encoder_keyboard` | Encoder bound to 3 keystrokes | `encoder_left_keycode`/`middle`/`right_keycode` (+ `keyString` each) |
+
+### 7.3 Theme builder/editor API (`Mk20Control.Protocol.Theme.Building`)
+
+For programmatic theme construction/editing (set a picture on a button, assign its
+behavior, set a background, add a data gauge, ...) without hand-writing JSON, use:
+
+- **`ThemeBuilder`** — fluent builder for a brand-new `ThemeFile` from scratch. Chain
+  `.AddPage(page => ...)`, and within a page use `.AddKey(row, col, key => ...)`,
+  `.AddBackground(bg => ...)`, `.AddText(...)`, `.AddProgressBar(...)`,
+  `.AddLinearGauge(...)`, `.AddRadialGauge(...)`, `.AddDigitalClockField(...)`,
+  `.AddDynamicImage(...)`. Call `.Build()` to get an immutable `ThemeFile`, then
+  `ThemeFileCodec.Encode(...)` to get bytes ready for `Mk20DeviceClient.UploadThemeFileAsync`.
+- **`ThemeEditor`** — wraps an already-decoded `ThemeFile` (e.g. from `ThemeFileCodec.Decode`
+  on a real `.Theme` file) for targeted edits: `editor.Page(n).SetKeyIcon(row, col, ...)`,
+  `.SetKeyAction(row, col, ...)`, `.SetKeyTitle(...)`, `.AddKey(...)`, `.RemoveKey(...)`,
+  `.SetMainBackground(...)`. Call `editor.Save()` to get the updated `ThemeFile`.
+- **`KeyActions`** — factory methods for every confirmed `KeyAction` variant from §7.2
+  (`KeyActions.Keyboard(keycode, label)`, `.OpenWeb(url)`, `.Mouse(...)`, `.PreviousPage()`/
+  `.NextPage()`, `.OpenPage(pageId)`, `.OneLevelUp()`, `.TypeText(...)`, `.AudioVolume(...)`,
+  `.KeyboardSwitch()`, `.EncoderKeyboard(...)`, `.EncoderFunction(rawType, ...)`).
+
+Every item produced by this API uses the confirmed-required JSON field skeleton from §7.1
+(no `w`/`h` on key items; `maxWidth`/`maxHeight`/`scaledWidthTo`/`scaledHeightTo`/`opacity`/
+`paths`/`soundFile`/`title`/`titleParam` present; `lock` as a `"0"`/`"1"` string) — this field
+set was cross-checked against multiple real theme files shipped with ScreenKeyWindows_v1_1
+(`defaultTheme.Theme`, `时尚按键.Theme`) as well as this project's own capture traces, not
+just a single sample.
+
+**Cross-check performed:** decoding a real theme file, rebuilding its Background+Key items
+purely through this API from the *decoded/interpreted* data (row/col, icon asset bytes,
+action), re-encoding, and re-decoding reproduces every physical (row/col-addressable) key's
+icon and action with **zero mismatches** across two real theme files (39/39 keys in
+`时尚按键.Theme`; 80/80 non-encoder-slot keys in `defaultTheme.Theme` — the only apparent
+"mismatches" there were encoder-function key entries, which share a fixed `row=0,col=0`
+sentinel rather than a unique grid position, an artifact of the comparison script's simple
+row/col lookup, not a builder defect). Exact byte-for-byte file equality is intentionally
+*not* the bar — the real ScreenKeyWindows editor embeds extra bookkeeping fields (`itemName`,
+`backupX`/`backupY`, JSON key ordering/whitespace) that have no confirmed effect on device
+behavior; see `CaptureAnalyzer --builder-byte-diff <file.Theme>` to reproduce this check.
 
 ---
 
@@ -693,6 +743,7 @@ picture vs. GIF vs. video — only a bigger/smaller asset entry inside the same 
 | 3 | `ControlFlow` action with actual configured steps | **U** — only an empty/never-configured instance observed |
 | 4 | Achievable telemetry push rate | **U** — not benchmarked |
 | 5 | Bulk-transfer resilience: whether the device rejects/retries on a corrupt chunk or dropped connection mid-transfer | **U** — a retried upload was observed in the confirming capture but the retry-trigger condition was not isolated |
+| 6 | Consequence of an under-specified Key (type 115) item JSON | **Diagnosed and re-tested, freeze recurred — root cause NOT the KeyItem JSON fields.** A synthesized theme's key items originally omitted `maxWidth`/`maxHeight`/`scaledWidthTo`/`scaledHeightTo`/`opacity`/`paths`/`soundFile`/`title`/`titleParam` (and carried a spurious `w`/`h`, which real key items never have), which correlated with `SET_DEVICE_RELOAD` hangs on two attempts. §7.1's field-set fix was applied and locally round-trip verified, then re-uploaded to real hardware a third time (after deleting the stale broken `test5.Theme` first) — **this attempt hung even earlier, during `FILE_END` of the upload itself** (previously the upload always completed and only the later reload hung), and this time the device stopped responding even to `FIND_DEVICE`/ping (previously it stayed ping-responsive while frozen). This is a *worse* and *different* failure mode than before, indicating the KeyItem field fix, while still correct per the confirmed real-theme JSON structure, is **not the (or not the only) root cause of the freeze**. Suspect candidates not yet ruled out: repeated upload/delete/re-upload cycles to the same theme name/path degrading on-device flash-management state; a timing/back-pressure issue in the bulk chunk transfer that only manifests intermittently; or an unrelated device-side fault unrelated to theme content. Device required a third physical power-cycle. **Recommendation: do not re-attempt hardware uploads of synthetic/test themes without first doing a byte-for-byte comparison of the exact wire bytes sent against a known-good captured upload (e.g. capture14) to rule out a transport-level discrepancy, and consider testing on a freshly power-cycled device without any prior delete/upload cycles in the same session.** |
 
 ---
 
@@ -706,6 +757,7 @@ picture vs. GIF vs. video — only a bigger/smaller asset entry inside the same 
 | §5.1/§5.3 Simple String Map | `Mk20Control.Protocol.Codecs.SimpleStringMapCodec` |
 | §5.2 Tagged-Value Map | `Mk20Control.Protocol.Codecs.VariantMapCodec` |
 | §7 `.Theme` file format | `Mk20Control.Protocol.Codecs.ThemeFileCodec`, `Mk20Control.Protocol.Theme.*` |
+| §7.3 Theme builder/editor API | `Mk20Control.Protocol.Theme.Building.*` (`ThemeBuilder`, `ThemeEditor`, `KeyActions`) |
 | §8 Command sequences | `Mk20Control.Protocol.Client.Mk20DeviceClient` |
 
 See `README.md` for build/usage instructions and additional narrative detail on how each
