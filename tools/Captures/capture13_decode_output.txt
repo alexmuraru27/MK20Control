@@ -1,0 +1,48 @@
+MK20 USB device address: 64
+42 USB packets with payload data found for device 64.
+
+=== host -> device (OUT) ===
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=14%
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=17%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=23%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+[H>D] type=0 cmd=11 (SetDeviceDeleteTheme) len=68  string-map: {"/data/theme/MK20/字母/字母.Theme": ""}
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=12%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+
+=== device -> host (IN) ===
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=542  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483", "/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "4115248687", "/data/theme/MK20/时尚按键/时尚按键.Theme": "2405913355", "/data/theme/MK20/快捷键/快捷键.Theme": "3192816671", "/data/theme/MK20/字母/字母.Theme": "230709637", "/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337"}
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=11 (SetDeviceDeleteTheme) len=20  string-map: {"res": "1"}
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)

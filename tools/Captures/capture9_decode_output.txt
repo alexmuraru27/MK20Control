@@ -1,0 +1,32 @@
+MK20 USB device address: 64
+1086 USB packets with payload data found for device 64.
+
+=== host -> device (OUT) ===
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GET_DEVICE_THEME) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FILE_START) len=90  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 2510012]
+[H>D] type=0 cmd=7 (FILE_END) len=94  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 467012241]
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GET_DEVICE_THEME) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FILE_START) len=90  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 2492490]
+[H>D] type=0 cmd=7 (FILE_END) len=96  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 2405913355]
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+
+=== device -> host (IN) ===
+[D>H] type=2 cmd=3 (GET_DEVICE_THEME) len=268  qt-strings: [bytesTotal | 2648 | bytesAvailable | 2512 | /data/theme/MK20/时尚按键/时尚按键.Theme | 2405913355 | /data/theme/MK20/可爱按键/可爱按键.Theme | 2283199203]
+[D>H] type=2 cmd=6 (FILE_START) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FILE_END) len=108  qt-strings: [res | 1 | fileName | /data/theme/MK20/时尚按键/时尚按键.Theme]
+[D>H] type=2 cmd=15 (SEND_JSON) len=194  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":[],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[D>H] type=2 cmd=3 (GET_DEVICE_THEME) len=266  qt-strings: [bytesTotal | 2648 | bytesAvailable | 2512 | /data/theme/MK20/时尚按键/时尚按键.Theme | 467012241 | /data/theme/MK20/可爱按键/可爱按键.Theme | 2283199203]
+[D>H] type=2 cmd=6 (FILE_START) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FILE_END) len=108  qt-strings: [res | 1 | fileName | /data/theme/MK20/时尚按键/时尚按键.Theme]
+[D>H] type=2 cmd=15 (SEND_JSON) len=194  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":[],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme

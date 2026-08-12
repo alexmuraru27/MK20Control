@@ -1,0 +1,185 @@
+MK20 USB device address: 64
+3309 USB packets with payload data found for device 64.
+
+=== host -> device (OUT) ===
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=21%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=17%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=17%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=17%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=21%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=19%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=19%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FileStart) len=82  string-map: {"/data/theme/MK20/字母/字母.Theme": "7441267"}
+[H>D] type=0 cmd=7 (FileEnd) len=86  string-map: {"/data/theme/MK20/字母/字母.Theme": "231142751"}
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SetDeviceReload) len=36  utf8: /data/theme/MK20/字母/字母.Theme
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=98  RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=98  RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FileStart) len=82  string-map: {"/data/theme/MK20/字母/字母.Theme": "7441267"}
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=98  RAM Usage=49%, GPU Usage=0%, CPU Usage=20%
+
+=== device -> host (IN) ===
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=542  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483", "/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "4115248687", "/data/theme/MK20/时尚按键/时尚按键.Theme": "2405913355", "/data/theme/MK20/快捷键/快捷键.Theme": "3192816671", "/data/theme/MK20/字母/字母.Theme": "442063441", "/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337"}
+[D>H] type=2 cmd=6 (FileStart) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FileEnd) len=100  string-map: {"res": "1", "fileName": "/data/theme/MK20/字母/字母.Theme"}
+[D>H] type=2 cmd=15 (SendJson) len=256  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","GPU Usage","RAM Usage"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SetDeviceReload) len=36  utf8: /data/theme/MK20/字母/字母.Theme
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=542  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483", "/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "4115248687", "/data/theme/MK20/时尚按键/时尚按键.Theme": "2405913355", "/data/theme/MK20/快捷键/快捷键.Theme": "3192816671", "/data/theme/MK20/字母/字母.Theme": "231142751", "/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337"}
+[D>H] type=2 cmd=6 (FileStart) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FileEnd) len=100  string-map: {"res": "1", "fileName": "/data/theme/MK20/字母/字母.Theme"}
+[D>H] type=2 cmd=15 (SendJson) len=256  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","GPU Usage","RAM Usage"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SetDeviceReload) len=36  utf8: /data/theme/MK20/字母/字母.Theme
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)

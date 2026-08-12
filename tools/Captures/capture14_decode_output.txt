@@ -1,0 +1,309 @@
+MK20 USB device address: 64
+21681 USB packets with payload data found for device 64.
+
+=== host -> device (OUT) ===
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=17%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=17%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=22%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=22%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=18%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=18%
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=18%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=14%
+[H>D] type=0 cmd=11 (SetDeviceDeleteTheme) len=300  string-map: {"/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "", "/data/theme/MK20/时尚按键/时尚按键.Theme": "", "/data/theme/MK20/快捷键/快捷键.Theme": "", "/data/theme/MK20/可爱按键/可爱按键.Theme": ""}
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=18%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=19%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=19%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=66  RAM Usage=49%, CPU Usage=9%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=66  RAM Usage=49%, CPU Usage=9%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+[H>D] type=0 cmd=15 (SendJson) len=36  {"getDeviceNetworkState":""}
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=66  RAM Usage=49%, CPU Usage=9%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=66  RAM Usage=49%, CPU Usage=9%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=66  RAM Usage=49%, CPU Usage=9%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=66  RAM Usage=49%, CPU Usage=9%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=11%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=66  RAM Usage=49%, CPU Usage=9%
+[H>D] type=0 cmd=15 (SendJson) len=32  {"bootloader_jump":true}
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=66  RAM Usage=49%, CPU Usage=9%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=10%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=10%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=11%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=11%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=15%
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=0 (FindDevice) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=0 (FindDevice) len=0  (empty payload)
+[H>D] type=0 cmd=15 (SendJson) len=24  {"connect":true}
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=28%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=28%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=50%, CPU Usage=20%
+[H>D] type=0 cmd=15 (SendJson) len=36  {"getDeviceNetworkState":""}
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=50%, CPU Usage=20%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=16%
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=15%
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FileStart) len=88  string-map: {"/data/theme/MK20/可爱按键/可爱按键.Theme": "743649"}
+[H>D] type=0 cmd=7 (FileEnd) len=96  string-map: {"/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337"}
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SetDeviceReload) len=48  utf8: /data/theme/MK20/可爱按键/可爱按键.Theme
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=14%
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=12%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=12%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=66  RAM Usage=49%, CPU Usage=9%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=11%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=11%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=13%
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FileStart) len=102  string-map: {"/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "2873627"}
+[H>D] type=0 cmd=7 (FileEnd) len=108  string-map: {"/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "4115248687"}
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SetDeviceReload) len=66  utf8: /data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:33
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:34
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:34
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:35
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:35
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:36
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:37
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:37
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:38
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:38
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:39
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:40
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:40
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:41
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:41
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:42
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:43
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:09:44
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FileStart) len=98  string-map: {"/data/theme/MK20/defaultTheme.Theme": "33366323"}
+[H>D] type=0 cmd=7 (FileEnd) len=100  string-map: {"/data/theme/MK20/defaultTheme.Theme": "606840933"}
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SetDeviceReload) len=35  utf8: /data/theme/MK20/defaultTheme.Theme
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FileStart) len=98  string-map: {"/data/theme/MK20/defaultTheme.Theme": "33366323"}
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=0 (FindDevice) len=0  (empty payload)
+[H>D] type=0 cmd=15 (SendJson) len=24  {"connect":true}
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:10:00
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:10:01
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:10:02
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:10:02
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:10:03
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:10:03
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:10:04
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:10:05
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=23:10:06
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=28  Volume=70
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=28  Volume=70
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=28  Volume=70
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FileStart) len=98  string-map: {"/data/theme/MK20/defaultTheme.Theme": "33366323"}
+[H>D] type=0 cmd=7 (FileEnd) len=102  string-map: {"/data/theme/MK20/defaultTheme.Theme": "3779651448"}
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SetDeviceReload) len=35  utf8: /data/theme/MK20/defaultTheme.Theme
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FileStart) len=98  string-map: {"/data/theme/MK20/defaultTheme.Theme": "33366323"}
+[H>D] type=0 cmd=7 (FileEnd) len=100  string-map: {"/data/theme/MK20/defaultTheme.Theme": "619014388"}
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SetDeviceReload) len=35  utf8: /data/theme/MK20/defaultTheme.Theme
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=66  RAM Usage=49%, CPU Usage=9%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=66  RAM Usage=49%, CPU Usage=9%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=66  RAM Usage=49%, CPU Usage=9%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=66  RAM Usage=49%, CPU Usage=9%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=66  RAM Usage=49%, CPU Usage=9%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=10%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=10%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=68  RAM Usage=49%, CPU Usage=11%
+
+=== device -> host (IN) ===
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=460  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483", "/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "4115248687", "/data/theme/MK20/时尚按键/时尚按键.Theme": "2405913355", "/data/theme/MK20/快捷键/快捷键.Theme": "3192816671", "/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337"}
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=11 (SetDeviceDeleteTheme) len=20  string-map: {"res": "4"}
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=164  {"wifiMessage":{"current_ssid":"","interface_exists":false,"wifi_connected":false,"wifi_networks":[]}}
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=0 (FindDevice) len=316  string-map: {"version": "V2.32", "upgradeToLatestMethod": "1", "screen_width": "640", "screen_model": "MK20", "screen_height": "656", "deviceVolume": "7", "deviceName": "ScreenKey", "deviceBl": "100"}
+[D>H] type=2 cmd=0 (FindDevice) len=316  string-map: {"version": "V2.32", "upgradeToLatestMethod": "1", "screen_width": "640", "screen_model": "MK20", "screen_height": "656", "deviceVolume": "7", "deviceName": "ScreenKey", "deviceBl": "100"}
+[D>H] type=2 cmd=15 (SendJson) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=206  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","RAM Usage"],"deviceRequestSystemDataShowUnit":true}
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=164  {"wifiMessage":{"current_ssid":"","interface_exists":false,"wifi_connected":false,"wifi_networks":[]}}
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=84  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483"}
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=84  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483"}
+[D>H] type=2 cmd=6 (FileStart) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FileEnd) len=108  string-map: {"res": "1", "fileName": "/data/theme/MK20/可爱按键/可爱按键.Theme"}
+[D>H] type=2 cmd=15 (SendJson) len=235  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","RAM Usage"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SetDeviceReload) len=48  utf8: /data/theme/MK20/可爱按键/可爱按键.Theme
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=176  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483", "/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337"}
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=176  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483", "/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337"}
+[D>H] type=2 cmd=6 (FileStart) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FileEnd) len=120  string-map: {"res": "1", "fileName": "/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme"}
+[D>H] type=2 cmd=15 (SendJson) len=209  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["time"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SetDeviceReload) len=66  utf8: /data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=280  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483", "/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "4115248687", "/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337"}
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=280  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483", "/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "4115248687", "/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337"}
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=6 (FileStart) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FileEnd) len=114  string-map: {"res": "1", "fileName": "/data/theme/MK20/defaultTheme.Theme"}
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=376  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483", "/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "4115248687", "/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337", "/data/theme/MK20/defaultTheme.Theme": "606840933"}
+[D>H] type=2 cmd=6 (FileStart) len=0  (empty payload)
+[D>H] type=2 cmd=0 (FindDevice) len=316  string-map: {"version": "V2.32", "upgradeToLatestMethod": "1", "screen_width": "640", "screen_model": "MK20", "screen_height": "656", "deviceVolume": "7", "deviceName": "ScreenKey", "deviceBl": "100"}
+[D>H] type=2 cmd=15 (SendJson) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=180  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["time"],"deviceRequestSystemDataShowUnit":true}
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=211  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["Volume"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SetDeviceReload) len=35  utf8: /data/theme/MK20/defaultTheme.Theme
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=376  string-map: {"bytesTotal": "2648", "bytesAvailable": "2509", "/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "4115248687", "/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337", "/data/theme/MK20/defaultTheme.Theme": "606840933"}
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=6 (FileStart) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FileEnd) len=114  string-map: {"res": "1", "fileName": "/data/theme/MK20/defaultTheme.Theme"}
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=378  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483", "/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "4115248687", "/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337", "/data/theme/MK20/defaultTheme.Theme": "3779651448"}
+[D>H] type=2 cmd=6 (FileStart) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=256  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","GPU Usage","RAM Usage"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SetDeviceReload) len=35  utf8: /data/theme/MK20/defaultTheme.Theme
+[D>H] type=2 cmd=7 (FileEnd) len=114  string-map: {"res": "1", "fileName": "/data/theme/MK20/defaultTheme.Theme"}
+[D>H] type=2 cmd=15 (SendJson) len=235  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","RAM Usage"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SetDeviceReload) len=35  utf8: /data/theme/MK20/defaultTheme.Theme
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)

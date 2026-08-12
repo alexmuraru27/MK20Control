@@ -1,0 +1,1646 @@
+MK20 USB device address: 64
+9970 USB packets with payload data found for device 64.
+
+=== host -> device (OUT) ===
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=17%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=24%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=24%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=19%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=19%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=19%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=19%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=19%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=17%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=17%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=24%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GET_DEVICE_THEME) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FILE_START) len=90  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 4212956]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=22%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=22%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GET_DEVICE_THEME) len=0  (empty payload)
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FILE_START) len=90  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 4195439]
+[H>D] type=0 cmd=7 (FILE_END) len=96  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 3302580682]
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GET_DEVICE_THEME) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FILE_START) len=90  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 4197347]
+[H>D] type=0 cmd=7 (FILE_END) len=96  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 3518201904]
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=22%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=22%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=19%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=5777  [SEND_PIXMAP: JPEG data starting at payload offset 30, 5747 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33383  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33353 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33322  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33292 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33322  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33292 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33989  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33959 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33989  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33959 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33860  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33830 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33857  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33827 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33857  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33827 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33828  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33798 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33828  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33798 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33905  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33875 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33905  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33875 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33905  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33875 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33873  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33843 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33873  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33843 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33873  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33843 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33873  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33843 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33849  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33819 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33849  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33819 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33757  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33727 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33757  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33727 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33818  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33788 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33776  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33746 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33776  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33746 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33821  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33791 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33821  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33791 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33821  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33791 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33971  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33941 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33971  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33941 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33971  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33941 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33995  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33965 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33995  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33965 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33995  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33965 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33974  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33944 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33974  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33944 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33974  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33944 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33927  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33897 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33927  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33897 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33919  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33889 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33919  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33889 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33932  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33902 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33906  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33876 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33906  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33876 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33915  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33885 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33915  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33885 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33847  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33817 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33847  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33817 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33845  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33815 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33845  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33815 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33845  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33815 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33845  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33815 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33866  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33836 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33866  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33836 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33864  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33834 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33864  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33834 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33865  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33835 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33865  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33835 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33915  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33885 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33915  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33885 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=17%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33915  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33885 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33915  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33885 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33910  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33880 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33923  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33893 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33923  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33893 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33923  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33893 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33779  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33749 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33779  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33749 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33767  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33737 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33767  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33737 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33767  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33737 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33791  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33761 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33791  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33761 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33791  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33761 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33791  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33761 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=34017  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33987 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=34017  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33987 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33991  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33961 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33991  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33961 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33999  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33969 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33999  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33969 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=34005  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33975 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=34005  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33975 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=34005  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33975 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33820  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33790 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33820  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33790 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33836  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33806 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33836  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33806 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33853  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33823 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33853  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33823 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33853  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33823 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33853  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33823 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33900  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33870 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33900  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33870 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33900  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33870 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33900  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33870 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33900  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33870 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33883  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33853 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33883  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33853 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33884  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33854 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33909  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33879 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33909  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33879 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33869  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33839 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33869  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33839 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33869  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33839 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33774  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33744 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33774  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33744 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33837  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33807 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33837  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33807 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33858  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33828 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33858  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33828 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33858  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33828 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33858  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33828 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33966  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33936 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33965  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33935 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33965  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33935 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33965  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33935 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33990  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33960 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33990  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33960 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33990  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33960 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33810  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33780 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33820  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33790 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33820  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33790 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33820  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33790 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33819  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33789 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33872  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33842 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33872  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33842 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33872  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33842 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33923  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33893 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33923  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33893 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33923  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33893 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GET_DEVICE_THEME) len=0  (empty payload)
+[H>D] type=0 cmd=12 (SEND_PIXMAP) len=33924  [SEND_PIXMAP: JPEG data starting at payload offset 30, 33894 bytes]
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FILE_START) len=90  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 4212962]
+[H>D] type=0 cmd=7 (FILE_END) len=96  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 2073686103]
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=20%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=20%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=25%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=25%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=20%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=19%, CPU Temperature=0℃
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GET_DEVICE_THEME) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FILE_START) len=90  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 4216900]
+[H>D] type=0 cmd=7 (FILE_END) len=96  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 1676430542]
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=25%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=25%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=26%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=26%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=25%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=25%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=25%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=20%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=17%, CPU Temperature=0℃
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GET_DEVICE_THEME) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FILE_START) len=90  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 4216153]
+[H>D] type=0 cmd=7 (FILE_END) len=96  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 3222582154]
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=17%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=17%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=11%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=11%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=17%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=20%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=20%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=11%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=11%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=11%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=11%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=11%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=11%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=23%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=23%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=21%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=21%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=21%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=21%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=22%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=22%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=23%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=23%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=23%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=23%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=20%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=20%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=24%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=24%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=23%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=13%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=15%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=19%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=19%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GET_DEVICE_THEME) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FILE_START) len=90  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 2461519]
+[H>D] type=0 cmd=7 (FILE_END) len=96  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 3223677086]
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GET_DEVICE_THEME) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FILE_START) len=90  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 2469766]
+[H>D] type=0 cmd=7 (FILE_END) len=96  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 1692224235]
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GET_DEVICE_THEME) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FILE_START) len=90  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 2492519]
+[H>D] type=0 cmd=7 (FILE_END) len=96  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 3943469175]
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GET_DEVICE_THEME) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FILE_START) len=90  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 2492490]
+[H>D] type=0 cmd=7 (FILE_END) len=94  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 522949157]
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:54:59
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:54:59
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:00
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:00
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:01
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:02
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:02
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:03
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:04
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:04
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:05
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:05
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:06
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:07
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:07
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:08
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:08
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:09
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:10
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:10
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:11
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:11
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:12
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:13
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:13
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:14
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:15
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:15
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:16
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:16
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:17
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:18
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:18
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:19
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:19
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:20
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:21
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:21
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:22
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:22
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:23
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:24
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:24
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:25
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:25
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:26
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:27
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:27
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:28
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:29
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:29
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:55:30
+
+=== device -> host (IN) ===
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GET_DEVICE_THEME) len=268  qt-strings: [bytesTotal | 2648 | bytesAvailable | 2518 | /data/theme/MK20/时尚按键/时尚按键.Theme | 1912439360 | /data/theme/MK20/可爱按键/可爱按键.Theme | 2283199203]
+[D>H] type=2 cmd=6 (FILE_START) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FILE_END) len=108  qt-strings: [res | 1 | fileName | /data/theme/MK20/时尚按键/时尚按键.Theme]
+[D>H] type=2 cmd=15 (SEND_JSON) len=333  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","CPU Voltage","CPU Temperature","GPU Usage","GPU Temperature","GPU Power"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GET_DEVICE_THEME) len=266  qt-strings: [bytesTotal | 2648 | bytesAvailable | 2518 | /data/theme/MK20/时尚按键/时尚按键.Theme | 242803056 | /data/theme/MK20/可爱按键/可爱按键.Theme | 2283199203]
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=6 (FILE_START) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FILE_END) len=108  qt-strings: [res | 1 | fileName | /data/theme/MK20/时尚按键/时尚按键.Theme]
+[D>H] type=2 cmd=15 (SEND_JSON) len=333  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","CPU Voltage","CPU Temperature","GPU Usage","GPU Temperature","GPU Power"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GET_DEVICE_THEME) len=268  qt-strings: [bytesTotal | 2648 | bytesAvailable | 2518 | /data/theme/MK20/时尚按键/时尚按键.Theme | 3302580682 | /data/theme/MK20/可爱按键/可爱按键.Theme | 2283199203]
+[D>H] type=2 cmd=6 (FILE_START) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FILE_END) len=108  qt-strings: [res | 1 | fileName | /data/theme/MK20/时尚按键/时尚按键.Theme]
+[D>H] type=2 cmd=15 (SEND_JSON) len=374  {"deviceRequestImageName":["ScreenKey"],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","CPU Voltage","CPU Temperature","GPU Usage","GPU Temperature","GPU Power","ScreenKey"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GET_DEVICE_THEME) len=268  qt-strings: [bytesTotal | 2648 | bytesAvailable | 2518 | /data/theme/MK20/时尚按键/时尚按键.Theme | 3518201904 | /data/theme/MK20/可爱按键/可爱按键.Theme | 2283199203]
+[D>H] type=2 cmd=12 (SEND_PIXMAP) len=0  (empty payload)
+[D>H] type=2 cmd=6 (FILE_START) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FILE_END) len=108  qt-strings: [res | 1 | fileName | /data/theme/MK20/时尚按键/时尚按键.Theme]
+[D>H] type=2 cmd=15 (SEND_JSON) len=333  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","CPU Voltage","CPU Temperature","GPU Usage","GPU Temperature","GPU Power"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GET_DEVICE_THEME) len=268  qt-strings: [bytesTotal | 2648 | bytesAvailable | 2518 | /data/theme/MK20/时尚按键/时尚按键.Theme | 2073686103 | /data/theme/MK20/可爱按键/可爱按键.Theme | 2283199203]
+[D>H] type=2 cmd=6 (FILE_START) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FILE_END) len=108  qt-strings: [res | 1 | fileName | /data/theme/MK20/时尚按键/时尚按键.Theme]
+[D>H] type=2 cmd=15 (SEND_JSON) len=333  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","CPU Voltage","CPU Temperature","GPU Usage","GPU Temperature","GPU Power"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GET_DEVICE_THEME) len=268  qt-strings: [bytesTotal | 2648 | bytesAvailable | 2518 | /data/theme/MK20/时尚按键/时尚按键.Theme | 1676430542 | /data/theme/MK20/可爱按键/可爱按键.Theme | 2283199203]
+[D>H] type=2 cmd=6 (FILE_START) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FILE_END) len=108  qt-strings: [res | 1 | fileName | /data/theme/MK20/时尚按键/时尚按键.Theme]
+[D>H] type=2 cmd=15 (SEND_JSON) len=333  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","CPU Voltage","CPU Temperature","GPU Usage","GPU Temperature","GPU Power"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GET_DEVICE_THEME) len=268  qt-strings: [bytesTotal | 2648 | bytesAvailable | 2518 | /data/theme/MK20/时尚按键/时尚按键.Theme | 3222582154 | /data/theme/MK20/可爱按键/可爱按键.Theme | 2283199203]
+[D>H] type=2 cmd=6 (FILE_START) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FILE_END) len=108  qt-strings: [res | 1 | fileName | /data/theme/MK20/时尚按键/时尚按键.Theme]
+[D>H] type=2 cmd=15 (SEND_JSON) len=194  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":[],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[D>H] type=2 cmd=13 (DEVICE_ProactiveEscalationCMD) len=613  qt-variant: [{"type": "keyState", "row": 1, "pressed": 0, "col": 1}, {"type": "qmk_mouse", "qmk_mouse_key": 2, "qmk_mouse_event": 3, "parentDescription": "System input control", "mouse_y": 0, "mouse_x": 30, "mouse_v": 0, "mouse_h": 40, "iconPath": "/static/icon/dark/mouse.png", "description": "Mouse", "AISoundControlKeyword": ""}]
+[D>H] type=2 cmd=13 (DEVICE_ProactiveEscalationCMD) len=613  qt-variant: [{"type": "keyState", "row": 1, "pressed": 0, "col": 1}, {"type": "qmk_mouse", "qmk_mouse_key": 2, "qmk_mouse_event": 3, "parentDescription": "System input control", "mouse_y": 0, "mouse_x": 30, "mouse_v": 0, "mouse_h": 40, "iconPath": "/static/icon/dark/mouse.png", "description": "Mouse", "AISoundControlKeyword": ""}]
+[D>H] type=2 cmd=13 (DEVICE_ProactiveEscalationCMD) len=613  qt-variant: [{"type": "keyState", "row": 1, "pressed": 0, "col": 1}, {"type": "qmk_mouse", "qmk_mouse_key": 2, "qmk_mouse_event": 3, "parentDescription": "System input control", "mouse_y": 0, "mouse_x": 30, "mouse_v": 0, "mouse_h": 40, "iconPath": "/static/icon/dark/mouse.png", "description": "Mouse", "AISoundControlKeyword": ""}]
+[D>H] type=2 cmd=3 (GET_DEVICE_THEME) len=268  qt-strings: [bytesTotal | 2648 | bytesAvailable | 2520 | /data/theme/MK20/时尚按键/时尚按键.Theme | 3223677086 | /data/theme/MK20/可爱按键/可爱按键.Theme | 2283199203]
+[D>H] type=2 cmd=6 (FILE_START) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FILE_END) len=108  qt-strings: [res | 1 | fileName | /data/theme/MK20/时尚按键/时尚按键.Theme]
+[D>H] type=2 cmd=15 (SEND_JSON) len=194  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":[],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[D>H] type=2 cmd=13 (DEVICE_ProactiveEscalationCMD) len=492  qt-variant: [{"type": "keyState", "row": 1, "pressed": 1, "col": 3}, {"type": "openWeb", "parentDescription": "System file control", "iconPath": "/static/icon/dark/openWeb.png", "description": "Open the web page", "Url": "www.google.com", "AISoundControlKeyword": ""}]
+[D>H] type=2 cmd=13 (DEVICE_ProactiveEscalationCMD) len=492  qt-variant: [{"type": "keyState", "row": 1, "pressed": 0, "col": 3}, {"type": "openWeb", "parentDescription": "System file control", "iconPath": "/static/icon/dark/openWeb.png", "description": "Open the web page", "Url": "www.google.com", "AISoundControlKeyword": ""}]
+[D>H] type=2 cmd=3 (GET_DEVICE_THEME) len=268  qt-strings: [bytesTotal | 2648 | bytesAvailable | 2520 | /data/theme/MK20/时尚按键/时尚按键.Theme | 1692224235 | /data/theme/MK20/可爱按键/可爱按键.Theme | 2283199203]
+[D>H] type=2 cmd=6 (FILE_START) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FILE_END) len=108  qt-strings: [res | 1 | fileName | /data/theme/MK20/时尚按键/时尚按键.Theme]
+[D>H] type=2 cmd=15 (SEND_JSON) len=194  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":[],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[D>H] type=2 cmd=3 (GET_DEVICE_THEME) len=268  qt-strings: [bytesTotal | 2648 | bytesAvailable | 2520 | /data/theme/MK20/时尚按键/时尚按键.Theme | 3943469175 | /data/theme/MK20/可爱按键/可爱按键.Theme | 2283199203]
+[D>H] type=2 cmd=6 (FILE_START) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FILE_END) len=108  qt-strings: [res | 1 | fileName | /data/theme/MK20/时尚按键/时尚按键.Theme]
+[D>H] type=2 cmd=15 (SEND_JSON) len=209  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["time"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)

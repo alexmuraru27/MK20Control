@@ -1,0 +1,50 @@
+MK20 USB device address: 64
+84 USB packets with payload data found for device 64.
+
+=== host -> device (OUT) ===
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:42
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:42
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:43
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:44
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:44
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:45
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:45
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:46
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:47
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:47
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:48
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:48
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=12%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=11%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=24%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:51
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:52
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:52
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=36  time=20:22:53
+
+=== device -> host (IN) ===
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SEND_JSON) len=333  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","CPU Voltage","CPU Temperature","GPU Usage","GPU Temperature","GPU Power"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=13 (DEVICE_ProactiveEscalationCMD) len=515  qt-variant: [{"type": "keyState", "row": 3, "pressed": 1, "col": 0}, {"type": "pageSwitch", "parentDescription": "Page switching", "pageSwitchMode": 1, "jumpToPage": 0, "iconPath": "/static/icon/dark/PageSwitch.png", "description": "Page switching", "AISoundControlKeyword": ""}]
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=13 (DEVICE_ProactiveEscalationCMD) len=515  qt-variant: [{"type": "keyState", "row": 3, "pressed": 0, "col": 0}, {"type": "pageSwitch", "parentDescription": "Page switching", "pageSwitchMode": 1, "jumpToPage": 0, "iconPath": "/static/icon/dark/PageSwitch.png", "description": "Page switching", "AISoundControlKeyword": ""}]
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SEND_JSON) len=209  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["time"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=13 (DEVICE_ProactiveEscalationCMD) len=515  qt-variant: [{"type": "keyState", "row": 3, "pressed": 1, "col": 4}, {"type": "pageSwitch", "parentDescription": "Page switching", "pageSwitchMode": 2, "jumpToPage": 0, "iconPath": "/static/icon/dark/PageSwitch.png", "description": "Page switching", "AISoundControlKeyword": ""}]
+[D>H] type=2 cmd=13 (DEVICE_ProactiveEscalationCMD) len=420  qt-variant: [{"type": "keyState", "row": 3, "pressed": 0, "col": 4}, {"type": "pageSwitch", "parentDescription": "页面切换", "pageSwitchMode": 0, "jumpToPage": 0, "iconPath": "/static/icon/dark/PageSwitch.png", "description": "页面切换"}]
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)

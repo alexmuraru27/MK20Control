@@ -1,0 +1,47 @@
+MK20 USB device address: 64
+667 USB packets with payload data found for device 64.
+
+=== host -> device (OUT) ===
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=164  device_bl=100, Volume=58, GPU Usage=0%, CPU Usage=17%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=164  device_bl=100, Volume=58, GPU Usage=0%, CPU Usage=17%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=164  device_bl=100, Volume=58, GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=164  device_bl=100, Volume=58, GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=164  device_bl=100, Volume=58, GPU Usage=0%, CPU Usage=16%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=164  device_bl=100, Volume=58, GPU Usage=0%, CPU Usage=27%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=164  device_bl=100, Volume=58, GPU Usage=0%, CPU Usage=27%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=164  device_bl=100, Volume=58, GPU Usage=0%, CPU Usage=18%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=164  device_bl=100, Volume=58, GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=164  device_bl=100, Volume=58, GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=164  device_bl=100, Volume=58, GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=164  device_bl=100, Volume=58, GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GET_DEVICE_THEME) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FILE_START) len=90  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 2561868]
+[H>D] type=0 cmd=7 (FILE_END) len=96  qt-strings: [/data/theme/MK20/时尚按键/时尚按键.Theme | 4271545462]
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=14%, CPU Temperature=0℃
+[H>D] type=0 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=108  GPU Usage=0%, CPU Usage=24%, CPU Temperature=0℃
+
+=== device -> host (IN) ===
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GET_DEVICE_THEME) len=266  qt-strings: [bytesTotal | 2648 | bytesAvailable | 2522 | /data/theme/MK20/时尚按键/时尚按键.Theme | 228428966 | /data/theme/MK20/可爱按键/可爱按键.Theme | 2283199203]
+[D>H] type=2 cmd=6 (FILE_START) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FILE_END) len=108  qt-strings: [res | 1 | fileName | /data/theme/MK20/时尚按键/时尚按键.Theme]
+[D>H] type=2 cmd=15 (SEND_JSON) len=333  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","CPU Voltage","CPU Temperature","GPU Usage","GPU Temperature","GPU Power"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SET_DEVICE_RELOAD) len=48  utf8: /data/theme/MK20/时尚按键/时尚按键.Theme
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SEND_SYSTEM_DATA_TO_DEVICE) len=0  (empty payload)

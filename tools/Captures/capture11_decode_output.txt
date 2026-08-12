@@ -1,0 +1,376 @@
+MK20 USB device address: 64
+5911 USB packets with payload data found for device 64.
+
+=== host -> device (OUT) ===
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=0 (FindDevice) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=0 (FindDevice) len=0  (empty payload)
+[H>D] type=0 cmd=15 (SendJson) len=24  {"connect":true}
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:40
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:41
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:41
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:42
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:43
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:43
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:44
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:44
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:45
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:46
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:46
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:47
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:47
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:48
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:49
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:49
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:50
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:50
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:51
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:52
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:52
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:53
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:53
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:54
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:55
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:55
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:56
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:57
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:57
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:58
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=36  time=22:15:58
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FileStart) len=82  string-map: {"/data/theme/MK20/字母/字母.Theme": "7442864"}
+[H>D] type=0 cmd=7 (FileEnd) len=86  string-map: {"/data/theme/MK20/字母/字母.Theme": "947216898"}
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SetDeviceReload) len=36  utf8: /data/theme/MK20/字母/字母.Theme
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=98  RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=98  RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=98  RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=98  RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=98  RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=98  RAM Usage=49%, GPU Usage=0%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=98  RAM Usage=49%, GPU Usage=0%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=98  RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=98  RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=98  RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=98  RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FileStart) len=82  string-map: {"/data/theme/MK20/字母/字母.Theme": "7447583"}
+[H>D] type=0 cmd=7 (FileEnd) len=86  string-map: {"/data/theme/MK20/字母/字母.Theme": "774689569"}
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SetDeviceReload) len=36  utf8: /data/theme/MK20/字母/字母.Theme
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=58, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=58, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=58, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=58, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=58, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=58, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=36, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=50, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=58, RAM Usage=49%, GPU Usage=0%, CPU Usage=21%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=21%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=12%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=12%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=12%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=12%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=122  Volume=62, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=6 (FileStart) len=82  string-map: {"/data/theme/MK20/字母/字母.Theme": "7445688"}
+[H>D] type=0 cmd=7 (FileEnd) len=86  string-map: {"/data/theme/MK20/字母/字母.Theme": "442063441"}
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=2 (SetDeviceReload) len=36  utf8: /data/theme/MK20/字母/字母.Theme
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=128  device_bl=80, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=128  device_bl=80, RAM Usage=49%, GPU Usage=0%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=128  device_bl=80, RAM Usage=49%, GPU Usage=0%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=128  device_bl=80, RAM Usage=49%, GPU Usage=0%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=128  device_bl=80, RAM Usage=49%, GPU Usage=0%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=128  device_bl=80, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=128  device_bl=80, RAM Usage=49%, GPU Usage=0%, CPU Usage=21%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=128  device_bl=80, RAM Usage=49%, GPU Usage=0%, CPU Usage=21%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=128  device_bl=80, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=128  device_bl=70, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=128  device_bl=80, RAM Usage=49%, GPU Usage=0%, CPU Usage=12%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=128  device_bl=10, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=128  device_bl=80, RAM Usage=49%, GPU Usage=0%, CPU Usage=12%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=128  device_bl=70, RAM Usage=49%, GPU Usage=0%, CPU Usage=12%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=126  device_bl=0, RAM Usage=49%, GPU Usage=0%, CPU Usage=14%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=126  device_bl=0, RAM Usage=49%, GPU Usage=0%, CPU Usage=12%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=12%
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] ABORT-FILE-TRANSFER control message
+[H>D] type=0 cmd=3 (GetDeviceTheme) len=0  (empty payload)
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=13%
+[H>D] type=0 cmd=2 (SetDeviceReload) len=36  utf8: /data/theme/MK20/字母/字母.Theme
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=16%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=15%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=12%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=12%
+[H>D] type=0 cmd=1 (SendSystemDataToDevice) len=130  device_bl=100, RAM Usage=49%, GPU Usage=0%, CPU Usage=16%
+
+=== device -> host (IN) ===
+[D>H] type=2 cmd=0 (FindDevice) len=314  string-map: {"version": "V2.32", "upgradeToLatestMethod": "1", "screen_width": "640", "screen_model": "MK20", "screen_height": "656", "deviceVolume": "7", "deviceName": "ScreenKey", "deviceBl": "80"}
+[D>H] type=2 cmd=0 (FindDevice) len=314  string-map: {"version": "V2.32", "upgradeToLatestMethod": "1", "screen_width": "640", "screen_model": "MK20", "screen_height": "656", "deviceVolume": "7", "deviceName": "ScreenKey", "deviceBl": "80"}
+[D>H] type=2 cmd=15 (SendJson) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=180  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["time"],"deviceRequestSystemDataShowUnit":true}
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=544  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483", "/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "4115248687", "/data/theme/MK20/时尚按键/时尚按键.Theme": "2405913355", "/data/theme/MK20/快捷键/快捷键.Theme": "3192816671", "/data/theme/MK20/字母/字母.Theme": "2626723596", "/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337"}
+[D>H] type=2 cmd=6 (FileStart) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FileEnd) len=100  string-map: {"res": "1", "fileName": "/data/theme/MK20/字母/字母.Theme"}
+[D>H] type=2 cmd=15 (SendJson) len=256  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","GPU Usage","RAM Usage"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SetDeviceReload) len=36  utf8: /data/theme/MK20/字母/字母.Theme
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=542  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483", "/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "4115248687", "/data/theme/MK20/时尚按键/时尚按键.Theme": "2405913355", "/data/theme/MK20/快捷键/快捷键.Theme": "3192816671", "/data/theme/MK20/字母/字母.Theme": "947216898", "/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337"}
+[D>H] type=2 cmd=6 (FileStart) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FileEnd) len=100  string-map: {"res": "1", "fileName": "/data/theme/MK20/字母/字母.Theme"}
+[D>H] type=2 cmd=15 (SendJson) len=274  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","GPU Usage","RAM Usage","Volume"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SetDeviceReload) len=36  utf8: /data/theme/MK20/字母/字母.Theme
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=694  variant-map: [{"type": "keyState", "row": 100, "pressed": 1, "col": 100}, {"type": "encoder_system_volume", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/system_volume.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/systemVolume.png", "description": "System volume", "category": "encoder"}]
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=694  variant-map: [{"type": "keyState", "row": 100, "pressed": 1, "col": 100}, {"type": "encoder_system_volume", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/system_volume.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/systemVolume.png", "description": "System volume", "category": "encoder"}]
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=694  variant-map: [{"type": "keyState", "row": 100, "pressed": 1, "col": 100}, {"type": "encoder_system_volume", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/system_volume.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/systemVolume.png", "description": "System volume", "category": "encoder"}]
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=542  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483", "/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "4115248687", "/data/theme/MK20/时尚按键/时尚按键.Theme": "2405913355", "/data/theme/MK20/快捷键/快捷键.Theme": "3192816671", "/data/theme/MK20/字母/字母.Theme": "774689569", "/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337"}
+[D>H] type=2 cmd=6 (FileStart) len=0  (empty payload)
+[D>H] type=2 cmd=7 (FileEnd) len=100  string-map: {"res": "1", "fileName": "/data/theme/MK20/字母/字母.Theme"}
+[D>H] type=2 cmd=15 (SendJson) len=277  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","GPU Usage","RAM Usage","device_bl"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SetDeviceReload) len=36  utf8: /data/theme/MK20/字母/字母.Theme
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":70}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":60}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":50}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":60}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":70}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":80}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":90}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=57  {"deviceMessage":{"deviceBl":100}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":90}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":80}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":70}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":60}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":50}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":40}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":30}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":20}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":10}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":20}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":30}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":40}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":50}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":60}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":70}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":80}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":90}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=57  {"deviceMessage":{"deviceBl":100}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":90}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":80}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":70}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":60}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":50}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":40}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":30}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":20}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":10}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=55  {"deviceMessage":{"deviceBl":0}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 101, "pressed": 1, "col": 101}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":10}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":20}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":30}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":40}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":50}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":60}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":70}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":80}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=56  {"deviceMessage":{"deviceBl":90}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=15 (SendJson) len=57  {"deviceMessage":{"deviceBl":100}}
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=13 (DeviceProactiveEscalationCommand) len=726  variant-map: [{"type": "keyState", "row": 102, "pressed": 1, "col": 102}, {"type": "encoder_device_brightness", "relatedTheme": "C:/Users/Alex/Desktop/MK20Software/ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/device_brightness.Theme", "parentDescription": "Encoder", "iconPath": "/static/icon/white/deviceBrightness.png", "description": "Device brightness", "category": "encoder"}]
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=3 (GetDeviceTheme) len=542  string-map: {"bytesTotal": "2648", "bytesAvailable": "2483", "/data/theme/MK20/海洋馆蜡笔小新/海洋馆蜡笔小新.Theme": "4115248687", "/data/theme/MK20/时尚按键/时尚按键.Theme": "2405913355", "/data/theme/MK20/快捷键/快捷键.Theme": "3192816671", "/data/theme/MK20/字母/字母.Theme": "442063441", "/data/theme/MK20/可爱按键/可爱按键.Theme": "3131160337"}
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=15 (SendJson) len=277  {"deviceRequestImageName":[],"deviceRequestSyncData":[],"deviceRequestSystemData":["CPU Usage","GPU Usage","RAM Usage","device_bl"],"deviceRequestSystemDataShowUnit":true,"themePageSwitch":true}
+[D>H] type=2 cmd=2 (SetDeviceReload) len=36  utf8: /data/theme/MK20/字母/字母.Theme
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
+[D>H] type=2 cmd=1 (SendSystemDataToDevice) len=0  (empty payload)
