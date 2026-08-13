@@ -35,8 +35,10 @@ MK20Control/
 │   │   ├── Transport/              ISerialTransport abstraction + SerialPortTransport implementation
 │   │   ├── Client/                 Mk20DeviceClient - the main facade API (see below)
 │   │   └── Exceptions/             Mk20ProtocolException + Timeout/UnconfirmedOperation/Checksum subtypes
-│   └── Mk20Control.App/            interactive console sandbox built on Mk20DeviceClient
-│       └── Program.cs              menu-driven scenarios (connect, ping, backlight, theme decode, ...)
+│   └── Mk20Control.IntegrationTests/   NUnit test project - one [Test] per scenario, run with `dotnet test`
+│       ├── Support/                 TestPaths (repo-relative assets/), HardwareConnection (opens a real device from MK20_COM_PORT)
+│       ├── OfflineThemeTests/        theme-building/round-trip tests - no hardware needed, always run
+│       └── HardwareTests/            tests with real, visible side effects on a physically-attached device - each requires MK20_COM_PORT (and, for destructive/parameterized scenarios, additional environment variables), and is skipped (not failed) otherwise
 ├── tools/
 │   ├── AssetGenerator/             generates the test assets below (re-run any time)
 │   ├── CaptureAnalyzer/            decodes a Wireshark/USBPcap .pcapng capture of MK20 USB traffic
@@ -44,10 +46,10 @@ MK20Control/
 └── assets/
     ├── icons/                      40 procedurally-generated 64x64 PNG icon badges
     ├── backgrounds/                background/test-pattern images for the device canvas
-    └── gifs/                       animated GIFs used by the sandbox app's demo/test themes (e.g. an animated key icon, a secondary-screen background)
+    └── gifs/                       animated GIFs used by the test project's demo/sandbox themes (e.g. an animated key icon, a secondary-screen background)
 ```
 
-> All demo/sandbox scenarios in `Mk20Control.App` load their images/GIFs exclusively from
+> Every test in `Mk20Control.IntegrationTests` loads its images/GIFs exclusively from
 > `assets/` (resolved relative to the repo root at run time) - there are no hardcoded,
 > machine-specific file paths anywhere in `src/` or `tools/`. Clone the repo on any machine
 > with the .NET 9 SDK installed and every `dotnet run` scenario works unmodified.
@@ -407,12 +409,12 @@ while (await timer.WaitForNextTickAsync())
 }
 ```
 
-See `Mk20Control.App`'s `BuildMainScreenWidgetTestTheme` (`--build-widget-test-scratch` CLI
-flag, also reachable via the interactive menu's option 18) for a complete, runnable example
-exercising every single widget type at once, each bound to its own test channel
-(`test1`-`test9`) plus a live clock, fed by a background loop that pushes varied
-random/ramp/sine-wave values so each widget's live update behavior can be visually verified
-on real hardware.
+See `Mk20Control.IntegrationTests`'s `MainScreenAllWidgetTypesThemeTests.BuildTheme()` (and
+its live-hardware counterpart, `HardwareTests.MainScreenAllWidgetTypesUploadTests`) for a
+complete, runnable example exercising every single widget type at once, each bound to its
+own test channel (`test1`-`test9`) plus a live clock, fed by a background loop that pushes
+varied random/ramp/sine-wave values so each widget's live update behavior can be visually
+verified on real hardware.
 
 #### Multi-page themes with page navigation
 
@@ -437,8 +439,8 @@ for (int p = 0; p < pageCount; p++)
 
 Because `PreviousPage()`/`NextPage()` are always relative, this naturally forms a ring - the
 last page's "next" wraps to the first page and vice versa, with no special-casing needed.
-See `Mk20Control.App`'s `BuildSixPageThemeFromScratch` (`--build-6page-scratch` CLI flag) for
-a complete, runnable 6-page/120-key example mixing static icons, animated keys, and page
+See `Mk20Control.IntegrationTests`'s `SixPageThemeBuilderTests.BuildSixPageTheme()` for a
+complete, runnable 6-page/120-key example mixing static icons, animated keys, and page
 navigation, verified round-trip and structurally checked against real theme files.
 
 #### Editing an existing theme
@@ -838,68 +840,94 @@ Typical workflow: capture on the USBPcap interface while running ScreenKeyWindow
 doing something specific (remap a key, change a picture, load a theme), save as
 `.pcapng`, then run this tool to see exactly what went over the wire.
 
-## Running the live control app
+## Running the tests
 
 ```powershell
-cd src\Mk20Control.App
-dotnet run
+cd src\Mk20Control.IntegrationTests
+dotnet test
 ```
 
-`Mk20Control.App` is an interactive console sandbox built directly on
-`Mk20DeviceClient` (the real, confirmed wire framing) with console logging enabled.
-Menu options:
-1. List serial ports (MK20 enumerates as USB CDC-ACM, VID:PID `1d6b:0104` or `1234:5678`)
-2. Connect to device
-3. Disconnect
-4. Ping device (identity info via `FIND_DEVICE`)
-5. Set backlight level (`SET_DEVICE_BL`)
-6. Push sample telemetry (`SEND_SYSTEM_DATA_TO_DEVICE`)
-7. Get installed themes (`GET_DEVICE_THEME`)
-8. Reload a theme by device-side path (`SET_DEVICE_RELOAD`)
-9. Listen for key/notification events (`DEVICE_ProactiveEscalationCMD`, Enter to stop)
-10. Decode a local `.Theme` file and print its structure (no hardware needed)
-11. Build a demo `.Theme` file locally (uses a generated icon), round-trip it through
-    `ThemeFileCodec`, and save it to disk (no hardware needed)
-12. Delete a theme from the device by device-side path (`SET_DEVICE_DELETE_THEME`)
-13. Upload a local `.Theme` file to the device and activate it (`FILE_START` + bulk
-    transfer + `FILE_END` + `SET_DEVICE_RELOAD`)
-14. Build+upload a 5-key test theme (icons 01-05 -> keys 1-5)
-15. Build+upload a full 20-key grid theme (icons 01-20, background) using the `ThemeBuilder` API
-16. Add a key to an existing local `.Theme` file (via `ThemeEditor`) and upload it
-17. **[sandbox]** Build+upload a cat-GIF + every-gauge-type secondary-screen theme, then
-    pump random telemetry - demonstrates overlaying live-data widgets on an animated GIF
-    background
-18. **[sandbox]** Build+upload a single main-screen theme exercising every widget type at
-    once (`test1`-`test9` channels plus a live clock), then pump varied telemetry -
-    see [Widgets - gauges, text, and clocks](#widgets---gauges-text-and-clocks)
-0. Exit
+`Mk20Control.IntegrationTests` is an NUnit test project built directly on
+`Mk20DeviceClient` (the real, confirmed wire framing). Every scenario that used to be a
+numbered console-menu option is now an individual `[Test]` method, split across two
+folders:
 
-Options marked **[sandbox]** are throwaway exploratory scenarios (not part of the
+- **`OfflineThemeTests/`** - builds a theme (from scratch or by editing an existing one),
+  decodes it back, and asserts the round-trip is structurally correct. No hardware
+  required; these always run and are the tests to check after any change to
+  `Mk20Control.Protocol`.
+- **`HardwareTests/`** - connects to a real, physically-attached device and produces a
+  visible side effect (backlight change, uploaded/activated theme, live telemetry). Each
+  test requires the `MK20_COM_PORT` environment variable (e.g. `COM7`); if it isn't set,
+  the test is **skipped**, not failed, via `Assert.Ignore(...)` - so `dotnet test` always
+  succeeds on a machine with no device attached, and you opt in to hardware tests
+  explicitly.
+
+Run everything (hardware tests skip themselves without a device):
+
+```powershell
+dotnet test
+```
+
+Run only the hardware-visible tests, against a device on `COM7`:
+
+```powershell
+dotnet test --environment MK20_COM_PORT=COM7
+```
+
+Run a single test by name:
+
+```powershell
+dotnet test --filter "FullyQualifiedName~PingDeviceTests" --environment MK20_COM_PORT=COM7
+```
+
+### Hardware test reference
+
+| Test class | Formerly (console menu option) | Additional environment variables |
+|---|---|---|
+| `ListSerialPortsTests` | 1 (list ports) | none - no device connection needed |
+| `PingDeviceTests` | 4 (ping) | none |
+| `SetBacklightTests` | 5 (set backlight) | `MK20_BACKLIGHT_LEVEL` (optional, default 80) |
+| `PushSampleTelemetryTests` | 6 (push telemetry) | none |
+| `GetInstalledThemesTests` | 7 (list installed themes) | none |
+| `ReloadThemeTests` | 8 (reload by path) | `MK20_THEME_PATH` (required) |
+| `ListenForEventsTests` | 9 (listen for key events) | `MK20_LISTEN_SECONDS` (optional, default 10) |
+| `DeleteThemeTests` | 12 (delete by path) | `MK20_THEME_PATH_TO_DELETE` (required - destructive, so never runs by accident) |
+| `UploadThemeFileTests` | 13 (upload arbitrary file) | `MK20_UPLOAD_LOCAL_PATH`, `MK20_UPLOAD_DEVICE_PATH` (both required) |
+| `FiveKeyThemeUploadTests` | 14 (build+upload 5-key theme) | `MK20_UPLOAD_DEVICE_PATH` (required) |
+| `FullGridThemeUploadTests` | 15 (build+upload 20-key grid) | `MK20_UPLOAD_DEVICE_PATH` (required) |
+| `ThemeEditorAddKeyAndUploadTests` | 16 (edit+upload) | `MK20_EDIT_LOCAL_THEME_PATH`, `MK20_EDIT_ROW`, `MK20_EDIT_COL`, `MK20_EDIT_ICON_FILE`, `MK20_EDIT_KEYCODE`, `MK20_EDIT_KEY_LABEL`, `MK20_UPLOAD_DEVICE_PATH` (all required) |
+| `SecondaryScreenGaugesOverlayUploadTests` | 17 **[sandbox]** (cat-GIF + gauges, secondary screen) | `MK20_UPLOAD_DEVICE_PATH` (required), `MK20_PUMP_SECONDS` (optional, default 15) |
+| `MainScreenAllWidgetTypesUploadTests` | 18 **[sandbox]** (every widget type, main screen) | `MK20_UPLOAD_DEVICE_PATH` (required), `MK20_PUMP_SECONDS` (optional, default 15) - see [Widgets - gauges, text, and clocks](#widgets---gauges-text-and-clocks) |
+
+Tests marked **[sandbox]** exercise throwaway exploratory scenarios (not part of the
 confirmed/stable API surface) kept for quick manual verification against real hardware -
-see the corresponding function's XML doc comment in `Program.cs` for details.
+see the corresponding offline theme-builder class's XML doc comment for details.
 
-### Non-interactive CLI flags
+### Offline theme-builder tests
 
-Several scenarios are also runnable directly as a CLI argument, without the interactive
-menu - useful for scripting or quick local verification (no hardware required unless
-noted):
+Every hardware upload test reuses a theme-building method from a matching class in
+`OfflineThemeTests/` (e.g. `MainScreenAllWidgetTypesUploadTests` uploads the theme built by
+`MainScreenAllWidgetTypesThemeTests.BuildTheme()`), so the same tested/verified builder
+logic backs both the no-hardware-needed correctness check and the real-hardware visual
+confirmation - there's exactly one implementation of each scenario, not two.
 
-| Flag | Effect |
-|---|---|
-| `--dump-raw-json <file.Theme>` | Prints every distinct item type's raw JSON found in the file. |
-| `--build-test5-local` | Builds the 5-key test theme locally and saves it to a temp file. |
-| `--build-fullgrid-local` | Builds the full 20-key grid theme locally and saves it to a temp file. |
-| `--build-7key-scratch` | Builds a 7-key theme (icons + one animated key) from scratch. |
-| `--build-title-opacity-demo` | Builds a theme demonstrating `KeyItemBuilder.Title`/`.Opacity`/`.TitleStyle`. |
-| `--build-title-opacity-backgrounds-demo` | Same as above, plus a main-screen picture background and a secondary-screen GIF background. |
-| `--build-secondary-gif-offset-test [offsetX] [offsetY]` | Builds a theme with only the secondary-screen GIF background, panned by the given offset (each in `[-1, 1]`) - a quick way to preview `SecondaryScreenBackgroundAutoFit`'s crop-offset behavior before wiring it into a full theme. |
-| `--build-gauges-scratch` | Builds the cat-GIF + every-gauge-type secondary-screen sandbox theme (see menu option 17). |
-| `--build-widget-test-scratch` | Builds the every-widget-type main-screen sandbox theme (see menu option 18). |
-| `--build-6page-scratch` | Builds a 6-page, 120-key theme with page navigation and mixed static/animated icons. |
-| `--add-key-local <themePath> <row> <col> <iconFileName> <keycode> <keyLabel>` | Loads an existing local `.Theme` file, adds one key via `ThemeEditor`, and saves the result. |
-
-All flags that build a theme save the result to a file under the OS temp directory and
-print its full path; none of them require a connected device.
+| Offline test class | Formerly | Builds |
+|---|---|---|
+| `DemoThemeBuilderTests` | menu option 11 / n/a | A single key, built directly against the raw `ThemeFile` model (no `ThemeBuilder`). |
+| `FiveKeyTestThemeTests` | `--build-test5-local` | 5 keys (icons 01-05, typing '1'-'5') + a main-screen background, built directly against the raw model. |
+| `FullGridThemeBuilderTests` | `--build-fullgrid-local` | A full 20-key (4x5) grid using the `ThemeBuilder` fluent API. |
+| `SevenKeyThemeBuilderTests` | `--build-7key-scratch` | 7 keys, including one animated-GIF key and a Ctrl+Alt+Del combo. |
+| `TitleOpacityDemoTests` | `--build-title-opacity-demo` | 5 keys demonstrating `KeyItemBuilder.Title`/`.Opacity`/`.TitleStyle`. |
+| `TitleOpacityBackgroundsDemoTests` | `--build-title-opacity-backgrounds-demo` | Same 5 keys, plus a main-screen picture background and a secondary-screen GIF background. |
+| `SecondaryGifOffsetTests` | `--build-secondary-gif-offset-test` | The secondary-screen GIF background at several different crop offsets, confirming the pan behavior actually changes the output. |
+| `SecondaryScreenGaugesOverlayThemeTests` | `--build-gauges-scratch` | Cat GIF + every gauge/text type overlaid on the secondary screen. |
+| `MainScreenAllWidgetTypesThemeTests` | `--build-widget-test-scratch` | One instance of every widget type on the main screen, each bound to its own test channel. |
+| `SixPageThemeBuilderTests` | `--build-6page-scratch` | 6 pages of 20 keys each, with page navigation and mixed static/animated icons. |
+| `DumpRawJsonTests` | `--dump-raw-json` | (Diagnostic helper) prints every distinct item type's raw JSON found in a theme's bytes. |
+| `ThemeEditorAddKeyTests` | `--add-key-local` / menu option 16 | Adds one key to an existing theme via `ThemeEditor`. |
+| `DecodeLocalThemeTests` | menu option 10 | (Diagnostic helper) decodes a theme and prints its page/item/action structure. |
+| `ThemePreviewPngTests` | (internal helpers) | Generates a thumbnail `.png` for a theme, as ScreenKeyWindows requires alongside a `.Theme` file. |
 
 ## Assets
 
@@ -942,11 +970,11 @@ copyrighted images are used or bundled.
 
 ### GIFs (`assets/gifs/`)
 
-Animated GIFs used by `Mk20Control.App`'s sandbox/demo scenarios - e.g. an animated key
-icon (`KeyItemBuilder.AnimatedIcon`) and a secondary-screen animated background
-(`DynamicImageItemBuilder.SecondaryScreenBackground`/`.SecondaryScreenBackgroundAutoFit`).
+Animated GIFs used by `Mk20Control.IntegrationTests`'s demo/sandbox scenarios - e.g. an
+animated key icon (`KeyItemBuilder.AnimatedIcon`) and a secondary-screen animated
+background (`DynamicImageItemBuilder.SecondaryScreenBackground`/`.SecondaryScreenBackgroundAutoFit`).
 Checked into the repo (unlike icons/backgrounds, these are not procedurally generated) so
-every sandbox scenario runs unmodified on any machine, with no manual asset setup required.
+every test runs unmodified on any machine, with no manual asset setup required.
 
 ## Requirements
 
