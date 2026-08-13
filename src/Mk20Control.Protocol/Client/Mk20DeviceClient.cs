@@ -92,6 +92,25 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
     /// <summary>Raised for every decoded DEVICE_ProactiveEscalationCMD event (key press/release, encoder function activation).</summary>
     public event EventHandler<DeviceNotificationEventArgs>? NotificationReceived;
 
+    /// <summary>
+    /// Raised for every unsolicited <c>SEND_JSON</c> (command 15) frame the device pushes -
+    /// the argument is the raw UTF-8 JSON text. The device uses this to report its own state,
+    /// e.g. which images/system data it wants, and - confirmed via a real nested-folder
+    /// navigation capture - a <c>"themePageSwitch": true</c> field on every page change,
+    /// whether that change came from a relative page-switch key, an absolute
+    /// <c>jumpToPage</c>, entering a folder (<c>openPage</c>) or leaving one
+    /// (<c>oneLevelUp</c>). See also <see cref="PageSwitched"/>.
+    /// </summary>
+    public event EventHandler<string>? JsonReceived;
+
+    /// <summary>
+    /// Raised whenever the device reports that its active page changed (a <c>SEND_JSON</c>
+    /// frame carrying <c>"themePageSwitch": true</c>) - the device's only confirmation that a
+    /// navigation key actually did something, which makes it the reliable way to verify
+    /// page/folder navigation on real hardware.
+    /// </summary>
+    public event EventHandler? PageSwitched;
+
     /// <summary>Raised when the underlying transport reports a read-loop error (the connection may still be usable).</summary>
     public event EventHandler<Exception>? TransportError;
 
@@ -673,6 +692,44 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
         if (frame.CommandId == (uint)CommandId.DeviceProactiveEscalationCommand)
         {
             HandleProactiveEscalation(frame);
+        }
+        else if (frame.CommandId == (uint)CommandId.SendJson && frame.Payload.Length > 0)
+        {
+            HandleDeviceJson(frame);
+        }
+    }
+
+    private void HandleDeviceJson(DeviceFrame frame)
+    {
+        string json;
+        try
+        {
+            json = Encoding.UTF8.GetString(frame.Payload);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Could not decode a SEND_JSON payload ({Length} bytes) as UTF-8.", frame.Payload.Length);
+            return;
+        }
+
+        JsonReceived?.Invoke(this, json);
+
+        // Confirmed via a real nested-folder navigation capture: the device appends
+        // "themePageSwitch": true to its status JSON on every page change.
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Object &&
+                doc.RootElement.TryGetProperty("themePageSwitch", out var switched) &&
+                switched.ValueKind == System.Text.Json.JsonValueKind.True)
+            {
+                _logger.LogDebug("Device reported a theme page switch.");
+                PageSwitched?.Invoke(this, EventArgs.Empty);
+            }
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            // Not JSON we understand - JsonReceived subscribers still saw the raw text.
         }
     }
 

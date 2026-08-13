@@ -198,6 +198,7 @@ ThemeFile
 ├── KeyMacroValue, KeyMacro (opaque header bytes, preserved for round-trip fidelity)
 ├── Pages: IReadOnlyList<ThemePage>
 │   ├── PageName (GUID string)
+│   ├── ParentPageName (GUID string; present ONLY on folder sub-pages — this is what makes a page a folder)
 │   ├── Canvas: ThemeCanvas (Width, Height, IsFlipped, IsRotated, ShowUnit)
 │   ├── Encoder: JsonElement? (rotary-encoder hardware descriptor, always present on a main-screen page)
 │   └── Items: IReadOnlyList<ThemeItem>
@@ -223,9 +224,9 @@ check `RawControlDataBase64` in that case). Concrete types in
 | `KeyboardAction` | `keyboard` | `Keycode` (USB HID usage; upper byte = modifier bitmask for combos), `KeyLabel` |
 | `OpenWebAction` | `openWeb` | `Url` |
 | `MouseAction` | `qmk_mouse` | `MouseKey`, `MouseEvent`, `MouseX`/`Y`/`VerticalScroll`/`HorizontalScroll` |
-| `PageSwitchAction` | `pageSwitch` | `PageSwitchMode` (1=previous, 2=next), `JumpToPage` |
+| `PageSwitchAction` | `pageSwitch` | `PageSwitchMode` (1=previous, 2=next, 0=absolute jump), `JumpToPage` (zero-based page index, used when mode is 0) |
 | `OpenPageAction` | `openPage` | `PageName` (target page GUID) |
-| `OneLevelUpAction` | `oneLevelUp` | — |
+| `OneLevelUpAction` | `oneLevelUp` | `PageName` (always the sentinel `"parentPage"`, which resolves via the page's own `ParentPageName`) |
 | `TextInputAction` | `text` | `InputText`, `IsInputEnter`, `IsCopyPaste` |
 | `AudioVolumeAction` | `Microphone`/`Loudspeaker` | `DeviceClass`, `TargetDeviceName`, `VolumeAdjustMode`/`Value` |
 | `KeyboardSwitchAction` | `keyboard_switch` | — |
@@ -271,6 +272,7 @@ an immutable `ThemeFile`. The first added page becomes the active page on load
 | Method | Adds |
 |---|---|
 | `.SetCanvas(width, height, showUnit=true)` | Canvas size — always `640, 656` for the real main screen. Call first. |
+| `.AsFolderOf(parentPage)` | Marks this page as a **folder** of `parentPage` (emits `parentPageName`). Required for `KeyActions.OneLevelUp()` to work — see [Page navigation](#page-navigation-paging-jumps-and-folders). |
 | `.AddKey(row, col, configure)` | A physical key (`KeyItemBuilder`, see below). |
 | `.AddBackground(configure)` | `.mp4` video background, main or secondary screen (`BackgroundItemBuilder`). |
 | `.AddDynamicImage(configure)` | Decorative animated GIF, or (via `.MainScreenBackground`/`.SecondaryScreenBackground`/their `AutoFit` size-guarding variants) a picture/GIF screen background (`DynamicImageItemBuilder`). |
@@ -304,9 +306,10 @@ using Mk20Control.Protocol.Theme.Building;
 
 KeyActions.Keyboard(HidKey.A, "A")                                    // plain keystroke
 KeyActions.KeyboardCombo(KeyModifiers.LeftCtrl | KeyModifiers.LeftAlt, HidKey.Delete) // Ctrl+Alt+Del
-KeyActions.PreviousPage() / KeyActions.NextPage()                     // relative page nav
-KeyActions.OpenPage(otherPage.PageId)                                 // jump to a specific page
-KeyActions.OneLevelUp()
+KeyActions.PreviousPage() / KeyActions.NextPage()                     // relative page nav (ring)
+KeyActions.JumpToPage(2)                                              // absolute jump to page index 2
+KeyActions.OpenPage(otherPage.PageId)                                 // enter a "folder" page (by GUID)
+KeyActions.OneLevelUp()                                               // return out of a folder
 KeyActions.OpenWeb("https://example.com")
 KeyActions.Mouse(mouseKey, mouseEvent, x, y, vScroll, hScroll)
 KeyActions.TypeText("hello", pressEnterAfter: true)
@@ -321,6 +324,226 @@ KeyActions.EncoderFunction("encoder_system_volume", relatedThemePath: null)     
 `Enter`, `Escape`, `Tab`, `Delete`, `F1`-`F12`, arrow keys, etc.) — use it instead of raw
 integers. `KeyModifiers` is a `[Flags]` enum (`LeftCtrl`, `LeftShift`, `LeftAlt`, `LeftWin`,
 `RightCtrl`, `RightShift`, `RightAlt`, `RightWin`) for `KeyboardCombo`.
+
+### Page navigation: paging, jumps and folders
+
+A theme's pages are a **flat array** — there is no nesting in the file format. What makes a
+page a "folder" is simply that some key opens it. There are three confirmed mechanisms, and
+they can be mixed freely on the same page.
+
+| Goal | Factory | Wire form |
+|---|---|---|
+| Previous page (relative) | `KeyActions.PreviousPage()` | `pageSwitchMode=1` |
+| Next page (relative) | `KeyActions.NextPage()` | `pageSwitchMode=2` |
+| Jump to a page (absolute) | `KeyActions.JumpToPage(index)` | `pageSwitchMode=0` + `jumpToPage=<index>` |
+| Enter a folder | `KeyActions.OpenPage(pageId)` | `openPage` + `pageName=<page GUID>` |
+| Return from a folder | `KeyActions.OneLevelUp()` | `oneLevelUp` + `pageName="parentPage"` |
+
+Two things to keep straight:
+
+- **`JumpToPage` takes a zero-based page *index*; `OpenPage` takes a page *GUID*.** Use the
+  no-arg `.AddPage()` overload to capture a `ThemePageBuilder` and pass its `.PageId`.
+- **`OpenPage` alone does not make a folder.** The target page must also declare its parent
+  via `.AsFolderOf(parent)` — see below. Without it the device navigates *into* the page and
+  then refuses to leave.
+
+Navigation keys normally reuse the vendor's built-in artwork instead of embedding an icon —
+see `SystemIconPaths` (`PageSwitch`, `CreateFolder`, `OneLevelUp`, plus the smaller
+`*Glyph` variants used as an action's own `iconPath`):
+
+```csharp
+key.IconAssetPath(SystemIconPaths.CreateFolder).Action(KeyActions.OpenPage(folder.PageId));
+```
+
+#### Relative paging (a ring)
+
+Every page gets a previous/next pair, so paging wraps around — the last page's "next"
+returns to the first, with no special-casing, because both actions are always relative to
+whichever page is currently shown.
+
+```csharp
+var builder = new ThemeBuilder();
+for (int i = 0; i < 6; i++)
+{
+    builder.AddPage(page =>
+    {
+        page.SetCanvas(640, 656);
+        page.AddKey(3, 0, key => key
+            .IconAssetPath(SystemIconPaths.PageSwitch)
+            .Title("PREV")
+            .Action(KeyActions.PreviousPage()));
+        page.AddKey(3, 4, key => key
+            .IconAssetPath(SystemIconPaths.PageSwitch)
+            .Title("NEXT")
+            .Action(KeyActions.NextPage()));
+    });
+}
+```
+
+#### Absolute jumps (hub and spoke)
+
+This is how the vendor's own `defaultTheme.Theme` navigates — it contains no relative paging
+at all. A home page jumps out to each section, and each section jumps back to index 0.
+
+```csharp
+var builder = new ThemeBuilder();
+var hub = builder.AddPage().SetCanvas(640, 656);      // page index 0
+var fuel = builder.AddPage().SetCanvas(640, 656);     // page index 1
+var tyres = builder.AddPage().SetCanvas(640, 656);    // page index 2
+
+hub.AddKey(0, 0, key => key.Title("FUEL").Action(KeyActions.JumpToPage(1)));
+hub.AddKey(0, 1, key => key.Title("TYRES").Action(KeyActions.JumpToPage(2)));
+
+foreach (var section in new[] { fuel, tyres })
+{
+    section.AddKey(3, 4, key => key
+        .IconAssetPath(SystemIconPaths.PageSwitch)
+        .Title("HOME")
+        .Action(KeyActions.JumpToPage(0)));           // 0 = the hub's index
+}
+```
+
+### How foldering actually works
+
+A folder is an ordinary page plus **one page-level field**: `parentPageName`, holding the
+`pageName` (GUID) of the page it hangs off. That single field is what separates a folder
+from a normal page — everything else (canvas, grid, keys) is identical.
+
+```json
+// an ordinary page                 // a folder page
+{ "canvas": {...},                  { "canvas": {...},
+  "encoder": [...],                   "encoder": [...],
+  "items":  [...],                    "items":  [...],
+  "pageName": "<guid>" }              "pageName": "<guid>",
+                                      "parentPageName": "<parent's guid>" }
+```
+
+The two halves work together:
+
+| Direction | Mechanism |
+|---|---|
+| In | A key with `KeyActions.OpenPage(folder.PageId)` — targets the folder by GUID |
+| Out | A key with `KeyActions.OneLevelUp()`, which emits the fixed sentinel `pageName="parentPage"` |
+
+`"parentPage"` is **not** a page id. It means *"go to the page named by my page's
+`parentPageName`"*. So the return destination comes from the page, not from the key — which
+is why `OneLevelUp()` needs no arguments, and why every return key in every real theme is
+byte-identical regardless of depth.
+
+> **The failure mode to know about.** If you call `OpenPage` at a page that never declared a
+> parent, the device happily navigates *into* it and then will not come back out. The return
+> key is received and correctly decoded as `oneLevelUp` — the device even reports the press
+> to the host — but nothing happens, because the page has no `parentPageName` to resolve.
+> Confirmed on real hardware. Use `.AsFolderOf(...)` and this can't happen.
+
+#### Folders, and returning to the base folder
+
+Create the folder page, mark it with `.AsFolderOf(parent)`, then point a key at it. Real
+themes place the return key at the bottom-right cell (row 3, column 4).
+
+```csharp
+var builder = new ThemeBuilder();
+var home = builder.AddPage().SetCanvas(640, 656);
+var folder = builder.AddPage().SetCanvas(640, 656)
+    .AsFolderOf(home);                                // <- emits parentPageName; REQUIRED
+
+home.AddKey(0, 0, key => key
+    .IconAssetPath(SystemIconPaths.CreateFolder)
+    .Title("PIT")
+    .Action(KeyActions.OpenPage(folder.PageId)));     // in
+
+folder.AddKey(3, 4, key => key
+    .IconAssetPath(SystemIconPaths.OneLevelUp)
+    .Title("BACK")
+    .Action(KeyActions.OneLevelUp()));                // back out to `home`
+```
+
+#### Putting content in a folder
+
+A folder page takes keys exactly like any other page — same 4x5 grid, same `AddKey(row, col, …)`,
+same actions. The only convention worth keeping is reserving the bottom-right cell for the
+return key, which leaves 19 usable cells:
+
+```csharp
+var pit = builder.AddPage().SetCanvas(640, 656).AsFolderOf(home);
+
+// Fill the grid in reading order, skipping the reserved return cell.
+var functions = new (string Label, HidKey Key)[]
+{
+    ("PIT REQ", HidKey.A), ("FUEL +", HidKey.B), ("FUEL -", HidKey.C),
+    ("TYRES",   HidKey.D), ("REPAIR", HidKey.E),
+};
+
+int i = 0;
+foreach (var (label, hidKey) in functions)
+{
+    int row = i / 5, col = i % 5;
+    i++;
+    pit.AddKey(row, col, key => key
+        .Icon($"{label}.png", File.ReadAllBytes(iconPath))
+        .Title(label)
+        .Action(KeyActions.Keyboard(hidKey, hidKey.ToString())));
+}
+
+pit.AddKey(3, 4, key => key                            // reserved: return key
+    .IconAssetPath(SystemIconPaths.OneLevelUp)
+    .Title("BACK")
+    .Action(KeyActions.OneLevelUp()));
+```
+
+A folder page can also hold `JumpToPage` keys (e.g. a "HOME" shortcut straight back to index
+0), backgrounds, gauges and text — it is a full page in every respect.
+
+#### Nested folders
+
+Nesting is just chaining: each level is a folder *of the level above it*, and each level's
+key opens the next. Depth is unlimited — a real vendor theme was found nested five deep.
+
+```csharp
+var builder = new ThemeBuilder();
+var root = builder.AddPage().SetCanvas(640, 656);
+
+// root -> level 1 -> level 2 -> level 3
+var pages = new List<ThemePageBuilder> { root };
+for (int level = 1; level <= 3; level++)
+{
+    var page = builder.AddPage().SetCanvas(640, 656)
+        .AsFolderOf(pages[level - 1]);                 // parent is the level above
+    pages.Add(page);
+}
+
+for (int level = 0; level < pages.Count; level++)
+{
+    if (level + 1 < pages.Count)                       // a way down...
+    {
+        var child = pages[level + 1];
+        pages[level].AddKey(0, 0, key => key
+            .IconAssetPath(SystemIconPaths.CreateFolder)
+            .Title($"LEVEL {level + 1}")
+            .Action(KeyActions.OpenPage(child.PageId)));
+    }
+
+    if (level > 0)                                     // ...and a way back up
+    {
+        pages[level].AddKey(3, 4, key => key
+            .IconAssetPath(SystemIconPaths.OneLevelUp)
+            .Title("BACK")
+            .Action(KeyActions.OneLevelUp()));
+    }
+}
+```
+
+`OneLevelUp` moves exactly **one** level per press, matching vendor behaviour. To escape to
+the top from deep inside, add a single `KeyActions.JumpToPage(0)` key instead — it jumps
+straight to page index 0 regardless of depth.
+
+> Working end-to-end examples: `OfflineThemeTests/NavigationThemeBuilderTests.cs` builds one
+> theme using all four navigation styles, and
+> `OfflineThemeTests/NestedFolderThemeBuilderTests.cs` builds a configurable-depth chain and
+> asserts every level's parent link. `HardwareTests/NavigationThemeUploadTests.cs` uploads to
+> a real device; `HardwareTests/ListenForEventsTests.cs` reports each press alongside the
+> device's own `themePageSwitch` confirmation, which is the reliable way to verify navigation
+> actually happened.
 
 ### Screen backgrounds
 

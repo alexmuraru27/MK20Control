@@ -135,6 +135,7 @@ public static class ThemeFileCodec
     {
         var canvas = pageEl.TryGetProperty("canvas", out var canvasEl) ? DecodeCanvas(canvasEl) : new ThemeCanvas();
         string? pageName = pageEl.TryGetProperty("pageName", out var pn) ? pn.GetString() : null;
+        string? parentPageName = pageEl.TryGetProperty("parentPageName", out var ppn) ? ppn.GetString() : null;
         JsonElement? encoder = pageEl.TryGetProperty("encoder", out var encEl) ? encEl.Clone() : null;
 
         var items = new List<ThemeItem>();
@@ -146,7 +147,7 @@ public static class ThemeFileCodec
             }
         }
 
-        return new ThemePage { PageName = pageName, Canvas = canvas, Items = items, Encoder = encoder };
+        return new ThemePage { PageName = pageName, ParentPageName = parentPageName, Canvas = canvas, Items = items, Encoder = encoder };
     }
 
     private static ThemeCanvas DecodeCanvas(JsonElement canvasEl) => new()
@@ -601,6 +602,10 @@ public static class ThemeFileCodec
             : JsonNode.Parse("""[{"col":0,"keyString":"","keycode":0,"row":103},{"col":0,"keyString":"","keycode":0,"row":104}]""");
         obj["items"] = new JsonArray(page.Items.Select(i => (JsonNode)BuildItemJson(i)).ToArray());
         if (page.PageName is not null) obj["pageName"] = page.PageName;
+        // Present ONLY on folder sub-pages - this is what makes the device treat the page as
+        // a folder and gives a oneLevelUp key ("pageName":"parentPage") somewhere to return
+        // to. Omitted entirely for ordinary pages, matching every real theme examined.
+        if (page.ParentPageName is not null) obj["parentPageName"] = page.ParentPageName;
         return obj;
     }
 

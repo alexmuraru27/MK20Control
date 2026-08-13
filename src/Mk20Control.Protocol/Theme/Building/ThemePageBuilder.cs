@@ -22,10 +22,43 @@ public sealed class ThemePageBuilder
     /// <summary>This page's unique id (a GUID by convention, matching real themes) - reference this from <c>KeyActions.OpenPage</c> for folder-style navigation.</summary>
     public string PageId { get; }
 
+    /// <summary>The parent page's id when this page is a "folder" - see <see cref="AsFolderOf"/>.</summary>
+    public string? ParentPageId { get; private set; }
+
     internal ThemePageBuilder(ThemeBuilder owner)
     {
         _owner = owner;
         PageId = Guid.NewGuid().ToString();
+    }
+
+    /// <summary>
+    /// Marks this page as a "folder" belonging to <paramref name="parentPage"/> by emitting
+    /// the page-level <c>parentPageName</c> field real folder pages carry.
+    ///
+    /// <b>Required for a folder to work.</b> A <c>KeyActions.OneLevelUp()</c> key sends
+    /// <c>pageName="parentPage"</c>, which is a sentinel meaning "go to my page's
+    /// <c>parentPageName</c>" - so without this call the device will navigate INTO the page
+    /// via <c>openPage</c> and then refuse to leave: the return key is received and correctly
+    /// decoded as <c>oneLevelUp</c>, but nothing happens because the page has no declared
+    /// parent (confirmed on real hardware).
+    ///
+    /// Nesting is expressed by chaining: each level names the level above it.
+    /// </summary>
+    public ThemePageBuilder AsFolderOf(ThemePageBuilder parentPage)
+    {
+        ArgumentNullException.ThrowIfNull(parentPage);
+        return AsFolderOf(parentPage.PageId);
+    }
+
+    /// <summary>Marks this page as a "folder" whose parent has the given page id - see <see cref="AsFolderOf(ThemePageBuilder)"/>.</summary>
+    public ThemePageBuilder AsFolderOf(string parentPageId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(parentPageId);
+        if (parentPageId == PageId)
+            throw new ArgumentException("A folder page cannot be its own parent.", nameof(parentPageId));
+
+        ParentPageId = parentPageId;
+        return this;
     }
 
     /// <summary>Sets the canvas size (defaults to 640x656, the confirmed MK20 main-screen canvas) - call before adding items that use it (e.g. a full-bleed background).</summary>
@@ -175,6 +208,7 @@ public sealed class ThemePageBuilder
     internal ThemePage Build() => new()
     {
         PageName = PageId,
+        ParentPageName = ParentPageId,
         Canvas = new ThemeCanvas { Width = _canvasWidth, Height = _canvasHeight, IsFlipped = false, IsRotated = false, ShowUnit = _showUnit },
         Items = _items.ToList(),
     };

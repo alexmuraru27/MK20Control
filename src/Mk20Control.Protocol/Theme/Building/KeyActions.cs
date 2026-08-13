@@ -113,22 +113,89 @@ public static class KeyActions
         PageSwitchMode = 2,
     };
 
-    /// <summary>Jumps directly to the page whose id is <paramref name="pageName"/> (a <see cref="ThemePage.PageName"/> GUID) - e.g. entering a "folder" of keys.</summary>
+    /// <summary>
+    /// Jumps directly to the page at zero-based index <paramref name="pageIndex"/> in the
+    /// theme's <c>pages</c> array - an ABSOLUTE jump, unlike <see cref="PreviousPage"/>/
+    /// <see cref="NextPage"/>, which are relative to whichever page is currently shown.
+    ///
+    /// Confirmed against the vendor's own <c>defaultTheme.Theme</c>, which uses this
+    /// exclusively (it contains no relative page-switch keys at all): its home page carries
+    /// three keys with <c>pageSwitchMode=0</c> and <c>jumpToPage</c> 1/2/3, and each of those
+    /// three destination pages carries a bottom-right key with <c>jumpToPage=0</c> to return
+    /// home - i.e. a hub-and-spoke menu. Note <c>jumpToPage</c> is a page INDEX, not a
+    /// <see cref="ThemePage.PageName"/> GUID (that is <see cref="OpenPage"/>'s job).
+    /// </summary>
+    public static PageSwitchAction JumpToPage(int pageIndex, string? description = null) => new()
+    {
+        RawType = "pageSwitch",
+        Description = description ?? "Page switching",
+        ParentDescription = "Page switching",
+        IconPath = "/static/icon/dark/PageSwitch.png",
+        RawFields = new Dictionary<string, TaggedValue> { ["AISoundControlKeyword"] = TaggedValue.Of("") },
+        PageSwitchMode = 0,
+        JumpToPage = pageIndex,
+    };
+
+    /// <summary>
+    /// Enters a "folder": jumps directly to the page whose id is <paramref name="pageName"/>
+    /// (a <see cref="ThemePage.PageName"/> GUID, e.g. another page builder's
+    /// <c>PageId</c>). Pair with <see cref="OneLevelUp"/> on the target page to get back.
+    ///
+    /// Confirmed against real vendor themes (<c>defaultTheme.Theme</c> and a folder-structure
+    /// theme nested five levels deep): folder keys carry <c>parentDescription</c>
+    /// "Page switching" and <c>iconPath</c> "/static/icon/dark/createFolder.png". Folders are
+    /// NOT nested in the file - every page lives in the same flat <c>pages</c> array and a
+    /// "folder" is simply a page that some key opens.
+    /// </summary>
     public static OpenPageAction OpenPage(string pageName, string? description = null) => new()
     {
         RawType = "openPage",
-        Description = description,
-        RawFields = Empty,
+        Description = description ?? "Create folders",
+        ParentDescription = "Page switching",
+        IconPath = "/static/icon/dark/createFolder.png",
+        // Field ORDER is preserved through encoding (the codec seeds its map from RawFields
+        // and overwrites in place), so seed the exact order a real ScreenKeyWindows-written
+        // key uses: type, parentDescription, pageName, iconPath, description,
+        // AISoundControlKeyword.
+        RawFields = NavigationRawFields("openPage", pageName, "/static/icon/dark/createFolder.png", description ?? "Create folders"),
         PageName = pageName,
     };
 
-    /// <summary>Navigates back up to the parent page (always uses the fixed sentinel "parentPage", not a real page id).</summary>
+    /// <summary>
+    /// Navigates back up out of a "folder" to the page it was opened from. Always uses the
+    /// fixed sentinel <c>pageName="parentPage"</c>, never a real page id - confirmed even
+    /// five levels deep in a real nested-folder theme, so the device pops a runtime
+    /// navigation stack rather than reading a parent declared in the file.
+    ///
+    /// Confirmed metadata: <c>parentDescription</c> "Page switching" and <c>iconPath</c>
+    /// "/static/icon/dark/oneLevelUp.png". Real themes consistently place this key at the
+    /// bottom-right cell (row 3, column 4) of a folder page.
+    /// </summary>
     public static OneLevelUpAction OneLevelUp(string? description = null) => new()
     {
         RawType = "oneLevelUp",
-        Description = description,
-        RawFields = Empty,
+        Description = description ?? "Return to the previous level",
+        ParentDescription = "Page switching",
+        IconPath = "/static/icon/dark/oneLevelUp.png",
+        RawFields = NavigationRawFields("oneLevelUp", "parentPage", "/static/icon/dark/oneLevelUp.png", description ?? "Return to the previous level"),
         PageName = "parentPage",
+    };
+
+    /// <summary>
+    /// Builds a folder-navigation action's field map in the exact order a real
+    /// ScreenKeyWindows-written key uses. Dictionary insertion order survives encoding, and
+    /// the codec overwrites existing keys in place rather than appending, so seeding these
+    /// here makes a builder-made key byte-order-identical to a vendor one.
+    /// </summary>
+    private static Dictionary<string, TaggedValue> NavigationRawFields(
+        string type, string pageName, string iconPath, string description) => new()
+    {
+        ["type"] = TaggedValue.Of(type),
+        ["parentDescription"] = TaggedValue.Of("Page switching"),
+        ["pageName"] = TaggedValue.Of(pageName),
+        ["iconPath"] = TaggedValue.Of(iconPath),
+        ["description"] = TaggedValue.Of(description),
+        ["AISoundControlKeyword"] = TaggedValue.Of(""),
     };
 
     /// <summary>Types literal text into the host, optionally pressing Enter afterward or using clipboard paste instead of keystrokes.</summary>

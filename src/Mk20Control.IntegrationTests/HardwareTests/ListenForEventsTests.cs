@@ -25,13 +25,24 @@ public class ListenForEventsTests
             string description = $"{e.Position} pressed={e.IsPressed}" +
                 (e.ActionDescriptor is { } d && d.TryGetValue("type", out var t) ? $" action={t.AsString}" : "");
             received.Add(description);
-            TestContext.WriteLine($"[event] {description}");
+            TestContext.WriteLine($"[key]  {description}");
+        };
+
+        // The device confirms every page change (relative paging, absolute jumpToPage,
+        // entering a folder via openPage, or leaving one via oneLevelUp) with a SEND_JSON
+        // frame carrying "themePageSwitch": true - the only feedback that a navigation key
+        // actually did something, so log it alongside the raw press.
+        int pageSwitches = 0;
+        client.PageSwitched += (_, _) =>
+        {
+            pageSwitches++;
+            TestContext.WriteLine("[page] device reports themePageSwitch -> the active page CHANGED");
         };
 
         int seconds = int.TryParse(Environment.GetEnvironmentVariable("MK20_LISTEN_SECONDS"), out int s) ? s : 10;
         TestContext.WriteLine($"Listening for {seconds} second(s) - press keys on the device now.");
         await Task.Delay(TimeSpan.FromSeconds(seconds));
 
-        TestContext.WriteLine($"Captured {received.Count} event(s) during the listen window.");
+        TestContext.WriteLine($"Captured {received.Count} key event(s) and {pageSwitches} page switch(es) during the listen window.");
     }
 }
