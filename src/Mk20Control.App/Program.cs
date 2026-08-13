@@ -34,6 +34,7 @@ string repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", 
 string assetsDir = Path.Combine(repoRoot, "assets");
 string iconsDir = Path.Combine(assetsDir, "icons");
 string backgroundsDir = Path.Combine(assetsDir, "backgrounds");
+string gifsDir = Path.Combine(assetsDir, "gifs");
 
 if (args.Length >= 2 && args[0] == "--dump-raw-json")
 {
@@ -63,7 +64,7 @@ if (args.Length >= 1 && args[0] == "--build-fullgrid-local")
 
 if (args.Length >= 1 && args[0] == "--build-7key-scratch")
 {
-    byte[]? built = BuildSevenKeyThemeFromScratch(iconsDir);
+    byte[]? built = BuildSevenKeyThemeFromScratch(iconsDir, gifsDir);
     if (built is null) return;
     string outPath = Path.Combine(Path.GetTempPath(), "mk20-7key-scratch-theme.Theme");
     File.WriteAllBytes(outPath, built);
@@ -86,15 +87,40 @@ if (args.Length >= 1 && args[0] == "--build-title-opacity-demo")
 
 if (args.Length >= 1 && args[0] == "--build-title-opacity-backgrounds-demo")
 {
-    byte[]? built = BuildTitleOpacityDemoWithBackgroundsFromScratch(iconsDir);
+    byte[]? built = BuildTitleOpacityDemoWithBackgroundsFromScratch(iconsDir, backgroundsDir, gifsDir);
     if (built is null) return;
     string outPath = Path.Combine(Path.GetTempPath(), "mk20-title-opacity-backgrounds-demo-theme.Theme");
     File.WriteAllBytes(outPath, built);
     Console.WriteLine($"Saved to {outPath}");
     string previewPath = Path.Combine(Path.GetTempPath(), "mk20-title-opacity-backgrounds-demo-theme.png");
-    string mainBgImagePathForPreview = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Racing_Setup_Cheatsheet.jpg");
+    string mainBgImagePathForPreview = Path.Combine(backgroundsDir, "Racing_Setup_Cheatsheet.jpg");
     GenerateRealBackgroundPreviewPng(iconsDir, mainBgImagePathForPreview, previewPath);
     Console.WriteLine($"Saved preview to {previewPath}");
+    return;
+}
+
+if (args.Length >= 1 && args[0] == "--build-secondary-gif-offset-test")
+{
+    // SANDBOX ONLY - quick local test of the Protocol library's
+    // DynamicImageItemBuilder.SecondaryScreenBackgroundAutoFit pan/offset capability. Usage:
+    //   --build-secondary-gif-offset-test [offsetX] [offsetY]
+    // offsetX/offsetY are each in [-1, 1] (0 = centered crop, the previous/default
+    // behavior; -1 = as far left/up as possible, +1 = as far right/down as possible).
+    double offsetX = args.Length >= 2 ? double.Parse(args[1]) : 0;
+    double offsetY = args.Length >= 3 ? double.Parse(args[2]) : 0;
+    string gifPath = Path.Combine(gifsDir, "pop-cat.gif");
+    if (!File.Exists(gifPath)) { Console.WriteLine($"Missing GIF: {gifPath}"); return; }
+
+    var builder = new ThemeBuilder();
+    builder.AddPage(page =>
+    {
+        page.SetCanvas(640, 656);
+        page.AddDynamicImage(img => img.SecondaryScreenBackgroundAutoFit("popcat_secondary_offset.gif", File.ReadAllBytes(gifPath), offsetX, offsetY));
+    });
+    byte[] encoded = ThemeFileCodec.Encode(builder.Build());
+    string outPath = Path.Combine(Path.GetTempPath(), $"mk20-secondary-gif-offset-{offsetX}_{offsetY}-theme.Theme");
+    File.WriteAllBytes(outPath, encoded);
+    Console.WriteLine($"Built with offset ({offsetX}, {offsetY}). Saved to {outPath}");
     return;
 }
 
@@ -103,7 +129,7 @@ if (args.Length >= 1 && args[0] == "--build-gauges-scratch")
     // SANDBOX ONLY - not part of the confirmed API surface, throwaway local experiment to
     // test rendering every gauge/text item type live-bound over a GIF background on the
     // secondary screen. Not intended to be committed/kept long-term.
-    byte[]? built = BuildSecondaryGaugesGifSandboxTheme(iconsDir);
+    byte[]? built = BuildSecondaryGaugesGifSandboxTheme(iconsDir, gifsDir);
     if (built is null) return;
     string outPath = Path.Combine(Path.GetTempPath(), "mk20-gauges-scratch-theme.Theme");
     File.WriteAllBytes(outPath, built);
@@ -126,7 +152,7 @@ if (args.Length >= 1 && args[0] == "--build-widget-test-scratch")
 
 if (args.Length >= 1 && args[0] == "--build-6page-scratch")
 {
-    byte[]? built = BuildSixPageThemeFromScratch(iconsDir);
+    byte[]? built = BuildSixPageThemeFromScratch(iconsDir, gifsDir);
     if (built is null) return;
     string outPath = Path.Combine(Path.GetTempPath(), "mk20-6page-scratch-theme.Theme");
     File.WriteAllBytes(outPath, built);
@@ -203,7 +229,7 @@ while (true)
             case "14": await BuildAndUploadFiveKeyTestThemeAsync(Require(client), iconsDir, backgroundsDir); break;
             case "15": await BuildAndUploadFullGridThemeAsync(Require(client), iconsDir, backgroundsDir); break;
             case "16": await AddKeyToThemeAndUploadAsync(Require(client), iconsDir); break;
-            case "17": await BuildUploadAndPumpGaugesSandboxAsync(Require(client), iconsDir); break;
+            case "17": await BuildUploadAndPumpGaugesSandboxAsync(Require(client), iconsDir, gifsDir); break;
             case "18": await BuildUploadAndPumpWidgetTestAsync(Require(client)); break;
             case "0": if (client is not null) await client.DisposeAsync(); return;
             default: Console.WriteLine("Unknown choice."); break;
@@ -382,7 +408,7 @@ static void DecodeLocalTheme()
     }
 }
 
-static byte[]? BuildSevenKeyThemeFromScratch(string iconsDir)
+static byte[]? BuildSevenKeyThemeFromScratch(string iconsDir, string gifsDir)
 {
     // Matches the layout of the user's real 5-button theme (customTheme5buttons.Theme) plus
     // a 6th key showing an animated GIF (a real, pressable KeyItem using the confirmed
@@ -404,10 +430,10 @@ static byte[]? BuildSevenKeyThemeFromScratch(string iconsDir)
         (21, HidKey.Digit0, "0"), // the 7th key
     };
 
-    string desktopGif = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "pop-cat.gif");
-    bool hasGif = File.Exists(desktopGif);
+    string gifAssetPath = Path.Combine(gifsDir, "pop-cat.gif");
+    bool hasGif = File.Exists(gifAssetPath);
     if (!hasGif)
-        Console.WriteLine($"Note: pop-cat.gif not found at {desktopGif} - the animated key will fall back to a static icon.");
+        Console.WriteLine($"Note: pop-cat.gif not found at {gifAssetPath} - the animated key will fall back to a static icon.");
 
     foreach (var (iconNum, _, _) in keyboardKeys)
     {
@@ -439,7 +465,7 @@ static byte[]? BuildSevenKeyThemeFromScratch(string iconsDir)
             page.AddKey(row, col, keyBuilder =>
             {
                 if (isAnimatedKey)
-                    keyBuilder.AnimatedIcon("pop-cat", File.ReadAllBytes(desktopGif));
+                    keyBuilder.AnimatedIcon("pop-cat", File.ReadAllBytes(gifAssetPath));
                 else
                     keyBuilder.Icon($"icon_{iconNum:D2}.png", File.ReadAllBytes(iconFile));
                 keyBuilder.Action(isAnimatedKey
@@ -480,10 +506,9 @@ static byte[]? BuildSevenKeyThemeFromScratch(string iconsDir)
 /// Tests whether ProgressBar/LinearGauge/RadialGauge/DigitalClock/Text items all render
 /// correctly live-bound while a GIF plays underneath.
 /// </summary>
-static byte[]? BuildSecondaryGaugesGifSandboxTheme(string iconsDir)
+static byte[]? BuildSecondaryGaugesGifSandboxTheme(string iconsDir, string gifsDir)
 {
-    string desktopDir = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-    string secondaryBgGifPath = Path.Combine(desktopDir, "pop-cat.gif");
+    string secondaryBgGifPath = Path.Combine(gifsDir, "pop-cat.gif");
     if (!File.Exists(secondaryBgGifPath)) { Console.WriteLine($"Missing GIF: {secondaryBgGifPath}"); return null; }
 
     string iconFile = Path.Combine(iconsDir, "icon_01.png");
@@ -561,9 +586,9 @@ static byte[]? BuildSecondaryGaugesGifSandboxTheme(string iconsDir)
 /// loops pushing randomly-generated telemetry values for every bound key until Enter is
 /// pressed, so the effect can be visually confirmed live on real hardware.
 /// </summary>
-static async Task BuildUploadAndPumpGaugesSandboxAsync(Mk20DeviceClient client, string iconsDir)
+static async Task BuildUploadAndPumpGaugesSandboxAsync(Mk20DeviceClient client, string iconsDir, string gifsDir)
 {
-    byte[]? encoded = BuildSecondaryGaugesGifSandboxTheme(iconsDir);
+    byte[]? encoded = BuildSecondaryGaugesGifSandboxTheme(iconsDir, gifsDir);
     if (encoded is null) return;
 
     string localOutPath = Path.Combine(Path.GetTempPath(), "mk20-gauges-scratch-theme.Theme");
@@ -811,29 +836,16 @@ static void GenerateRealBackgroundPreviewPng(string iconsDir, string mainBackgro
 }
 
 /// <summary>
-/// Loads a real image/GIF file from disk and resizes every frame to fill the exact target
-/// size (cropping to preserve aspect ratio, matching how every real background asset
-/// examined was pre-scaled to precisely the item's declared w/h - e.g. every real
-/// secondary-screen GIF is exactly 428x142, not scaled by the device at render time).
-/// Preserves the original frame count/delays/loop count for animated sources. Intended for
-/// the secondary screen only - see remarks on <see cref="ResizeImageToStaticFill"/> for why
-/// the main screen does not use this.
+/// Loads a real image/GIF file from disk and delegates to
+/// <see cref="Mk20Control.Protocol.Theme.Building.BackgroundImageNormalizer.ResizeToFill"/>
+/// (the Protocol library's own auto-resize/pan capability) to fill the exact target size.
+/// Thin file-loading wrapper kept in the sandbox app only for convenience; the actual
+/// resize/crop/pan logic lives in the library so any consumer gets it via
+/// <c>DynamicImageItemBuilder.SecondaryScreenBackgroundAutoFit</c>/
+/// <c>.MainScreenBackgroundAutoFit</c> without needing their own ImageSharp code.
 /// </summary>
-static byte[] ResizeImageOrGifToFill(string filePath, int targetWidth, int targetHeight)
-{
-    using var source = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.Rgba32>(filePath);
-    source.Mutate(ctx => ctx.Resize(new SixLabors.ImageSharp.Processing.ResizeOptions
-    {
-        Size = new SixLabors.ImageSharp.Size(targetWidth, targetHeight),
-        Mode = SixLabors.ImageSharp.Processing.ResizeMode.Crop,
-    }));
-    using var ms = new MemoryStream();
-    if (source.Frames.Count > 1)
-        source.Save(ms, new SixLabors.ImageSharp.Formats.Gif.GifEncoder());
-    else
-        source.Save(ms, new PngEncoder());
-    return ms.ToArray();
-}
+static byte[] ResizeImageOrGifToFill(string filePath, int targetWidth, int targetHeight, double offsetXPercent = 0, double offsetYPercent = 0)
+    => Mk20Control.Protocol.Theme.Building.BackgroundImageNormalizer.ResizeToFill(File.ReadAllBytes(filePath), targetWidth, targetHeight, offsetXPercent, offsetYPercent);
 
 /// <summary>
 /// Loads a real image (or the first frame of a GIF) from disk and resizes/crops it to fill
@@ -932,10 +944,10 @@ static byte[]? BuildTitleOpacityDemoThemeFromScratch(string iconsDir)
     return encoded;
 }
 
-static byte[]? BuildTitleOpacityDemoWithBackgroundsFromScratch(string iconsDir)
+static byte[]? BuildTitleOpacityDemoWithBackgroundsFromScratch(string iconsDir, string backgroundsDir, string gifsDir)
 {
     // Same 5 title/opacity keys as BuildTitleOpacityDemoThemeFromScratch, plus:
-    //   - a real STATIC image from the user's Desktop, resized to fill the confirmed real
+    //   - a real STATIC image from assets/backgrounds, resized to fill the confirmed real
     //     640x512 main-screen background area - embedded as a type-114 DynamicImageItem via
     //     DynamicImageItemBuilder.MainScreenBackground, NOT a type-100 BackgroundItem.
     //     CONFIRMED via a genuine ScreenKeyWindows-saved reference file (the user added
@@ -947,16 +959,15 @@ static byte[]? BuildTitleOpacityDemoWithBackgroundsFromScratch(string iconsDir)
     //     BackgroundItemBuilder.MainScreen, type 100, "/theme/MK20-PLUS/MainScreen/<file>")
     //     assumed, which is why that attempt didn't render on real hardware. See
     //     PROTOCOL_WAVESHARE_MK20.md §6.5/§10 Item #14.
-    //   - a real GIF from the user's Desktop, resized to fill the confirmed real 428x142
+    //   - a real GIF from assets/gifs, resized to fill the confirmed real 428x142
     //     secondary (2.8") screen area, embedded in this same page via the confirmed real
     //     mechanism (DynamicImageItemBuilder.SecondaryScreenBackground - a type-114 item at
     //     the fixed x=106,y=0,w=428,h=142 position with "backgroundType":"secondary",
     //     confirmed via defaultTheme.Theme; see PROTOCOL_WAVESHARE_MK20.md §7.1). GIF
     //     backgrounds ARE confirmed to work correctly here (user confirmed seeing the cat
     //     GIF rendering on the secondary screen).
-    string desktopDir = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-    string mainBgImagePath = Path.Combine(desktopDir, "Racing_Setup_Cheatsheet.jpg");
-    string secondaryBgGifPath = Path.Combine(desktopDir, "pop-cat.gif");
+    string mainBgImagePath = Path.Combine(backgroundsDir, "Racing_Setup_Cheatsheet.jpg");
+    string secondaryBgGifPath = Path.Combine(gifsDir, "pop-cat.gif");
     if (!File.Exists(mainBgImagePath)) { Console.WriteLine($"Missing image: {mainBgImagePath}"); return null; }
     if (!File.Exists(secondaryBgGifPath)) { Console.WriteLine($"Missing GIF: {secondaryBgGifPath}"); return null; }
 
@@ -1035,7 +1046,7 @@ static byte[]? BuildTitleOpacityDemoWithBackgroundsFromScratch(string iconsDir)
     return encoded;
 }
 
-static byte[]? BuildSixPageThemeFromScratch(string iconsDir)
+static byte[]? BuildSixPageThemeFromScratch(string iconsDir, string gifsDir)
 {
     // 6 pages, each a full 4x5 grid (20 keys - confirmed real MK20 main-screen grid size).
     // Bottom-left (row=3,col=0) = previous page, bottom-right (row=3,col=4) = next page on
@@ -1048,11 +1059,11 @@ static byte[]? BuildSixPageThemeFromScratch(string iconsDir)
     const int rows = 4, cols = 5;
     const int pageCount = 6;
 
-    string desktopGif = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "pop-cat.gif");
-    bool hasGif = File.Exists(desktopGif);
-    byte[]? gifBytes = hasGif ? File.ReadAllBytes(desktopGif) : null;
+    string gifAssetPath = Path.Combine(gifsDir, "pop-cat.gif");
+    bool hasGif = File.Exists(gifAssetPath);
+    byte[]? gifBytes = hasGif ? File.ReadAllBytes(gifAssetPath) : null;
     if (!hasGif)
-        Console.WriteLine($"Note: pop-cat.gif not found at {desktopGif} - all content keys will use numbered icons instead.");
+        Console.WriteLine($"Note: pop-cat.gif not found at {gifAssetPath} - all content keys will use numbered icons instead.");
 
     // USB HID keycodes for 'A'-'Z' are 0x04-0x1D (4-29) in sequence.
     int letterIndex = 0;

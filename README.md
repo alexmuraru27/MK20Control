@@ -18,6 +18,7 @@ datasheet's "Open Items" section.
 ```
 MK20Control/
 ├── PROTOCOL_WAVESHARE_MK20.md      the protocol datasheet - authoritative wire-format spec
+├── Mk20Control.Protocol.API.md     consumer-facing API reference for using the library as a .dll
 ├── Mk20Control.sln
 ├── src/
 │   ├── Mk20Control.Protocol/       reusable protocol library (packageable as a .dll)
@@ -26,7 +27,10 @@ MK20Control/
 │   │   ├── Model/                  CommandId enum, KeyPosition, DeviceIdentity, ThemeListing, PacketType
 │   │   ├── Codecs/                 VariantMapCodec (tagged-value format), SimpleStringMapCodec (untagged string map, FIND_DEVICE/GET_DEVICE_THEME/FILE_START/FILE_END), SystemDataCodec, ThemeFileCodec
 │   │   ├── Theme/                  strongly-typed .Theme model: ThemeFile/ThemePage/ThemeCanvas/ThemeAsset
-│   │   │   ├── Items/              ThemeItem hierarchy: Background/ProgressBar/Text/DynamicImage/Key/Unknown
+│   │   │   ├── Items/              core item types: Background/DynamicImage/Key/Unknown + base ThemeItem
+│   │   │   │   └── Widgets/        data-bound widget item types: Text/MultilineText/ShadowText, ProgressBar/LinearGauge/RadialGauge, CircularGauge/SegmentedCircularGauge/LightShadowGauge, DigitalClock
+│   │   │   ├── Building/           fluent builders: ThemeBuilder/ThemePageBuilder/KeyItemBuilder/ThemeEditor + item builders (Background/DynamicImage)
+│   │   │   │   └── Widgets/        fluent builders for every widget item type above (one builder per item type)
 │   │   │   └── Actions/            KeyAction hierarchy: Keyboard/OpenWeb/Mouse/PageSwitch/AudioVolume/TextInput/Unknown
 │   │   ├── Transport/              ISerialTransport abstraction + SerialPortTransport implementation
 │   │   ├── Client/                 Mk20DeviceClient - the main facade API (see below)
@@ -39,8 +43,14 @@ MK20Control/
 │   └── Captures/                   sample captures used for the findings below (see note)
 └── assets/
     ├── icons/                      40 procedurally-generated 64x64 PNG icon badges
-    └── backgrounds/                background/test-pattern images for the device canvas
+    ├── backgrounds/                background/test-pattern images for the device canvas
+    └── gifs/                       animated GIFs used by the sandbox app's demo/test themes (e.g. an animated key icon, a secondary-screen background)
 ```
+
+> All demo/sandbox scenarios in `Mk20Control.App` load their images/GIFs exclusively from
+> `assets/` (resolved relative to the repo root at run time) - there are no hardcoded,
+> machine-specific file paths anywhere in `src/` or `tools/`. Clone the repo on any machine
+> with the .NET 9 SDK installed and every `dotnet run` scenario works unmodified.
 
 > **`tools/Captures/`** holds the raw `.pcapng` files (capture.pcapng, capture2-14.pcapng)
 > and their `*_decode_output.txt` text summaries used to derive every finding in this
@@ -169,13 +179,18 @@ page builder directly for imperative-style chaining instead of a lambda).
 |---|---|
 | `.SetCanvas(width, height, showUnit=true)` | Canvas size - always `640, 656` for the confirmed real main screen; call before adding items that depend on it (e.g. a full-bleed background). |
 | `.AddKey(row, col, configure)` | Adds a physical key (see `KeyItemBuilder` below). |
-| `.AddBackground(configure)` | Adds a background image/video for the main OR secondary screen (see `BackgroundItemBuilder.MainScreen`/`.SecondaryScreen`). |
-| `.AddText(configure)` | Static or data-bound text label. |
-| `.AddProgressBar(configure)` | Data-bound circular/linear progress bar. |
-| `.AddLinearGauge(configure)` | Data-bound solid-color bar gauge. |
-| `.AddRadialGauge(configure)` | Data-bound arc/radial gauge with gradient stops. |
-| `.AddDigitalClockField(configure)` | One clock field (`"hour"`/`"minute"`/`"second"`) - combine 2-3 adjacent items for a full clock. |
-| `.AddDynamicImage(configure)` | A **non-interactive, decorative** animated GIF (type 114) - NOT pressable and carries no key action. For a pressable animated **key**, use `KeyItemBuilder.AnimatedIcon` instead (see below) - these are two entirely different mechanisms; using the wrong one for "I want an animated button" is a common mistake. Also the mechanism for `DynamicImageItemBuilder.SecondaryScreenBackground(...)` below. |
+| `.AddBackground(configure)` | Adds a `.mp4` video background for the main OR secondary screen (see `BackgroundItemBuilder.MainScreen`/`.SecondaryScreen`). |
+| `.AddDynamicImage(configure)` | A **non-interactive, decorative** animated GIF (type 114) - NOT pressable and carries no key action. For a pressable animated **key**, use `KeyItemBuilder.AnimatedIcon` instead (see below) - these are two entirely different mechanisms; using the wrong one for "I want an animated button" is a common mistake. Also the mechanism for picture/GIF screen backgrounds - see `.MainScreenBackground`/`.SecondaryScreenBackground`/their `AutoFit` variants below. |
+| `.AddText(configure)` | Static or data-bound single-line text label (type 113). |
+| `.AddMultilineText(configure)` | Static or data-bound wrapping text block (type 116) - same as `.AddText` plus explicit width/height wrap bounds. |
+| `.AddShadowText(configure)` | Static or data-bound text with a border stroke and a drop-shadow (type 117). |
+| `.AddProgressBar(configure)` | Data-bound circular/linear progress bar (type 102). |
+| `.AddLinearGauge(configure)` | Data-bound solid-color bar gauge, no gradient (type 103). |
+| `.AddRadialGauge(configure)` | Data-bound arc/radial gauge with up to 3 gradient stops and a configurable angle range (type 109). |
+| `.AddCircularGauge(configure)` | Data-bound plain solid-color ring gauge, no gradient/angle range (type 101). |
+| `.AddSegmentedCircularGauge(configure)` | Same fields as `.AddCircularGauge`, rendered as a segmented/notched ring instead of a solid arc (type 104). |
+| `.AddLightShadowGauge(configure)` | Data-bound ring with a separate arc-stroke color/width plus a glow/shadow highlight (type 110). |
+| `.AddDigitalClockField(configure)` | One clock field (`"hour"`/`"minute"`/`"second"`) - combine 2-3 adjacent items for a full clock (type 111). Fed by the host pushing `hour`/`minute`/`second` via `PushSystemDataAsync` every second - it is **not** driven by the device's own clock/RTC (confirmed via a real capture, see PROTOCOL_WAVESHARE_MK20.md §6.2). |
 | `.PageId` | This page's auto-generated GUID id - reference it from `KeyActions.OpenPage(pageId)` for folder-style navigation to a *specific* page (as opposed to `PreviousPage()`/`NextPage()`, which are always relative to the current page, not absolute). |
 
 Every page **must** carry a page-level `"encoder"` array describing the device's physical
@@ -317,6 +332,87 @@ the confirmed real fixed secondary-screen position/size (106, 0, 428x142) under
 static image is resized/cropped by ScreenKeyWindows to exactly fill its target area, while
 a GIF is embedded at its **original, unresized size** (the device does not appear to
 stretch a GIF background to fill the area).
+
+Both `.MainScreenBackground(...)`/`.SecondaryScreenBackground(...)` register the supplied
+bytes as-is - you're expected to pre-size the source image/GIF yourself. If you'd rather
+not pre-process images, use the `AutoFit` variants instead, which resize/crop an
+arbitrary-sized source to the exact required dimensions via
+`Mk20Control.Protocol.Theme.Building.BackgroundImageNormalizer`:
+
+```csharp
+page.AddDynamicImage(img => img.MainScreenBackgroundAutoFit("photo.jpg", anySizeJpegBytes));
+page.AddDynamicImage(img => img.SecondaryScreenBackgroundAutoFit("anim.gif", anySizeGifBytes,
+    offsetXPercent: -1, offsetYPercent: 0)); // pan the crop window fully left instead of centered
+```
+
+`offsetXPercent`/`offsetYPercent` (each in `[-1, 1]`, default `0` = centered) control which
+part of the source survives the crop when its aspect ratio doesn't match the target - `-1`
+shifts the crop window as far left/up as possible, `+1` as far right/down as possible. This
+only changes which source pixels are kept; it does not affect the item's on-device
+x/y/w/h rectangle. Animated GIF sources keep their frame count/delays/loop count intact.
+
+#### Widgets - gauges, text, and clocks
+
+Beyond keys and backgrounds, a page can carry any number of data-bound (or static) display
+widgets - progress bars, gauges, text, and clock fields - each optionally bound to a live
+data source via `.BoundTo(systemDataName, ...)`, updated at runtime with
+`Mk20DeviceClient.PushSystemDataAsync`. The binding name is an arbitrary string you choose;
+it is not a fixed/reserved set (see PROTOCOL_WAVESHARE_MK20.md §6.2 for how the device
+reports which names the loaded theme expects).
+
+| Widget | Builder method | Item type | Notes |
+|---|---|---|---|
+| Progress bar | `.AddProgressBar(configure)` | 102 | Circular/linear bar; `.BoundTo(name, min, max)`, `.Colors(front, back, border, borderWidth, cornerRadius)`. |
+| Linear gauge | `.AddLinearGauge(configure)` | 103 | Solid-color bar, no gradient; `.Colors(front, back, border, borderWidth)`. |
+| Radial gauge | `.AddRadialGauge(configure)` | 109 | Arc dial with up to 3 gradient stops; `.AngleRange(min, max)`, `.Gradient(c1, c2, c3)`, `.Direction(clockwise)`. |
+| Circular gauge | `.AddCircularGauge(configure)` | 101 | Plain solid-color ring, no gradient/angle range; `.Geometry(margin, radius)`. |
+| Segmented circular gauge | `.AddSegmentedCircularGauge(configure)` | 104 | Same fields as circular gauge, rendered as a segmented/notched ring. |
+| Light-shadow gauge | `.AddLightShadowGauge(configure)` | 110 | Ring with a separate arc-stroke color/width plus a glow highlight; `.LightShadow(color, lighter, position)`. |
+| Text | `.AddText(configure)` | 113 | Single-line static or data-bound text; `.Text(...)` or `.BoundTo(name)`, `.Font(...)`, `.Color(...)`. |
+| Multiline text | `.AddMultilineText(configure)` | 116 | Same as text, plus explicit width/height for wrapping. |
+| Shadow text | `.AddShadowText(configure)` | 117 | Same as text, plus `.Border(color, width)` and `.Shadow(color, size)`. |
+| Digital clock | `.AddDigitalClockField(configure)` | 111 | One `"hour"`/`"minute"`/`"second"` field per item - combine 2-3 for a full clock; host-driven, see note above. |
+
+Every widget/gauge builder is in `Mk20Control.Protocol.Theme.Building.Widgets`; every
+resulting item type is in `Mk20Control.Protocol.Theme.Items.Widgets`.
+
+Minimal example - a CPU-usage progress bar with a text readout, plus a live clock:
+
+```csharp
+var theme = new ThemeBuilder()
+    .AddPage(page => page
+        .SetCanvas(640, 656)
+        .AddProgressBar(pb => pb.At(20, 20, 200, 30).BoundTo("CPU Usage", 0, 100)
+            .Colors("r=0,g=170,b=255,a=220", "r=255,255,255,a=140", "r=0,g=0,b=0,a=180"))
+        .AddText(t => t.At(20, 55).BoundTo("CPU Usage").Font("Microsoft YaHei,14,-1,5,50,0,0,0,0,0"))
+        .AddDigitalClockField(c => c.At(500, 20, 40, 40).Field("hour"))
+        .AddDigitalClockField(c => c.At(545, 20, 40, 40).Field("minute")))
+    .Build();
+
+byte[] fileBytes = ThemeFileCodec.Encode(theme);
+await client.UploadThemeFileAsync("/data/theme/MK20/dashboard/dashboard.Theme", fileBytes);
+
+// Push live values every second - the clock fields need this too (they are host-driven,
+// not device-RTC-driven).
+var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+while (await timer.WaitForNextTickAsync())
+{
+    var now = DateTime.Now;
+    await client.PushSystemDataAsync(new Dictionary<string, string>
+    {
+        ["CPU Usage"] = $"{GetCurrentCpuUsagePercent()}%",
+        ["hour"] = now.Hour.ToString(),
+        ["minute"] = now.Minute.ToString(),
+    });
+}
+```
+
+See `Mk20Control.App`'s `BuildMainScreenWidgetTestTheme` (`--build-widget-test-scratch` CLI
+flag, also reachable via the interactive menu's option 18) for a complete, runnable example
+exercising every single widget type at once, each bound to its own test channel
+(`test1`-`test9`) plus a live clock, fed by a background loop that pushes varied
+random/ramp/sine-wave values so each widget's live update behavior can be visually verified
+on real hardware.
 
 #### Multi-page themes with page navigation
 
@@ -767,7 +863,43 @@ Menu options:
 12. Delete a theme from the device by device-side path (`SET_DEVICE_DELETE_THEME`)
 13. Upload a local `.Theme` file to the device and activate it (`FILE_START` + bulk
     transfer + `FILE_END` + `SET_DEVICE_RELOAD`)
+14. Build+upload a 5-key test theme (icons 01-05 -> keys 1-5)
+15. Build+upload a full 20-key grid theme (icons 01-20, background) using the `ThemeBuilder` API
+16. Add a key to an existing local `.Theme` file (via `ThemeEditor`) and upload it
+17. **[sandbox]** Build+upload a cat-GIF + every-gauge-type secondary-screen theme, then
+    pump random telemetry - demonstrates overlaying live-data widgets on an animated GIF
+    background
+18. **[sandbox]** Build+upload a single main-screen theme exercising every widget type at
+    once (`test1`-`test9` channels plus a live clock), then pump varied telemetry -
+    see [Widgets - gauges, text, and clocks](#widgets---gauges-text-and-clocks)
 0. Exit
+
+Options marked **[sandbox]** are throwaway exploratory scenarios (not part of the
+confirmed/stable API surface) kept for quick manual verification against real hardware -
+see the corresponding function's XML doc comment in `Program.cs` for details.
+
+### Non-interactive CLI flags
+
+Several scenarios are also runnable directly as a CLI argument, without the interactive
+menu - useful for scripting or quick local verification (no hardware required unless
+noted):
+
+| Flag | Effect |
+|---|---|
+| `--dump-raw-json <file.Theme>` | Prints every distinct item type's raw JSON found in the file. |
+| `--build-test5-local` | Builds the 5-key test theme locally and saves it to a temp file. |
+| `--build-fullgrid-local` | Builds the full 20-key grid theme locally and saves it to a temp file. |
+| `--build-7key-scratch` | Builds a 7-key theme (icons + one animated key) from scratch. |
+| `--build-title-opacity-demo` | Builds a theme demonstrating `KeyItemBuilder.Title`/`.Opacity`/`.TitleStyle`. |
+| `--build-title-opacity-backgrounds-demo` | Same as above, plus a main-screen picture background and a secondary-screen GIF background. |
+| `--build-secondary-gif-offset-test [offsetX] [offsetY]` | Builds a theme with only the secondary-screen GIF background, panned by the given offset (each in `[-1, 1]`) - a quick way to preview `SecondaryScreenBackgroundAutoFit`'s crop-offset behavior before wiring it into a full theme. |
+| `--build-gauges-scratch` | Builds the cat-GIF + every-gauge-type secondary-screen sandbox theme (see menu option 17). |
+| `--build-widget-test-scratch` | Builds the every-widget-type main-screen sandbox theme (see menu option 18). |
+| `--build-6page-scratch` | Builds a 6-page, 120-key theme with page navigation and mixed static/animated icons. |
+| `--add-key-local <themePath> <row> <col> <iconFileName> <keycode> <keyLabel>` | Loads an existing local `.Theme` file, adds one key via `ThemeEditor`, and saves the result. |
+
+All flags that build a theme save the result to a file under the OS temp directory and
+print its full path; none of them require a connected device.
 
 ## Assets
 
@@ -807,6 +939,14 @@ dotnet run -c Release
 
 All artwork is procedurally generated code (gradients/shapes/text) - no third-party or
 copyrighted images are used or bundled.
+
+### GIFs (`assets/gifs/`)
+
+Animated GIFs used by `Mk20Control.App`'s sandbox/demo scenarios - e.g. an animated key
+icon (`KeyItemBuilder.AnimatedIcon`) and a secondary-screen animated background
+(`DynamicImageItemBuilder.SecondaryScreenBackground`/`.SecondaryScreenBackgroundAutoFit`).
+Checked into the repo (unlike icons/backgrounds, these are not procedurally generated) so
+every sandbox scenario runs unmodified on any machine, with no manual asset setup required.
 
 ## Requirements
 

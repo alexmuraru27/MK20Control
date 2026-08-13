@@ -1220,15 +1220,14 @@ static bool TestHeaderJsonLengthField()
 // an animated key is a real, pressable KeyItem with "path":"" , "paths":"<folder>", and
 // "frameDelays":"<csv>", with each frame registered as a separate asset under that folder.
 // Verifies KeyItemBuilder.AnimatedIcon produces exactly this shape from a real GIF file
-// (the user's own pop-cat.gif, if present on the Desktop - this test is skipped, not
-// failed, if that file isn't available in this environment), and that the key still
-// carries its assigned action.
+// (assets/gifs/pop-cat.gif, checked into the repo so this test runs on any machine).
 static bool TestAnimatedKeyIcon()
 {
-    string gifPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "pop-cat.gif");
+    string repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".."));
+    string gifPath = Path.Combine(repoRoot, "assets", "gifs", "pop-cat.gif");
     if (!File.Exists(gifPath))
     {
-        Console.Write("(skipped - pop-cat.gif not present) ");
+        Console.Write("(skipped - assets/gifs/pop-cat.gif not present) ");
         return true;
     }
     byte[] gifBytes = File.ReadAllBytes(gifPath);

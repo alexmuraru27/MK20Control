@@ -72,6 +72,13 @@ public sealed class DynamicImageItemBuilder
     /// <paramref name="gifOrImageBytes"/> as the asset, equivalent to calling
     /// <see cref="Gif"/> at that position/size. Use a plain (non-animated) PNG/JPEG here if
     /// you don't want an animation - only the file bytes matter, not the extension.
+    ///
+    /// <paramref name="gifOrImageBytes"/> is registered byte-for-byte as-is (no implicit
+    /// resizing) - callers are expected to pre-size it to exactly 428x142 themselves (every
+    /// real secondary-screen background asset examined was pre-scaled to this exact size;
+    /// the device does not scale it at render time). Use
+    /// <see cref="SecondaryScreenBackgroundAutoFit"/> instead if you want this library to
+    /// resize/crop (and optionally pan) an arbitrary source image for you.
     /// </summary>
     public DynamicImageItemBuilder SecondaryScreenBackground(string suggestedFileName, byte[] gifOrImageBytes)
     {
@@ -83,6 +90,28 @@ public sealed class DynamicImageItemBuilder
         _assetPath = _owner.RegisterAssetAtPath($"/image/428x142/PhotoAlbum/{suggestedFileName}", gifOrImageBytes);
         return this;
     }
+
+    /// <summary>
+    /// Same as <see cref="SecondaryScreenBackground"/>, but first resizes/crops
+    /// <paramref name="imageOrGifBytes"/> to exactly fill the confirmed real 428x142
+    /// secondary-screen area via <see cref="BackgroundImageNormalizer.ResizeToFill"/> - a
+    /// size guard/auto-resize for callers who don't want to pre-process their own source
+    /// image. <paramref name="offsetXPercent"/>/<paramref name="offsetYPercent"/> (each in
+    /// [-1, 1], default 0 = centered) pan which part of the source survives the crop when
+    /// its aspect ratio doesn't match 428x142 - see <see cref="BackgroundImageNormalizer.ResizeToFill"/>.
+    /// </summary>
+    public DynamicImageItemBuilder SecondaryScreenBackgroundAutoFit(string suggestedFileName, byte[] imageOrGifBytes, double offsetXPercent = 0, double offsetYPercent = 0)
+        => SecondaryScreenBackground(suggestedFileName, BackgroundImageNormalizer.ResizeToFill(imageOrGifBytes, 428, 142, offsetXPercent, offsetYPercent));
+
+    /// <summary>
+    /// Same as <see cref="MainScreenBackground"/>, but first resizes/crops
+    /// <paramref name="imageOrGifBytes"/> to exactly fill the confirmed real 640x512
+    /// main-screen area via <see cref="BackgroundImageNormalizer.ResizeToFill"/>.
+    /// <paramref name="offsetXPercent"/>/<paramref name="offsetYPercent"/> (each in [-1, 1],
+    /// default 0 = centered) pan which part of the source survives the crop.
+    /// </summary>
+    public DynamicImageItemBuilder MainScreenBackgroundAutoFit(string suggestedFileName, byte[] imageOrGifBytes, double offsetXPercent = 0, double offsetYPercent = 0)
+        => MainScreenBackground(suggestedFileName, BackgroundImageNormalizer.ResizeToFill(imageOrGifBytes, 640, 512, offsetXPercent, offsetYPercent));
 
     internal ThemeItem Build() => new DynamicImageItem
     {

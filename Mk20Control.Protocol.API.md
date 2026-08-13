@@ -263,7 +263,7 @@ an immutable `ThemeFile`. The first added page becomes the active page on load
 | `.SetCanvas(width, height, showUnit=true)` | Canvas size — always `640, 656` for the real main screen. Call first. |
 | `.AddKey(row, col, configure)` | A physical key (`KeyItemBuilder`, see below). |
 | `.AddBackground(configure)` | `.mp4` video background, main or secondary screen (`BackgroundItemBuilder`). |
-| `.AddDynamicImage(configure)` | Decorative animated GIF, or (via `.MainScreenBackground(...)`/`.SecondaryScreenBackground(...)`) a picture/GIF screen background (`DynamicImageItemBuilder`). |
+| `.AddDynamicImage(configure)` | Decorative animated GIF, or (via `.MainScreenBackground`/`.SecondaryScreenBackground`/their `AutoFit` size-guarding variants) a picture/GIF screen background (`DynamicImageItemBuilder`). |
 | `.AddText(configure)` | Static or data-bound text label (type 113). |
 | `.AddMultilineText(configure)` | Static or data-bound wrapping text block (type 116). |
 | `.AddShadowText(configure)` | Static or data-bound text with border stroke + drop-shadow (type 117). |
@@ -319,11 +319,23 @@ page.AddBackground(bg => bg.MainScreen("bg.mp4", mp4Bytes));
 page.AddBackground(bg => bg.SecondaryScreen("bg.mp4", mp4Bytes));
 
 // Picture or GIF background (confirmed alternative for BOTH main and secondary screens).
+// These register the bytes as-is - pre-size the source yourself to exactly 640x512 (main)
+// or 428x142 (secondary), matching every real background asset examined.
 page.AddDynamicImage(img => img.MainScreenBackground("photo.jpg", jpegBytes));
 page.AddDynamicImage(img => img.SecondaryScreenBackground("anim.gif", gifBytes));
+
+// Auto-fit variants: resize/crop an arbitrary source image/GIF to the exact required size
+// for you (via BackgroundImageNormalizer), with optional pan/offset control.
+page.AddDynamicImage(img => img.MainScreenBackgroundAutoFit("photo.jpg", anySizeJpegBytes));
+page.AddDynamicImage(img => img.SecondaryScreenBackgroundAutoFit("anim.gif", anySizeGifBytes,
+    offsetXPercent: -1, offsetYPercent: 0)); // pan the crop window fully left
 ```
-A static image is resized/cropped to exactly fill its target area (640x512 main,
-428x142 secondary); a GIF is embedded at its original, unresized size.
+`offsetXPercent`/`offsetYPercent` are each in `[-1, 1]` (0 = centered crop, the default; -1 =
+crop window as far left/up as possible, +1 as far right/down as possible) - useful when the
+source's aspect ratio doesn't match the target and you want to control which part of the
+image survives the crop (e.g. keep the top of a GIF visible instead of its center). This
+only affects which source pixels are kept; it does not change the item's on-device
+x/y/w/h rectangle. Animated GIF sources keep their frame count/delays/loop count.
 
 ---
 
