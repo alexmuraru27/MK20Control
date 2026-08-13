@@ -12,6 +12,7 @@ using Mk20Control.Protocol.Codecs;
 using Mk20Control.Protocol.Exceptions;
 using Mk20Control.Protocol.Framing;
 using Mk20Control.Protocol.Model;
+using Mk20Control.Protocol.Theme;
 using Mk20Control.Protocol.Transport;
 
 namespace Mk20Control.Protocol.Client;
@@ -383,6 +384,14 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
         ArgumentException.ThrowIfNullOrWhiteSpace(deviceThemePath);
         ArgumentNullException.ThrowIfNull(themeFileBytes);
 
+        // The device resumes on whichever page the layout JSON's "main.currentPage" names -
+        // this is NOT necessarily the first page in the "pages" array (e.g. it drifts to
+        // whatever page was last open when the file was re-saved by ScreenKeyWindows, or
+        // whatever ThemeEditor last had selected). Force it back to the first page here so
+        // every upload through this client always activates showing page 1, regardless of
+        // what value happened to be embedded in the bytes handed to this method.
+        themeFileBytes = NormalizeToFirstPage(themeFileBytes);
+
         if (_pendingReloadPaths.ContainsKey(deviceThemePath))
         {
             _logger.LogWarning(
@@ -422,6 +431,34 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
                 _pendingReloadPaths.TryRemove(deviceThemePath, out _);
             }
         }
+    }
+
+    /// <summary>
+    /// Re-encodes <paramref name="themeFileBytes"/> with "main.currentPage" set to its first
+    /// page's id, if it isn't already - so activating this theme always opens on page 1. A
+    /// no-op (returns the original bytes unchanged) for single-page themes or themes whose
+    /// currentPage already matches the first page, to avoid needless re-encoding.
+    /// </summary>
+    private static byte[] NormalizeToFirstPage(byte[] themeFileBytes)
+    {
+        ThemeFile theme;
+        try
+        {
+            theme = ThemeFileCodec.Decode(themeFileBytes);
+        }
+        catch
+        {
+            // Not a well-formed .Theme file this codec understands - upload as-is rather than
+            // failing the whole operation over a best-effort convenience tweak.
+            return themeFileBytes;
+        }
+
+        if (theme.Pages.Count == 0) return themeFileBytes;
+        string firstPageId = theme.Pages[0].PageName ?? "";
+        if (theme.CurrentPageId == firstPageId) return themeFileBytes;
+
+        var normalized = theme with { CurrentPageId = firstPageId };
+        return ThemeFileCodec.Encode(normalized);
     }
 
     private async Task UploadThemeFileAttemptAsync(string deviceThemePath, byte[] themeFileBytes, TimeSpan? timeout, CancellationToken cancellationToken)

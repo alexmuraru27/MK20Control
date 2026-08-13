@@ -290,7 +290,7 @@ static void DecodeLocalTheme()
     if (!File.Exists(path)) { Console.WriteLine("File not found."); return; }
 
     var theme = ThemeFileCodec.Decode(File.ReadAllBytes(path));
-    Console.WriteLine($"Language={theme.Language} LayoutVersion={theme.LayoutVersion} Pages={theme.Pages.Count} Assets={theme.Assets.Count}");
+    Console.WriteLine($"Language={theme.Language} LayoutVersion={theme.LayoutVersion} Pages={theme.Pages.Count} Assets={theme.Assets.Count} CurrentPageId={theme.CurrentPageId}");
     foreach (var page in theme.Pages)
     {
         Console.WriteLine($"  Page {page.PageName}: {page.Items.Count} items");
