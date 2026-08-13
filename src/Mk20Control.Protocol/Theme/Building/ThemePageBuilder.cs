@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mk20Control.Protocol.Theme.Items;
+using Mk20Control.Protocol.Theme.Building.Widgets;
 
 namespace Mk20Control.Protocol.Theme.Building;
 
@@ -96,6 +97,56 @@ public sealed class ThemePageBuilder
     {
         ArgumentNullException.ThrowIfNull(configure);
         var b = new RadialGaugeItemBuilder(_owner);
+        configure(b);
+        _items.Add(b.Build());
+        return this;
+    }
+
+    /// <summary>Adds a data-bound plain circular gauge item (type 101, solid ring, no gradient/angle range).</summary>
+    public ThemePageBuilder AddCircularGauge(Action<CircularGaugeItemBuilder> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        var b = new CircularGaugeItemBuilder(_owner, segmented: false);
+        configure(b);
+        _items.Add(b.Build());
+        return this;
+    }
+
+    /// <summary>Adds a data-bound segmented/notched circular gauge item (type 104, "seg-circular" - same fields as <see cref="AddCircularGauge"/>, different render style).</summary>
+    public ThemePageBuilder AddSegmentedCircularGauge(Action<CircularGaugeItemBuilder> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        var b = new CircularGaugeItemBuilder(_owner, segmented: true);
+        configure(b);
+        _items.Add(b.Build());
+        return this;
+    }
+
+    /// <summary>Adds a data-bound "light-shadow" ring gauge item (type 110, arc stroke + glow highlight).</summary>
+    public ThemePageBuilder AddLightShadowGauge(Action<LightShadowGaugeItemBuilder> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        var b = new LightShadowGaugeItemBuilder(_owner);
+        configure(b);
+        _items.Add(b.Build());
+        return this;
+    }
+
+    /// <summary>Adds a static or data-bound multi-line (wrapping) text item (type 116).</summary>
+    public ThemePageBuilder AddMultilineText(Action<MultilineTextItemBuilder> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        var b = new MultilineTextItemBuilder(_owner);
+        configure(b);
+        _items.Add(b.Build());
+        return this;
+    }
+
+    /// <summary>Adds a static or data-bound drop-shadow text item (type 117, border stroke + shadow).</summary>
+    public ThemePageBuilder AddShadowText(Action<ShadowTextItemBuilder> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        var b = new ShadowTextItemBuilder(_owner);
         configure(b);
         _items.Add(b.Build());
         return this;

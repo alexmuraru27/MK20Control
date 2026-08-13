@@ -1,4 +1,4 @@
-namespace Mk20Control.Protocol.Theme.Items;
+namespace Mk20Control.Protocol.Theme.Items.Widgets;
 
 /// <summary>
 /// A radial/arc-style gauge item ("type": "109" in the theme layout JSON) - a data-bound
@@ -27,4 +27,7 @@ public sealed record RadialGaugeItem : ThemeItem
     public string? GradientColor1 { get; init; }
     public string? GradientColor2 { get; init; }
     public string? GradientColor3 { get; init; }
+
+    /// <summary>Raw "Clockwise" flag (0/1); direction the arc fills, confirmed present in <c>widgetThemeDemo.Theme</c>.</summary>
+    public bool? Clockwise { get; init; }
 }

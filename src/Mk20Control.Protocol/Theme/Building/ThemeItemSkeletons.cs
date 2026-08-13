@@ -146,6 +146,67 @@ internal static class ThemeItemSkeletons
         return ToElement(obj);
     }
 
+    /// <summary>CircularGaugeItem (type 101) / SegmentedCircularGaugeItem (type 104) skeleton - solid front/back colors, margin+radius, no gradient/angle range. Confirmed identical JSON shape for both types via widgetThemeDemo.Theme; only the "type" code differs.</summary>
+    public static JsonElement CircularGaugeItem(string frontColorRgba, string backColorRgba, double margin, double radius)
+    {
+        var obj = new JsonObject
+        {
+            ["front_color"] = frontColorRgba,
+            ["back_color"] = backColorRgba,
+            ["margin"] = margin.ToString(),
+            ["radius"] = radius.ToString(),
+        };
+        return ToElement(obj);
+    }
+
+    /// <summary>LightShadowGaugeItem (type 110) skeleton - ring with separate arc stroke plus a glow/shadow highlight. Confirmed via widgetThemeDemo.Theme.</summary>
+    public static JsonElement LightShadowGaugeItem(string backColorRgba, string arcColorRgba, double arcWidth, double radius, bool clockwise, double displayDirection, string lightShadowColorRgba, double lightShadowLighter, double lightShadowPosition)
+    {
+        var obj = new JsonObject
+        {
+            ["back_color"] = backColorRgba,
+            ["arcColor"] = arcColorRgba,
+            ["arcWidth"] = arcWidth.ToString(),
+            ["radius"] = radius.ToString(),
+            ["Clockwise"] = clockwise ? "1" : "0",
+            ["DisplayDirection"] = displayDirection.ToString(),
+            ["lightShadowColor"] = lightShadowColorRgba,
+            ["lightShadowLighter"] = lightShadowLighter.ToString(),
+            ["lightShadowPosition"] = lightShadowPosition.ToString(),
+        };
+        return ToElement(obj);
+    }
+
+    /// <summary>MultilineTextItem (type 116) skeleton - same shape as TextItem plus w/h wrap bounds (w/h are set separately via the item's Width/Height properties).</summary>
+    public static JsonElement MultilineTextItem(string frontColorRgba, string font)
+    {
+        var obj = new JsonObject
+        {
+            ["front_color"] = frontColorRgba,
+            ["text_customFont_flag"] = "",
+            ["text_customFont_path"] = "",
+            ["text_font"] = font,
+        };
+        return ToElement(obj);
+    }
+
+    /// <summary>ShadowTextItem (type 117) skeleton - TextItem shape plus a border stroke and a drop-shadow. Confirmed via widgetThemeDemo.Theme.</summary>
+    public static JsonElement ShadowTextItem(string frontColorRgba, string font, string borderColorRgba, double borderWidth, string shadeColorRgba, double shadeSize)
+    {
+        var obj = new JsonObject
+        {
+            ["front_color"] = frontColorRgba,
+            ["text_customFont_flag"] = "",
+            ["text_customFont_path"] = "",
+            ["text_font"] = font,
+            ["border_color"] = borderColorRgba,
+            ["border_width"] = borderWidth.ToString(),
+            ["shadeColor"] = shadeColorRgba,
+            ["shadeSize"] = shadeSize.ToString(),
+        };
+        return ToElement(obj);
+    }
+
     /// <summary>RadialGaugeItem (type 109) skeleton - arc gauge with up to 3 gradient stops.</summary>
     public static JsonElement RadialGaugeItem(double radius)
     {

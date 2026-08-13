@@ -1,4 +1,4 @@
-namespace Mk20Control.Protocol.Theme.Items;
+namespace Mk20Control.Protocol.Theme.Items.Widgets;
 
 /// <summary>
 /// A live digital clock display item ("type": "111" in the theme layout JSON). Confirmed

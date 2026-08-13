@@ -22,9 +22,11 @@ and how to use it.
 | `Mk20Control.Protocol.Model` | Value types returned by the client (`DeviceIdentity`, `ThemeListing`, `KeyPosition`, `CommandId`) |
 | `Mk20Control.Protocol.Codecs` | `ThemeFileCodec` — decode/encode raw `.Theme` file bytes |
 | `Mk20Control.Protocol.Theme` | `ThemeFile`, `ThemePage`, `ThemeCanvas`, `ThemeAsset` — the decoded theme data model |
-| `Mk20Control.Protocol.Theme.Items` | Page item types (`KeyItem`, `BackgroundItem`, `DynamicImageItem`, gauges, text, clock) |
+| `Mk20Control.Protocol.Theme.Items` | Core page item types (`KeyItem`, `BackgroundItem`, `DynamicImageItem`) |
+| `Mk20Control.Protocol.Theme.Items.Widgets` | Data-bound widget item types (`TextItem`, `MultilineTextItem`, `ShadowTextItem`, `ProgressBarItem`, `LinearGaugeItem`, `RadialGaugeItem`, `CircularGaugeItem`, `SegmentedCircularGaugeItem`, `LightShadowGaugeItem`, `DigitalClockItem`) |
 | `Mk20Control.Protocol.Theme.Actions` | Key action types (`KeyboardAction`, `PageSwitchAction`, etc.) |
-| `Mk20Control.Protocol.Theme.Building` | `ThemeBuilder`, `ThemeEditor`, `KeyActions`, `HidKey`, `KeyModifiers` — fluent theme construction/editing |
+| `Mk20Control.Protocol.Theme.Building` | `ThemeBuilder`, `ThemeEditor`, `ThemePageBuilder`, `KeyActions`, `HidKey`, `KeyModifiers` — fluent theme construction/editing |
+| `Mk20Control.Protocol.Theme.Building.Widgets` | Fluent builders for the widget item types above (`TextItemBuilder`, `ProgressBarItemBuilder`, `RadialGaugeItemBuilder`, etc.) |
 | `Mk20Control.Protocol.Exceptions` | `Mk20ProtocolException` and subtypes |
 
 Required NuGet dependencies (already declared by the project; pull in transitively when
@@ -192,7 +194,10 @@ ThemeFile
 │       ├── KeyItem (type 115): Row, Column, IconAssetPath, Action, RawControlDataBase64
 │       ├── BackgroundItem (type 100): Surface, AssetPath (`.mp4` video only)
 │       ├── DynamicImageItem (type 114): AssetPath, SystemDataName, BackgroundType ("main"/"secondary"/null)
-│       ├── TextItem, ProgressBarItem, LinearGaugeItem, RadialGaugeItem, DigitalClockItem
+│       ├── TextItem (113), MultilineTextItem (116), ShadowTextItem (117)
+│       ├── ProgressBarItem (102), LinearGaugeItem (103), RadialGaugeItem (109)
+│       ├── CircularGaugeItem (101), SegmentedCircularGaugeItem (104), LightShadowGaugeItem (110)
+│       ├── DigitalClockItem (111)
 │       └── UnknownThemeItem (any type code not yet modeled - RawJson preserved)
 └── Assets: IReadOnlyList<ThemeAsset> (Path, Data, Kind)
 ```
@@ -259,9 +264,13 @@ an immutable `ThemeFile`. The first added page becomes the active page on load
 | `.AddKey(row, col, configure)` | A physical key (`KeyItemBuilder`, see below). |
 | `.AddBackground(configure)` | `.mp4` video background, main or secondary screen (`BackgroundItemBuilder`). |
 | `.AddDynamicImage(configure)` | Decorative animated GIF, or (via `.MainScreenBackground(...)`/`.SecondaryScreenBackground(...)`) a picture/GIF screen background (`DynamicImageItemBuilder`). |
-| `.AddText(configure)` | Static or data-bound text label. |
-| `.AddProgressBar(configure)` / `.AddLinearGauge(configure)` / `.AddRadialGauge(configure)` | Data-bound gauges. |
-| `.AddDigitalClockField(configure)` | One clock field (`hour`/`minute`/`second`); combine 2–3 for a full clock. |
+| `.AddText(configure)` | Static or data-bound text label (type 113). |
+| `.AddMultilineText(configure)` | Static or data-bound wrapping text block (type 116). |
+| `.AddShadowText(configure)` | Static or data-bound text with border stroke + drop-shadow (type 117). |
+| `.AddProgressBar(configure)` / `.AddLinearGauge(configure)` / `.AddRadialGauge(configure)` | Data-bound bar/gauge (types 102/103/109). |
+| `.AddCircularGauge(configure)` / `.AddSegmentedCircularGauge(configure)` | Data-bound plain or segmented ring gauge, no gradient/angle range (types 101/104). |
+| `.AddLightShadowGauge(configure)` | Data-bound ring with a separate arc stroke plus a glow/shadow highlight (type 110). |
+| `.AddDigitalClockField(configure)` | One clock field (`hour`/`minute`/`second`); combine 2–3 for a full clock (type 111). |
 
 ### `KeyItemBuilder` (inside `.AddKey(row, col, key => ...)`)
 

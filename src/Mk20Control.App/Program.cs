@@ -12,7 +12,9 @@ using Mk20Control.Protocol.Model;
 using Mk20Control.Protocol.Theme;
 using Mk20Control.Protocol.Theme.Actions;
 using Mk20Control.Protocol.Theme.Building;
+using Mk20Control.Protocol.Theme.Building.Widgets;
 using Mk20Control.Protocol.Theme.Items;
+using Mk20Control.Protocol.Theme.Items.Widgets;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Png;
@@ -96,6 +98,32 @@ if (args.Length >= 1 && args[0] == "--build-title-opacity-backgrounds-demo")
     return;
 }
 
+if (args.Length >= 1 && args[0] == "--build-gauges-scratch")
+{
+    // SANDBOX ONLY - not part of the confirmed API surface, throwaway local experiment to
+    // test rendering every gauge/text item type live-bound over a GIF background on the
+    // secondary screen. Not intended to be committed/kept long-term.
+    byte[]? built = BuildSecondaryGaugesGifSandboxTheme(iconsDir);
+    if (built is null) return;
+    string outPath = Path.Combine(Path.GetTempPath(), "mk20-gauges-scratch-theme.Theme");
+    File.WriteAllBytes(outPath, built);
+    Console.WriteLine($"Saved to {outPath}");
+    return;
+}
+
+if (args.Length >= 1 && args[0] == "--build-widget-test-scratch")
+{
+    // SANDBOX ONLY - not part of the confirmed API surface, throwaway local experiment.
+    // No buttons: fills the main screen with 3 instances of one widget type, each bound to
+    // a distinct test channel (test1/test2/test3), to visually confirm live data binding.
+    byte[]? built = BuildMainScreenWidgetTestTheme();
+    if (built is null) return;
+    string outPath = Path.Combine(Path.GetTempPath(), "mk20-widget-test-scratch-theme.Theme");
+    File.WriteAllBytes(outPath, built);
+    Console.WriteLine($"Saved to {outPath}");
+    return;
+}
+
 if (args.Length >= 1 && args[0] == "--build-6page-scratch")
 {
     byte[]? built = BuildSixPageThemeFromScratch(iconsDir);
@@ -149,6 +177,8 @@ while (true)
     Console.WriteLine("14) Build+upload a 5-key test theme (icons 01-05 -> keys 1-5)");
     Console.WriteLine("15) Build+upload a full 20-key grid theme (icons 01-20, background) using ThemeBuilder API");
     Console.WriteLine("16) Add a key to an existing local .Theme file (via ThemeEditor) and upload it");
+    Console.WriteLine("17) [SANDBOX] Build+upload cat-GIF+gauges secondary-screen theme, then pump random telemetry");
+    Console.WriteLine("18) [SANDBOX] Build+upload single-widget-type main-screen test (test1/test2/test3), then pump varied telemetry");
     Console.WriteLine("0) Exit");
     Console.Write("> ");
     string? choice = Console.ReadLine();
@@ -173,6 +203,8 @@ while (true)
             case "14": await BuildAndUploadFiveKeyTestThemeAsync(Require(client), iconsDir, backgroundsDir); break;
             case "15": await BuildAndUploadFullGridThemeAsync(Require(client), iconsDir, backgroundsDir); break;
             case "16": await AddKeyToThemeAndUploadAsync(Require(client), iconsDir); break;
+            case "17": await BuildUploadAndPumpGaugesSandboxAsync(Require(client), iconsDir); break;
+            case "18": await BuildUploadAndPumpWidgetTestAsync(Require(client)); break;
             case "0": if (client is not null) await client.DisposeAsync(); return;
             default: Console.WriteLine("Unknown choice."); break;
         }
@@ -436,6 +468,298 @@ static byte[]? BuildSevenKeyThemeFromScratch(string iconsDir)
     }
 
     return encoded;
+}
+
+/// <summary>
+/// SANDBOX ONLY (not committed as a lasting feature) - builds a theme whose secondary
+/// (428x142) screen shows a cat GIF background with one live-data-bound item of every
+/// gauge/text type overlaid on top, positioned in the left/right margins so the GIF stays
+/// visible in the center (mirrors the confirmed real layout observed in
+/// ScreenKeyWindows_v1_1's SecondaryScreen/1/1.theme: bars/text at x~20-90 and x~326-411,
+/// GIF at x=106..534). Main screen is left with a single plain key so the theme is valid.
+/// Tests whether ProgressBar/LinearGauge/RadialGauge/DigitalClock/Text items all render
+/// correctly live-bound while a GIF plays underneath.
+/// </summary>
+static byte[]? BuildSecondaryGaugesGifSandboxTheme(string iconsDir)
+{
+    string desktopDir = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+    string secondaryBgGifPath = Path.Combine(desktopDir, "pop-cat.gif");
+    if (!File.Exists(secondaryBgGifPath)) { Console.WriteLine($"Missing GIF: {secondaryBgGifPath}"); return null; }
+
+    string iconFile = Path.Combine(iconsDir, "icon_01.png");
+    if (!File.Exists(iconFile)) { Console.WriteLine($"Missing icon file: {iconFile}."); return null; }
+
+    byte[] secondaryBackgroundGif = ResizeImageOrGifToFill(secondaryBgGifPath, 428, 142);
+
+    var builder = new ThemeBuilder();
+    builder.AddPage(page =>
+    {
+        page.SetCanvas(640, 656);
+
+        // A single plain key on the main screen - required so the page has at least one
+        // pressable item; not the focus of this sandbox test.
+        page.AddKey(0, 0, keyBuilder =>
+        {
+            keyBuilder.Icon("icon_01.png", File.ReadAllBytes(iconFile));
+            keyBuilder.Action(KeyActions.Keyboard(HidKey.Digit1, "1"));
+        });
+
+        // The cat GIF fills the whole secondary screen (x=106,y=0,w=428,h=142), z=1.
+        page.AddDynamicImage(img => img.SecondaryScreenBackground("popcat_secondary.gif", secondaryBackgroundGif));
+
+        // Left margin (x ~20-90): ProgressBar bound to "CPU Usage" + its readout text.
+        page.AddProgressBar(pb => pb.At(114, 8, 85, 22, z: 2).BoundTo("CPU Usage", 0, 100)
+            .Colors("r=0,g=170,b=255,a=220", "r=255,g=255,b=255,a=140", "r=0,g=0,b=0,a=180", 2, 6));
+        page.AddText(t => t.At(120, 12, z: 3).BoundTo("CPU Usage").Font("Microsoft YaHei,10,-1,5,50,0,0,0,0,0").Color("r=255,g=255,b=255,a=255"));
+
+        // Left margin, second row: LinearGauge bound to "RAM Usage" + readout text.
+        page.AddLinearGauge(lg => lg.At(114, 34, 85, 12, z: 2).BoundTo("RAM Usage", 0, 100)
+            .Colors("r=0,g=220,b=120,a=220", "r=255,g=255,b=255,a=140", "r=0,g=0,b=0,a=180", 2));
+        page.AddText(t => t.At(120, 46, z: 3).BoundTo("RAM Usage").Font("Microsoft YaHei,9,-1,5,50,0,0,0,0,0").Color("r=255,g=255,b=255,a=255"));
+
+        // Right margin: RadialGauge bound to "GPU Usage" (dial arc).
+        page.AddRadialGauge(rg => rg.At(360, 8, z: 2, scale: 0.35).BoundTo("GPU Usage", 0, 100)
+            .Gradient("r=0,g=170,b=255,a=255", "r=255,g=200,b=0,a=255", "r=255,g=0,b=0,a=255"));
+        page.AddText(t => t.At(376, 30, z: 3).BoundTo("GPU Usage").Font("Microsoft YaHei,9,-1,5,50,0,0,0,0,0").Color("r=255,g=255,b=255,a=255"));
+
+        // Right margin, second row: static label text + digital clock fields (hour:minute),
+        // to also exercise a non-data-bound static Text item alongside DigitalClockItem.
+        page.AddText(t => t.At(360, 60).Text("Time").Font("Microsoft YaHei,9,-1,5,50,0,0,0,0,0").Color("r=255,g=255,b=255,a=200"));
+        page.AddDigitalClockField(c => c.At(340, 78, 20, 16, z: 2).Field("hour").Colors(
+            "r=255,g=255,b=255,a=255", "r=0,g=0,b=0,a=0", "r=0,g=0,b=0,a=0"));
+        page.AddDigitalClockField(c => c.At(362, 78, 20, 16, z: 2).Field("minute").Colors(
+            "r=255,g=255,b=255,a=255", "r=0,g=0,b=0,a=0", "r=0,g=0,b=0,a=0"));
+    });
+
+    var theme = builder.Build();
+    byte[] encoded = ThemeFileCodec.Encode(theme);
+
+    var reDecoded = ThemeFileCodec.Decode(encoded);
+    var secondaryItem = reDecoded.Pages[0].Items.OfType<Mk20Control.Protocol.Theme.Items.DynamicImageItem>()
+        .FirstOrDefault(d => d.BackgroundType == "secondary");
+    bool roundTripOk = reDecoded.Pages.Count == 1
+        && reDecoded.Pages[0].Encoder is not null
+        && secondaryItem is not null
+        && reDecoded.Pages[0].Items.OfType<ProgressBarItem>().Any()
+        && reDecoded.Pages[0].Items.OfType<LinearGaugeItem>().Any()
+        && reDecoded.Pages[0].Items.OfType<RadialGaugeItem>().Any()
+        && reDecoded.Pages[0].Items.OfType<DigitalClockItem>().Count() == 2
+        && reDecoded.Pages[0].Items.OfType<TextItem>().Count() >= 3;
+
+    Console.WriteLine($"Built gauges-sandbox theme: {encoded.Length} bytes, {reDecoded.Assets.Count} asset(s), round-trip: {(roundTripOk ? "PASSED" : "FAILED")}");
+    if (!roundTripOk)
+    {
+        Console.WriteLine("Aborting - local round-trip verification failed.");
+        return null;
+    }
+
+    return encoded;
+}
+
+/// <summary>
+/// SANDBOX ONLY - builds and uploads <see cref="BuildSecondaryGaugesGifSandboxTheme"/>, then
+/// loops pushing randomly-generated telemetry values for every bound key until Enter is
+/// pressed, so the effect can be visually confirmed live on real hardware.
+/// </summary>
+static async Task BuildUploadAndPumpGaugesSandboxAsync(Mk20DeviceClient client, string iconsDir)
+{
+    byte[]? encoded = BuildSecondaryGaugesGifSandboxTheme(iconsDir);
+    if (encoded is null) return;
+
+    string localOutPath = Path.Combine(Path.GetTempPath(), "mk20-gauges-scratch-theme.Theme");
+    File.WriteAllBytes(localOutPath, encoded);
+    Console.WriteLine($"Also saved locally to {localOutPath}.");
+
+    Console.Write("Device-side path to store as (e.g. /data/theme/MK20/gaugesbox/gaugesbox.Theme): ");
+    string devicePath = Console.ReadLine() ?? "";
+    if (string.IsNullOrWhiteSpace(devicePath)) { Console.WriteLine("No path entered."); return; }
+
+    Console.WriteLine($"Uploading {encoded.Length} bytes to {devicePath}...");
+    await client.UploadThemeFileAsync(devicePath, encoded, TimeSpan.FromSeconds(30));
+    Console.WriteLine("Upload complete and theme activated.");
+
+    Console.WriteLine("Pumping random telemetry every second (CPU/RAM/GPU Usage). Press Enter to stop.");
+    using var cts = new CancellationTokenSource();
+    var pumpTask = Task.Run(async () =>
+    {
+        var rnd = new Random();
+        while (!cts.IsCancellationRequested)
+        {
+            var data = new Dictionary<string, string>
+            {
+                ["CPU Usage"] = rnd.Next(0, 101).ToString(),
+                ["RAM Usage"] = rnd.Next(0, 101).ToString(),
+                ["GPU Usage"] = rnd.Next(0, 101).ToString(),
+            };
+            try { await client.PushSystemDataAsync(data); }
+            catch (Exception ex) { Console.WriteLine($"[pump-error] {ex.Message}"); }
+            Console.WriteLine("Pushed: " + string.Join(", ", data.Select(kv => $"{kv.Key}={kv.Value}")));
+            try { await Task.Delay(TimeSpan.FromSeconds(1), cts.Token); } catch (TaskCanceledException) { }
+        }
+    }, cts.Token);
+
+    Console.ReadLine();
+    cts.Cancel();
+    try { await pumpTask; } catch (Exception) { }
+    Console.WriteLine("Stopped pumping telemetry.");
+}
+
+/// <summary>
+/// SANDBOX ONLY (not committed as a lasting feature) - fills the 640x656 main screen with
+/// ONE instance of every distinct widget type, no keys/buttons at all, each data-bound
+/// widget bound to its own test channel ("test1", "test2", ...) so pushing varied values
+/// per channel visibly animates every widget independently. Covers all widget types this
+/// library supports: ProgressBar, LinearGauge, RadialGauge, CircularGauge,
+/// SegmentedCircularGauge, LightShadowGauge, Text, MultilineText, ShadowText, and
+/// DigitalClock (hour/minute/second - fed by the device's own RTC, not a test channel, so
+/// it ticks on its own with no telemetry push required).
+/// </summary>
+static byte[]? BuildMainScreenWidgetTestTheme()
+{
+    var builder = new ThemeBuilder();
+    builder.AddPage(page =>
+    {
+        page.SetCanvas(640, 656);
+
+        // Row 1 (y=20): ProgressBar / LinearGauge / RadialGauge - test1/test2/test3.
+        page.AddProgressBar(pb => pb.At(20, 20, 150, 30).BoundTo("test1", 0, 100)
+            .Colors("r=0,g=170,b=255,a=220", "r=255,g=255,b=255,a=140", "r=0,g=0,b=0,a=180", 2, 6));
+        page.AddText(t => t.At(20, 55).BoundTo("test1").Font("Microsoft YaHei,14,-1,5,50,0,0,0,0,0").Color("r=255,g=255,b=255,a=255"));
+
+        page.AddLinearGauge(lg => lg.At(220, 20, 150, 20).BoundTo("test2", 0, 100)
+            .Colors("r=0,g=220,b=120,a=220", "r=255,g=255,b=255,a=140", "r=0,g=0,b=0,a=180", 2));
+        page.AddText(t => t.At(220, 45).BoundTo("test2").Font("Microsoft YaHei,14,-1,5,50,0,0,0,0,0").Color("r=255,g=255,b=255,a=255"));
+
+        page.AddRadialGauge(rg => rg.At(420, 10, z: 1, scale: 0.4).BoundTo("test3", 0, 100)
+            .Gradient("r=0,g=170,b=255,a=255", "r=255,g=200,b=0,a=255", "r=255,g=0,b=0,a=255"));
+        page.AddText(t => t.At(430, 90).BoundTo("test3").Font("Microsoft YaHei,14,-1,5,50,0,0,0,0,0").Color("r=255,g=255,b=255,a=255"));
+
+        // Row 2 (y=170): CircularGauge / SegmentedCircularGauge / LightShadowGauge - test4/5/6.
+        page.AddCircularGauge(g => g.At(50, 200).BoundTo("test4", 0, 100)
+            .Colors("r=0,g=255,b=0,a=255", "r=60,g=60,b=60,a=255").Geometry(20, 80));
+        page.AddText(t => t.At(35, 300).BoundTo("test4").Font("Microsoft YaHei,14,-1,5,50,0,0,0,0,0").Color("r=255,g=255,b=255,a=255"));
+
+        page.AddSegmentedCircularGauge(g => g.At(260, 200).BoundTo("test5", 0, 100)
+            .Colors("r=255,g=170,b=0,a=255", "r=60,g=60,b=60,a=255").Geometry(20, 80));
+        page.AddText(t => t.At(245, 300).BoundTo("test5").Font("Microsoft YaHei,14,-1,5,50,0,0,0,0,0").Color("r=255,g=255,b=255,a=255"));
+
+        page.AddLightShadowGauge(g => g.At(470, 200).BoundTo("test6", 0, 100)
+            .Colors("r=0,g=255,b=0,a=255", "r=0,g=0,b=255,a=255", arcWidth: 6).Geometry(radius: 60));
+        page.AddText(t => t.At(455, 300).BoundTo("test6").Font("Microsoft YaHei,14,-1,5,50,0,0,0,0,0").Color("r=255,g=255,b=255,a=255"));
+
+        // Row 3 (y=380): Text / MultilineText / ShadowText - test7/8/9.
+        page.AddText(t => t.At(20, 380).BoundTo("test7").Font("Microsoft YaHei,28,-1,5,50,0,0,0,0,0").Color("r=0,g=255,b=0,a=255"));
+
+        page.AddMultilineText(t => t.At(220, 380, 180, 100).BoundTo("test8")
+            .Font("Microsoft YaHei,20,-1,5,50,0,0,0,0,0").Color("r=0,g=255,b=255,a=255"));
+
+        page.AddShadowText(t => t.At(20, 500).BoundTo("test9")
+            .Font("Microsoft YaHei,50,-1,5,50,0,0,0,0,0").Color("r=255,g=255,b=0,a=255")
+            .Border("r=23,g=54,b=255,a=255", 5).Shadow("r=0,g=0,b=0,a=128", 10));
+
+        // Row 3, right side: DigitalClock (hour:minute:second) - fed by the device's own
+        // RTC, not a pushed test channel, so it ticks on its own without any telemetry push.
+        page.AddText(t => t.At(470, 380).Text("Clock").Font("Microsoft YaHei,14,-1,5,50,0,0,0,0,0").Color("r=255,g=255,b=255,a=200"));
+        page.AddDigitalClockField(c => c.At(460, 410, 40, 40, z: 2).Field("hour").Colors(
+            "r=255,g=255,b=0,a=255", "r=0,g=0,b=0,a=0", "r=0,g=0,b=0,a=0"));
+        page.AddDigitalClockField(c => c.At(505, 410, 40, 40, z: 2).Field("minute").Colors(
+            "r=255,g=255,b=0,a=255", "r=0,g=0,b=0,a=0", "r=0,g=0,b=0,a=0"));
+        page.AddDigitalClockField(c => c.At(550, 410, 40, 40, z: 2).Field("second").Colors(
+            "r=255,g=255,b=0,a=255", "r=0,g=0,b=0,a=0", "r=0,g=0,b=0,a=0"));
+    });
+
+    var theme = builder.Build();
+    byte[] encoded = ThemeFileCodec.Encode(theme);
+
+    var reDecoded = ThemeFileCodec.Decode(encoded);
+    var items = reDecoded.Pages[0].Items;
+    bool roundTripOk = reDecoded.Pages.Count == 1
+        && reDecoded.Pages[0].Encoder is not null
+        && items.OfType<ProgressBarItem>().Any()
+        && items.OfType<LinearGaugeItem>().Any()
+        && items.OfType<RadialGaugeItem>().Any()
+        && items.OfType<CircularGaugeItem>().Any()
+        && items.OfType<SegmentedCircularGaugeItem>().Any()
+        && items.OfType<LightShadowGaugeItem>().Any()
+        && items.OfType<MultilineTextItem>().Any()
+        && items.OfType<ShadowTextItem>().Any()
+        && items.OfType<DigitalClockItem>().Count() == 3
+        && items.OfType<TextItem>().Count() >= 5
+        && !items.OfType<KeyItem>().Any();
+
+    Console.WriteLine($"Built widget-test theme: {encoded.Length} bytes, {items.Count} item(s), 0 keys, round-trip: {(roundTripOk ? "PASSED" : "FAILED")}");
+    if (!roundTripOk)
+    {
+        Console.WriteLine("Aborting - local round-trip verification failed.");
+        return null;
+    }
+
+    return encoded;
+}
+
+/// <summary>
+/// SANDBOX ONLY - builds and uploads <see cref="BuildMainScreenWidgetTestTheme"/>, then
+/// loops pushing randomly-varied values for test1-test9 until Enter is pressed, so every
+/// widget type's live rendering can be visually confirmed on real hardware at once.
+/// </summary>
+static async Task BuildUploadAndPumpWidgetTestAsync(Mk20DeviceClient client)
+{
+    byte[]? encoded = BuildMainScreenWidgetTestTheme();
+    if (encoded is null) return;
+
+    string localOutPath = Path.Combine(Path.GetTempPath(), "mk20-widget-test-scratch-theme.Theme");
+    File.WriteAllBytes(localOutPath, encoded);
+    Console.WriteLine($"Also saved locally to {localOutPath}.");
+
+    Console.Write("Device-side path to store as (e.g. /data/theme/MK20/widgettest/widgettest.Theme): ");
+    string devicePath = Console.ReadLine() ?? "";
+    if (string.IsNullOrWhiteSpace(devicePath)) { Console.WriteLine("No path entered."); return; }
+
+    Console.WriteLine($"Uploading {encoded.Length} bytes to {devicePath}...");
+    await client.UploadThemeFileAsync(devicePath, encoded, TimeSpan.FromSeconds(30));
+    Console.WriteLine("Upload complete and theme activated.");
+
+    Console.WriteLine("Pumping varied telemetry every second (test1-test9). Press Enter to stop.");
+    using var cts = new CancellationTokenSource();
+    var pumpTask = Task.Run(async () =>
+    {
+        var rnd = new Random();
+        int tick = 0;
+        while (!cts.IsCancellationRequested)
+        {
+            tick++;
+            var now = DateTime.Now;
+            var data = new Dictionary<string, string>
+            {
+                // Varied generators so each widget visibly moves differently: random, a
+                // sawtooth ramp, a sine wave, etc.
+                ["test1"] = rnd.Next(0, 101).ToString(),
+                ["test2"] = (tick * 7 % 101).ToString(),
+                ["test3"] = ((int)(50 + 50 * Math.Sin(tick * 0.3))).ToString(),
+                ["test4"] = rnd.Next(0, 101).ToString(),
+                ["test5"] = (tick * 13 % 101).ToString(),
+                ["test6"] = ((int)(50 + 50 * Math.Cos(tick * 0.25))).ToString(),
+                ["test7"] = $"tick {tick}",
+                ["test8"] = $"Line A {rnd.Next(0, 999)}\nLine B {rnd.Next(0, 999)}",
+                ["test9"] = $"{rnd.Next(0, 300)} kph",
+                // DigitalClockItem is fed by the host, not the device's own RTC - confirmed
+                // via capture17_multiple_theme_set.pcapng (ScreenKeyWindows pushes
+                // hour/minute/second every second alongside "time"). Push the same way here.
+                ["hour"] = now.Hour.ToString(),
+                ["minute"] = now.Minute.ToString(),
+                ["second"] = now.Second.ToString(),
+            };
+            try { await client.PushSystemDataAsync(data); }
+            catch (Exception ex) { Console.WriteLine($"[pump-error] {ex.Message}"); }
+            Console.WriteLine("Pushed: " + string.Join(", ", data.Select(kv => $"{kv.Key}={kv.Value}")));
+            try { await Task.Delay(TimeSpan.FromSeconds(1), cts.Token); } catch (TaskCanceledException) { }
+        }
+    }, cts.Token);
+
+    Console.ReadLine();
+    cts.Cancel();
+    try { await pumpTask; } catch (Exception) { }
+    Console.WriteLine("Stopped pumping telemetry.");
 }
 
 /// <summary>Generates a simple 640x656 preview PNG showing the theme's key icons in a row -
@@ -815,12 +1139,13 @@ static void DumpRawJson(string themePath)
     var theme = ThemeFileCodec.Decode(File.ReadAllBytes(themePath));
     Console.WriteLine($"Pages: {theme.Pages.Count}, Assets: {theme.Assets.Count}, LayoutVersion: {theme.LayoutVersion}");
     var seenTypes = new HashSet<string>();
+    bool dumpAll = Environment.GetEnvironmentVariable("MK20_DUMP_ALL_ITEMS") == "1";
     foreach (var page in theme.Pages)
     {
         Console.WriteLine("Canvas: " + System.Text.Json.JsonSerializer.Serialize(page.Canvas));
         foreach (var item in page.Items)
         {
-            if (!seenTypes.Add(item.RawTypeCode)) continue;
+            if (!dumpAll && !seenTypes.Add(item.RawTypeCode)) continue;
             Console.WriteLine($"[type={item.RawTypeCode} / {item.GetType().Name}]: " + item.RawJson.GetRawText());
         }
     }

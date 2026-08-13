@@ -1,4 +1,4 @@
-namespace Mk20Control.Protocol.Theme.Items;
+namespace Mk20Control.Protocol.Theme.Items.Widgets;
 
 /// <summary>
 /// A linear bar-with-border gauge item ("type": "103" in the theme layout JSON) - similar

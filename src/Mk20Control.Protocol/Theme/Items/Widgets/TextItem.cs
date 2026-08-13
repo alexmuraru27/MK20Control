@@ -1,4 +1,4 @@
-namespace Mk20Control.Protocol.Theme.Items;
+namespace Mk20Control.Protocol.Theme.Items.Widgets;
 
 /// <summary>
 /// A text item ("type": "113" in the theme layout JSON), optionally bound to a live data

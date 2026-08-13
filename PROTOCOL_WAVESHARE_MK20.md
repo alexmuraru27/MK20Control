@@ -301,6 +301,16 @@ sequenceDiagram
     end
 ```
 
+**Value format:** confirmed real values pushed by ScreenKeyWindows are always
+pre-formatted display strings, not bare numbers — even for keys bound to a numeric-range
+gauge (`system_data_min_value`/`max_value`). Examples from a real capture
+(`capture20_widget_data.pcapng`): `"CPU Usage": "22%"`, `"CPU Temperature": "0℃"`,
+`"RAM Used Memory": "20 GB"`, `"CPU Model": "13th Gen Intel Core i7-13700K"` (a free-text
+value bound to a gauge with `min=0/max=10000` — the device/renderer apparently tolerates a
+non-numeric string on a numeric-bound gauge without erroring). This applies uniformly
+across text items, progress bars, linear/radial/circular gauges. The renderer parses the
+leading numeric portion for gauge fill level and ignores the rest.
+
 ### 6.3 Key press / encoder events
 
 `DEVICE_ProactiveEscalationCMD` (commandId 13) fires **only** for a key or encoder that has
@@ -543,13 +553,24 @@ emits this field, preserved from source or defaulted for a new page.
 | Code | Name | Purpose | Key fields |
 |------|------|---------|-----------|
 | 100 | Background | `.mp4` video background (main or secondary screen) | `backgroundType`: `main`\|`secondary`, `path` |
+| 101 | Circular gauge | Data-bound solid-color ring/dial, no gradient/angle range | `system_data_name`, `front_color`/`back_color`, `margin`, `radius` |
 | 102 | Progress bar | Data-bound circular/linear bar | `system_data_name`, `system_data_min_value`/`max_value` |
 | 103 | Linear gauge | Data-bound bar, solid front/back/border colors | `system_data_name`, `front_color`/`back_color`/`border_color` |
-| 109 | Radial gauge | Data-bound arc gauge, up to 3 gradient stops | `system_data_name`, `angleMinValue`/`angleMaxValue`, `gradientColor1`–`3` |
+| 104 | Segmented circular gauge ("seg-circular") | Same JSON field set as type 101; editor renders it as a segmented/notched ring instead of a solid arc | `system_data_name`, `front_color`/`back_color`, `margin`, `radius` |
+| 109 | Radial gauge | Data-bound arc gauge, up to 3 gradient stops | `system_data_name`, `angleMinValue`/`angleMaxValue`, `gradientColor1`–`3`, `Clockwise` |
+| 110 | Light-shadow gauge | Data-bound ring, separate arc stroke color/width plus a glow/shadow highlight | `system_data_name`, `back_color`, `arcColor`/`arcWidth`, `lightShadowColor`/`Lighter`/`Position`, `Clockwise`, `DisplayDirection` |
 | 111 | Digital clock | Live clock field (one item per field) | `system_data_name`: `hour`\|`minute`\|`second` |
 | 113 | Text | Static or data-bound text | `system_data_name`, `text_font`, `text_str` |
 | 114 | Dynamic image | Decorative animated GIF (item-local); also the mechanism for a main/secondary-screen picture or GIF background (`backgroundType`) — see §6.5 | `path` → embedded asset |
 | 115 | Key | Physical key definition | `row`, `col`, `path` (icon), `controlData` (base64, see §7.2) |
+| 116 | Multi-line text | Same field set as type 113 plus explicit `w`/`h` wrap bounds | `system_data_name`, `text_font`, `text_str`, `w`, `h` |
+| 117 | Shadow text | Same field set as type 113 plus a drop-shadow style | `system_data_name`, `text_font`, `text_str`, `border_color`/`border_width`, `shadeColor`, `shadeSize` |
+
+All type 101/104/110/116/117 rows confirmed via `widgetThemeDemo.Theme` (ScreenKeyWindows
+editor's "widget" demo, decoded 2026-08-13) — the editor's UI groups image / text /
+multiline text / shadow text / circular progress bar (plain, segmented, light-shadow) /
+horizontal progress bar / clock widgets; only a horizontal-progress-bar segmented variant
+("seg-hor") and an analog clock face remain unconfirmed (§10 Open Item #15).
 
 **Required fields for a type-115 Key item:** `id`, `itemName` (e.g. `"control1"`), `x`,
 `y`, `z`, `rotate`, `scale`, `lock`, `row`, `col`, `path`, `controlData`, `maxWidth`,
@@ -986,6 +1007,7 @@ picture vs. GIF vs. video — only a bigger/smaller asset entry inside the same 
 | 4 | Achievable telemetry push rate | **U** — not benchmarked |
 | 5 | Bulk-transfer resilience: whether the device rejects/retries on a corrupt chunk or dropped connection mid-transfer | **U** — a retried upload was observed in the confirming capture but the retry-trigger condition was not isolated |
 | 7 | A specific 1-page/5-key synthesized test theme reloads far slower than any real theme | **Open, low severity.** Uploads successfully, does not freeze the device, CRC verifies correctly, but `SET_DEVICE_RELOAD` ack was not observed even after 60s (vs. 1-16s for real themes up to 33MB). Not isolated to a specific cause; deprioritized since every real-world theme tested (13/13 vendor themes) reloads normally. |
+| 15 | ScreenKeyWindows editor widget sub-variants: horizontal progress bar "seg-hor" variant, and clock face style (`analog` vs `digital`) | **U** — resolved for multiline text (type 116), shadow text (type 117), and circular gauge variants (type 101 plain, type 104 "seg-circular", type 110 "light-shadow") via `widgetThemeDemo.Theme` + `capture20_widget_data.pcapng`, decoded 2026-08-13 (see §7.1). Still unconfirmed: a segmented/notched horizontal progress bar ("seg-hor") and an analog clock face — type 111 (`DigitalClockItem`) is confirmed digital-only. |
 
 ### Resolved items
 

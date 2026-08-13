@@ -1,4 +1,4 @@
-namespace Mk20Control.Protocol.Theme.Items;
+namespace Mk20Control.Protocol.Theme.Items.Widgets;
 
 /// <summary>
 /// A progress bar item ("type": "102" in the theme layout JSON), circular or linear,

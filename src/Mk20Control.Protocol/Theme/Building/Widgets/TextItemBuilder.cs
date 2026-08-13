@@ -1,6 +1,8 @@
 using Mk20Control.Protocol.Theme.Items;
+using Mk20Control.Protocol.Theme.Items.Widgets;
 
-namespace Mk20Control.Protocol.Theme.Building;
+using Mk20Control.Protocol.Theme.Building;
+namespace Mk20Control.Protocol.Theme.Building.Widgets;
 
 /// <summary>Fluent builder for a <see cref="TextItem"/> (type 113) - static or data-bound text. Obtained from <see cref="ThemePageBuilder.AddText"/>.</summary>
 public sealed class TextItemBuilder

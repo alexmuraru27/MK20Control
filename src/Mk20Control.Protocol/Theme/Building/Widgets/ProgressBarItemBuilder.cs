@@ -1,6 +1,8 @@
 using Mk20Control.Protocol.Theme.Items;
+using Mk20Control.Protocol.Theme.Items.Widgets;
 
-namespace Mk20Control.Protocol.Theme.Building;
+using Mk20Control.Protocol.Theme.Building;
+namespace Mk20Control.Protocol.Theme.Building.Widgets;
 
 /// <summary>Fluent builder for a <see cref="ProgressBarItem"/> (type 102) - a data-bound circular/linear bar. Obtained from <see cref="ThemePageBuilder.AddProgressBar"/>.</summary>
 public sealed class ProgressBarItemBuilder

@@ -9,6 +9,7 @@ using System.Text.Json.Nodes;
 using Mk20Control.Protocol.Theme;
 using Mk20Control.Protocol.Theme.Actions;
 using Mk20Control.Protocol.Theme.Items;
+using Mk20Control.Protocol.Theme.Items.Widgets;
 
 namespace Mk20Control.Protocol.Codecs;
 
@@ -184,6 +185,19 @@ public static class ThemeFileCodec
                     Surface = rawSurface switch { "main" => BackgroundSurface.Main, "secondary" => BackgroundSurface.Secondary, _ => BackgroundSurface.Unknown },
                     AssetPath = TryGetString(itemEl, "path") ?? "",
                 };
+            case "101":
+                return new CircularGaugeItem
+                {
+                    RawTypeCode = typeCode, Id = id, ItemName = itemName, X = x, Y = y, Z = z, Width = w, Height = h,
+                    Rotate = rotate, Scale = scale, IsLocked = locked, RawJson = itemEl.Clone(),
+                    SystemDataName = TryGetBool(itemEl, "system_data_flag") == true ? TryGetString(itemEl, "system_data_name") : null,
+                    MinValue = TryGetDouble(itemEl, "system_data_min_value"),
+                    MaxValue = TryGetDouble(itemEl, "system_data_max_value"),
+                    FrontColor = TryGetString(itemEl, "front_color"),
+                    BackColor = TryGetString(itemEl, "back_color"),
+                    Margin = TryGetDouble(itemEl, "margin"),
+                    Radius = TryGetDouble(itemEl, "radius"),
+                };
             case "102":
                 return new ProgressBarItem
                 {
@@ -206,6 +220,19 @@ public static class ThemeFileCodec
                     BorderColor = TryGetString(itemEl, "border_color"),
                     BorderWidth = TryGetDouble(itemEl, "border_width"),
                 };
+            case "104":
+                return new SegmentedCircularGaugeItem
+                {
+                    RawTypeCode = typeCode, Id = id, ItemName = itemName, X = x, Y = y, Z = z, Width = w, Height = h,
+                    Rotate = rotate, Scale = scale, IsLocked = locked, RawJson = itemEl.Clone(),
+                    SystemDataName = TryGetBool(itemEl, "system_data_flag") == true ? TryGetString(itemEl, "system_data_name") : null,
+                    MinValue = TryGetDouble(itemEl, "system_data_min_value"),
+                    MaxValue = TryGetDouble(itemEl, "system_data_max_value"),
+                    FrontColor = TryGetString(itemEl, "front_color"),
+                    BackColor = TryGetString(itemEl, "back_color"),
+                    Margin = TryGetDouble(itemEl, "margin"),
+                    Radius = TryGetDouble(itemEl, "radius"),
+                };
             case "113":
                 return new TextItem
                 {
@@ -214,6 +241,30 @@ public static class ThemeFileCodec
                     SystemDataName = TryGetBool(itemEl, "system_data_flag") == true ? TryGetString(itemEl, "system_data_name") : null,
                     Text = TryGetString(itemEl, "text_str"),
                     Font = TryGetString(itemEl, "text_font"),
+                };
+            case "116":
+                return new MultilineTextItem
+                {
+                    RawTypeCode = typeCode, Id = id, ItemName = itemName, X = x, Y = y, Z = z, Width = w, Height = h,
+                    Rotate = rotate, Scale = scale, IsLocked = locked, RawJson = itemEl.Clone(),
+                    SystemDataName = TryGetBool(itemEl, "system_data_flag") == true ? TryGetString(itemEl, "system_data_name") : null,
+                    Text = TryGetString(itemEl, "text_str"),
+                    Font = TryGetString(itemEl, "text_font"),
+                    FrontColor = TryGetString(itemEl, "front_color"),
+                };
+            case "117":
+                return new ShadowTextItem
+                {
+                    RawTypeCode = typeCode, Id = id, ItemName = itemName, X = x, Y = y, Z = z, Width = w, Height = h,
+                    Rotate = rotate, Scale = scale, IsLocked = locked, RawJson = itemEl.Clone(),
+                    SystemDataName = TryGetBool(itemEl, "system_data_flag") == true ? TryGetString(itemEl, "system_data_name") : null,
+                    Text = TryGetString(itemEl, "text_str"),
+                    Font = TryGetString(itemEl, "text_font"),
+                    FrontColor = TryGetString(itemEl, "front_color"),
+                    BorderColor = TryGetString(itemEl, "border_color"),
+                    BorderWidth = TryGetDouble(itemEl, "border_width"),
+                    ShadeColor = TryGetString(itemEl, "shadeColor"),
+                    ShadeSize = TryGetDouble(itemEl, "shadeSize"),
                 };
             case "114":
                 return new DynamicImageItem
@@ -239,6 +290,25 @@ public static class ThemeFileCodec
                     GradientColor1 = TryGetString(itemEl, "gradientColor1"),
                     GradientColor2 = TryGetString(itemEl, "gradientColor2"),
                     GradientColor3 = TryGetString(itemEl, "gradientColor3"),
+                    Clockwise = TryGetBool(itemEl, "Clockwise"),
+                };
+            case "110":
+                return new LightShadowGaugeItem
+                {
+                    RawTypeCode = typeCode, Id = id, ItemName = itemName, X = x, Y = y, Z = z, Width = w, Height = h,
+                    Rotate = rotate, Scale = scale, IsLocked = locked, RawJson = itemEl.Clone(),
+                    SystemDataName = TryGetBool(itemEl, "system_data_flag") == true ? TryGetString(itemEl, "system_data_name") : null,
+                    MinValue = TryGetDouble(itemEl, "system_data_min_value"),
+                    MaxValue = TryGetDouble(itemEl, "system_data_max_value"),
+                    BackColor = TryGetString(itemEl, "back_color"),
+                    ArcColor = TryGetString(itemEl, "arcColor"),
+                    ArcWidth = TryGetDouble(itemEl, "arcWidth"),
+                    Radius = TryGetDouble(itemEl, "radius"),
+                    Clockwise = TryGetBool(itemEl, "Clockwise"),
+                    DisplayDirection = TryGetDouble(itemEl, "DisplayDirection"),
+                    LightShadowColor = TryGetString(itemEl, "lightShadowColor"),
+                    LightShadowLighter = TryGetDouble(itemEl, "lightShadowLighter"),
+                    LightShadowPosition = TryGetDouble(itemEl, "lightShadowPosition"),
                 };
             case "111":
                 return new DigitalClockItem
@@ -559,6 +629,26 @@ public static class ThemeFileCodec
                 obj["backgroundType"] = bg.RawSurface;
                 obj["path"] = bg.AssetPath;
                 break;
+            case CircularGaugeItem cg:
+                obj["system_data_flag"] = cg.SystemDataName is not null ? "1" : "0";
+                if (cg.SystemDataName is not null) obj["system_data_name"] = cg.SystemDataName;
+                SetOrRemove(obj, "system_data_min_value", cg.MinValue);
+                SetOrRemove(obj, "system_data_max_value", cg.MaxValue);
+                if (cg.FrontColor is not null) obj["front_color"] = cg.FrontColor;
+                if (cg.BackColor is not null) obj["back_color"] = cg.BackColor;
+                SetOrRemove(obj, "margin", cg.Margin);
+                SetOrRemove(obj, "radius", cg.Radius);
+                break;
+            case SegmentedCircularGaugeItem sg:
+                obj["system_data_flag"] = sg.SystemDataName is not null ? "1" : "0";
+                if (sg.SystemDataName is not null) obj["system_data_name"] = sg.SystemDataName;
+                SetOrRemove(obj, "system_data_min_value", sg.MinValue);
+                SetOrRemove(obj, "system_data_max_value", sg.MaxValue);
+                if (sg.FrontColor is not null) obj["front_color"] = sg.FrontColor;
+                if (sg.BackColor is not null) obj["back_color"] = sg.BackColor;
+                SetOrRemove(obj, "margin", sg.Margin);
+                SetOrRemove(obj, "radius", sg.Radius);
+                break;
             case ProgressBarItem pb:
                 obj["system_data_flag"] = pb.SystemDataName is not null ? "1" : "0";
                 if (pb.SystemDataName is not null) obj["system_data_name"] = pb.SystemDataName;
@@ -587,6 +677,22 @@ public static class ThemeFileCodec
                 if (rg.GradientColor1 is not null) obj["gradientColor1"] = rg.GradientColor1;
                 if (rg.GradientColor2 is not null) obj["gradientColor2"] = rg.GradientColor2;
                 if (rg.GradientColor3 is not null) obj["gradientColor3"] = rg.GradientColor3;
+                SetOrRemove(obj, "Clockwise", rg.Clockwise);
+                break;
+            case LightShadowGaugeItem ls:
+                obj["system_data_flag"] = ls.SystemDataName is not null ? "1" : "0";
+                if (ls.SystemDataName is not null) obj["system_data_name"] = ls.SystemDataName;
+                SetOrRemove(obj, "system_data_min_value", ls.MinValue);
+                SetOrRemove(obj, "system_data_max_value", ls.MaxValue);
+                if (ls.BackColor is not null) obj["back_color"] = ls.BackColor;
+                if (ls.ArcColor is not null) obj["arcColor"] = ls.ArcColor;
+                SetOrRemove(obj, "arcWidth", ls.ArcWidth);
+                SetOrRemove(obj, "radius", ls.Radius);
+                SetOrRemove(obj, "Clockwise", ls.Clockwise);
+                SetOrRemove(obj, "DisplayDirection", ls.DisplayDirection);
+                if (ls.LightShadowColor is not null) obj["lightShadowColor"] = ls.LightShadowColor;
+                SetOrRemove(obj, "lightShadowLighter", ls.LightShadowLighter);
+                SetOrRemove(obj, "lightShadowPosition", ls.LightShadowPosition);
                 break;
             case DigitalClockItem clock:
                 obj["system_data_flag"] = clock.SystemDataName is not null ? "1" : "0";
@@ -597,6 +703,24 @@ public static class ThemeFileCodec
                 if (clock.BorderColor is not null) obj["border_color"] = clock.BorderColor;
                 SetOrRemove(obj, "border_width", clock.BorderWidth);
                 SetOrRemove(obj, "corner_radius", clock.CornerRadius);
+                break;
+            case MultilineTextItem mtext:
+                obj["system_data_flag"] = mtext.SystemDataName is not null ? "1" : "0";
+                if (mtext.SystemDataName is not null) obj["system_data_name"] = mtext.SystemDataName;
+                if (mtext.Text is not null) obj["text_str"] = mtext.Text;
+                if (mtext.Font is not null) obj["text_font"] = mtext.Font;
+                if (mtext.FrontColor is not null) obj["front_color"] = mtext.FrontColor;
+                break;
+            case ShadowTextItem stext:
+                obj["system_data_flag"] = stext.SystemDataName is not null ? "1" : "0";
+                if (stext.SystemDataName is not null) obj["system_data_name"] = stext.SystemDataName;
+                if (stext.Text is not null) obj["text_str"] = stext.Text;
+                if (stext.Font is not null) obj["text_font"] = stext.Font;
+                if (stext.FrontColor is not null) obj["front_color"] = stext.FrontColor;
+                if (stext.BorderColor is not null) obj["border_color"] = stext.BorderColor;
+                SetOrRemove(obj, "border_width", stext.BorderWidth);
+                if (stext.ShadeColor is not null) obj["shadeColor"] = stext.ShadeColor;
+                SetOrRemove(obj, "shadeSize", stext.ShadeSize);
                 break;
             case TextItem text:
                 obj["system_data_flag"] = text.SystemDataName is not null ? "1" : "0";
