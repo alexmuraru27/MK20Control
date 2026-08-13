@@ -66,10 +66,20 @@ public sealed class ThemeBuilder : IThemeAssetRegistry
     /// </summary>
     public string RegisterAsset(string suggestedFileName, byte[] data)
     {
-        string path = $"/image/mk20control/{_nextAssetSeq:D4}_{suggestedFileName}";
-        if (_assets.TryGetValue(path, out var existing) && existing.Data.AsSpan().SequenceEqual(data))
-            return path;
-        _nextAssetSeq++;
+        // Confirmed via a real ScreenKeyWindows-created reference theme
+        // (customTheme7buttonsSoftware.Theme, built entirely through their own UI): new icon
+        // assets are registered under the same "/image/MK20/cache/<fileName>" namespace the
+        // device/software already uses for its built-in icon library - NOT a separate,
+        // library-invented namespace. See PROTOCOL_WAVESHARE_MK20.md §10 Item #10.
+        string path = $"/image/MK20/cache/{suggestedFileName}";
+        if (_assets.TryGetValue(path, out var existing))
+        {
+            if (existing.Data.AsSpan().SequenceEqual(data)) return path;
+            string ext = System.IO.Path.GetExtension(suggestedFileName);
+            string stem = System.IO.Path.GetFileNameWithoutExtension(suggestedFileName);
+            path = $"/image/MK20/cache/{stem}_{_nextAssetSeq:D4}{ext}";
+            _nextAssetSeq++;
+        }
         _assets[path] = new ThemeAsset { Path = path, Data = data };
         return path;
     }

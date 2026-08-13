@@ -59,7 +59,23 @@ public sealed class ThemeEditor : IThemeAssetRegistry
     /// <summary>Registers a new asset (or reuses an identical existing one by path+bytes) and returns its virtual path.</summary>
     public string RegisterAsset(string suggestedFileName, byte[] data)
     {
-        string path = $"/image/mk20control/{Guid.NewGuid():N}_{suggestedFileName}";
+        // Confirmed via a real ScreenKeyWindows-created reference theme
+        // (customTheme7buttonsSoftware.Theme, built entirely through their own UI): new icon
+        // assets are registered under the same "/image/MK20/cache/<fileName>" namespace the
+        // device/software already uses for its built-in icon library - NOT a separate,
+        // library-invented namespace. Using an unfamiliar path prefix (e.g. the previous
+        // "/image/mk20control/<guid>_<fileName>") was one of the confirmed structural
+        // differences from a real, known-working theme - see PROTOCOL_WAVESHARE_MK20.md §10
+        // Item #10.
+        string path = $"/image/MK20/cache/{suggestedFileName}";
+        if (_assets.TryGetValue(path, out var existing) && !existing.Data.AsSpan().SequenceEqual(data))
+        {
+            // Path collision with different bytes - fall back to a disambiguated name rather
+            // than silently overwriting a different asset.
+            string ext = System.IO.Path.GetExtension(suggestedFileName);
+            string stem = System.IO.Path.GetFileNameWithoutExtension(suggestedFileName);
+            path = $"/image/MK20/cache/{stem}_{Guid.NewGuid():N}{ext}";
+        }
         _assets[path] = new ThemeAsset { Path = path, Data = data };
         return path;
     }
@@ -91,6 +107,7 @@ public sealed class ThemeEditor : IThemeAssetRegistry
         private readonly ThemeEditor _owner;
         private readonly List<ThemeItem> _items;
         private ThemeCanvas _canvas;
+        private System.Text.Json.JsonElement? _encoder;
 
         public string? PageId { get; private set; }
 
@@ -100,6 +117,7 @@ public sealed class ThemeEditor : IThemeAssetRegistry
             PageId = source.PageName;
             _canvas = source.Canvas;
             _items = source.Items.ToList();
+            _encoder = source.Encoder;
         }
 
         /// <summary>All items currently on this page, in original order.</summary>
@@ -109,11 +127,11 @@ public sealed class ThemeEditor : IThemeAssetRegistry
         public KeyItem? FindKey(int row, int column) =>
             _items.OfType<KeyItem>().FirstOrDefault(k => k.Row == row && k.Column == column);
 
-        /// <summary>Replaces the icon of the key at (<paramref name="row"/>, <paramref name="column"/>) by registering a new asset. Throws if no key exists there.</summary>
+        /// <summary>Replaces the icon of the key at (<paramref name="row"/>, <paramref name="column"/>) by registering a new asset (automatically normalized to the confirmed real-hardware key icon format, 128x128 RGB PNG). Throws if no key exists there.</summary>
         public PageEditor SetKeyIcon(int row, int column, string suggestedFileName, byte[] pngOrGifBytes)
         {
             var key = FindKey(row, column) ?? throw new InvalidOperationException($"No key at row={row}, column={column}.");
-            string assetPath = _owner.RegisterAsset(suggestedFileName, pngOrGifBytes);
+            string assetPath = _owner.RegisterAsset(suggestedFileName, IconImageNormalizer.NormalizeToKeyIcon(pngOrGifBytes));
             ReplaceItem(key, key with { IconAssetPath = assetPath });
             return this;
         }
@@ -185,7 +203,7 @@ public sealed class ThemeEditor : IThemeAssetRegistry
             if (idx >= 0) _items[idx] = newItem;
         }
 
-        internal ThemePage Build() => new() { PageName = PageId, Canvas = _canvas, Items = _items.ToList() };
+        internal ThemePage Build() => new() { PageName = PageId, Canvas = _canvas, Items = _items.ToList(), Encoder = _encoder };
     }
 }
 

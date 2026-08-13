@@ -39,13 +39,19 @@ internal static class ThemeItemSkeletons
         double maxWidth, double maxHeight,
         double scaledWidthTo = 128, double scaledHeightTo = 128,
         string title = "", string? titleParam = null,
-        string opacity = "100", string paths = "", string soundFile = "")
+        string opacity = "100", string paths = "", string soundFile = "",
+        string? frameDelays = null)
     {
         var obj = new JsonObject
         {
             ["maxWidth"] = maxWidth.ToString(),
             ["maxHeight"] = maxHeight.ToString(),
             ["opacity"] = opacity,
+            // Confirmed real animated keys always have "path":"" explicitly (not omitted)
+            // alongside a non-empty "paths" folder - static keys instead get "path"
+            // overwritten with their actual icon asset path by ThemeFileCodec.BuildItemJson
+            // when KeyItem.IconAssetPath is set.
+            ["path"] = "",
             ["paths"] = paths,
             ["scaledWidthTo"] = scaledWidthTo.ToString(),
             ["scaledHeightTo"] = scaledHeightTo.ToString(),
@@ -53,6 +59,7 @@ internal static class ThemeItemSkeletons
             ["title"] = title,
             ["titleParam"] = titleParam ?? DefaultTitleParam,
         };
+        if (frameDelays is not null) obj["frameDelays"] = frameDelays;
         return ToElement(obj);
     }
 

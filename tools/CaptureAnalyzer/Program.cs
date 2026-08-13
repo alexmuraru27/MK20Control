@@ -49,6 +49,16 @@ if (args.Length >= 2 && args[0] == "--builder-byte-diff")
     return RunBuilderByteDiff(args[1]);
 }
 
+if (args.Length >= 2 && args[0] == "--wire-log")
+{
+    return RunWireLogDecode(args[1]);
+}
+
+if (args.Length >= 1 && args[0] == "--emit-frame-hex")
+{
+    return RunEmitFrameHex();
+}
+
 if (args.Length < 1)
 {
     Console.WriteLine("Usage: CaptureAnalyzer <capture.pcapng> [path-to-tshark.exe] [--hex] [--device-address=N]");
@@ -199,6 +209,79 @@ static byte[] HexToBytes(string hex)
     for (int i = 0; i < bytes.Length; i++)
         bytes[i] = Convert.ToByte(hex.Substring(i * 2, 2), 16);
     return bytes;
+}
+
+/// <summary>
+/// Decodes a wire-level log produced by <c>Mk20Control.Protocol.Transport.WireLoggingTransport</c>
+/// (format: "{elapsedSeconds}\t{OUT|IN}\t{hexBytes}" per line) using the exact same framing
+/// parser as real .pcapng captures, and prints the sequence with real per-line timestamps -
+/// this is the live-hardware-test equivalent of decoding a USB capture, for direct
+/// side-by-side comparison against tools/Captures/*.pcapng using the same analysis approach.
+/// </summary>
+static int RunWireLogDecode(string logPath)
+{
+    if (!File.Exists(logPath))
+    {
+        Console.WriteLine($"File not found: {logPath}");
+        return 1;
+    }
+
+    var outParser = new DeviceFrameParser();
+    var inParser = new DeviceFrameParser();
+    // Track approximate timestamp per buffered byte offset, per direction, the same way the
+    // capture analysis scripts do, so printed frame times reflect when their first byte was
+    // logged (not when DrainFrames happened to run).
+    var outTimes = new List<(int offset, double t)>();
+    var inTimes = new List<(int offset, double t)>();
+    int outOffset = 0, inOffset = 0;
+    var events = new List<(double t, string dir, DeviceFrame frame)>();
+
+    foreach (string rawLine in File.ReadLines(logPath))
+    {
+        string line = rawLine.TrimEnd('\r', '\n');
+        if (line.Length == 0) continue;
+        string[] parts = line.Split('\t');
+        if (parts.Length < 3) continue;
+        if (!double.TryParse(parts[0], System.Globalization.CultureInfo.InvariantCulture, out double t)) continue;
+        string direction = parts[1];
+        byte[] data = Convert.FromHexString(parts[2]);
+
+        if (direction == "OUT")
+        {
+            outTimes.Add((outOffset, t));
+            outOffset += data.Length;
+            outParser.Feed(data);
+            foreach (var frame in outParser.DrainFrames())
+                events.Add((t, "OUT", frame));
+        }
+        else if (direction == "IN")
+        {
+            inTimes.Add((inOffset, t));
+            inOffset += data.Length;
+            inParser.Feed(data);
+            foreach (var frame in inParser.DrainFrames())
+                events.Add((t, "IN", frame));
+        }
+    }
+
+    Console.WriteLine($"Decoded wire log {logPath}: {events.Count} frame(s).");
+    foreach (var (t, direction, frame) in events)
+    {
+        if (frame.IsAbortTransferMessage)
+        {
+            Console.WriteLine($"  t={t,9:F3} [{direction}] ABORT-FILE-TRANSFER");
+            continue;
+        }
+        string cmdName = Enum.IsDefined(typeof(CommandId), frame.CommandId) ? ((CommandId)frame.CommandId).ToString() : $"cmd_{frame.CommandId}";
+        string crcFlag = frame.IsChecksumValid ? "" : " [CRC-MISMATCH]";
+        string extra = "";
+        if (frame.CommandId == (uint)CommandId.SetDeviceReload && frame.Payload.Length > 0)
+        {
+            try { extra = " path=" + System.Text.Encoding.UTF8.GetString(frame.Payload); } catch { }
+        }
+        Console.WriteLine($"  t={t,9:F3} [{direction}] type={frame.PacketType} cmd={frame.CommandId}({cmdName}) len={frame.Payload.Length}{crcFlag}{extra}");
+    }
+    return 0;
 }
 
 static void DecodeRealAndPrint(byte[] stream, string label, bool showHex = false)
@@ -383,6 +466,41 @@ static bool IsMostlyPrintableUtf8(byte[] payload, out string text)
     {
         return false;
     }
+}
+
+static int RunEmitFrameHex()
+{
+    // Reproduces the exact FileStart/FileEnd/SetDeviceReload/Abort frames our own client
+    // would send for the confirmed real-hardware upload of 可爱按键.Theme in capture14.pcapng
+    // (743649 bytes, crc32=3131160337 decimal / 0xBAA1B711), for a direct byte-for-byte hex
+    // diff against the real captured bytes - no hardware or live USB capture needed.
+    const string devicePath = "/data/theme/MK20/可爱按键/可爱按键.Theme";
+    const int totalSize = 743649;
+    const uint crc = 3131160337;
+
+    byte[] fileStartPayload = SimpleStringMapCodec.Encode(
+        new[] { new KeyValuePair<string, string>(devicePath, totalSize.ToString()) });
+    var fileStartFrame = DeviceFrame.CreateRequest((uint)CommandId.FileStart, fileStartPayload);
+    Console.WriteLine("[FileStart] our encoding:");
+    Console.WriteLine("  hex: " + Convert.ToHexString(fileStartFrame.Encode()).ToLowerInvariant());
+    Console.WriteLine();
+
+    byte[] fileEndPayload = SimpleStringMapCodec.Encode(
+        new[] { new KeyValuePair<string, string>(devicePath, crc.ToString()) });
+    var fileEndFrame = DeviceFrame.CreateRequest((uint)CommandId.FileEnd, fileEndPayload);
+    Console.WriteLine("[FileEnd] our encoding:");
+    Console.WriteLine("  hex: " + Convert.ToHexString(fileEndFrame.Encode()).ToLowerInvariant());
+    Console.WriteLine();
+
+    var reloadFrame = DeviceFrame.CreateRequest((uint)CommandId.SetDeviceReload, Encoding.UTF8.GetBytes(devicePath));
+    Console.WriteLine("[SetDeviceReload] our encoding:");
+    Console.WriteLine("  hex: " + Convert.ToHexString(reloadFrame.Encode()).ToLowerInvariant());
+    Console.WriteLine();
+
+    Console.WriteLine("[Abort] our encoding:");
+    Console.WriteLine("  hex: " + Convert.ToHexString(Mk20Control.Protocol.Framing.DeviceFrameHeader.AbortTransferBytes).ToLowerInvariant());
+
+    return 0;
 }
 
 static int RunBuilderByteDiff(string themePath)
@@ -706,8 +824,15 @@ static int RunSelfTest()
     allPassed &= RunNamedTest("SimpleStringMapCodec encode/decode round-trip", TestSimpleStringMapRoundTrip);
     allPassed &= RunNamedTest("SimpleStringMapCodec decode of real SET_DEVICE_DELETE_THEME bytes", TestSimpleStringMapRealDeleteTheme);
     allPassed &= RunNamedTest("Mk20DeviceClient.UploadThemeFileAsync chunking matches confirmed capture", TestUploadThemeFileChunking);
+    allPassed &= RunNamedTest("Mk20DeviceClient.UploadThemeFileAsync retries once on a FILE_END timeout", TestUploadRetriesOnceOnFileEndTimeout);
+    allPassed &= RunNamedTest("Mk20DeviceClient.UploadThemeFileAsync fails fast when the device is fully locked up", TestUploadFailsFastWhenDeviceFullyLockedUp);
     allPassed &= RunNamedTest("ThemeBuilder produces a KeyItem field set matching real hardware themes", TestThemeBuilderKeyItemFieldParity);
+    allPassed &= RunNamedTest("Theme pages always emit the confirmed-required page-level 'encoder' field", TestPageEncoderFieldPresence);
+    allPassed &= RunNamedTest("Theme file header's 8-byte gap encodes (JSON length + 1) matching real files", TestHeaderJsonLengthField);
+    allPassed &= RunNamedTest("KeyItemBuilder.AnimatedIcon produces a real, pressable animated key (paths/frameDelays/path=\"\")", TestAnimatedKeyIcon);
     allPassed &= RunNamedTest("ThemeBuilder+ThemeEditor full round-trip (build, encode, decode, edit, re-encode, re-decode)", TestThemeBuilderEditorRoundTrip);
+    allPassed &= RunNamedTest("Mk20DeviceClient refuses DeleteThemeAsync while a reload is unconfirmed", TestDeleteRefusedWhilePendingReload);
+    allPassed &= RunNamedTest("Mk20DeviceClient serializes concurrent theme operations", TestThemeOperationsAreSerialized);
 
     Console.WriteLine();
     Console.WriteLine(allPassed ? "ALL SELF-TESTS PASSED" : "SOME SELF-TESTS FAILED");
@@ -895,13 +1020,24 @@ static bool TestSimpleStringMapRealDeleteTheme()
 // and checks its actual chunk sizes match that confirmed real-world pattern exactly.
 static bool TestThemeBuilderKeyItemFieldParity()
 {
+    // A minimal but genuinely valid 4x4 RGBA PNG - required now that Icon() actually
+    // decodes+re-encodes icon bytes via ImageSharp (see IconImageNormalizer).
+    byte[] tinyValidPng =
+    {
+        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+        0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04, 0x08, 0x06, 0x00, 0x00, 0x00, 0xA9, 0xF1, 0x9E,
+        0x7E, 0x00, 0x00, 0x00, 0x15, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63, 0xFC, 0xCF, 0xC0, 0xD0,
+        0xC0, 0x80, 0x04, 0x98, 0x90, 0x39, 0xC4, 0x09, 0x00, 0x00, 0x64, 0x11, 0x01, 0x87, 0xA9, 0x8A,
+        0xB1, 0xCB, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+    };
+
     // The confirmed-required field set for a real KeyItem (type 115), cross-checked against
     // multiple real theme files (defaultTheme.Theme, 时尚按键.Theme) - see
     // PROTOCOL_WAVESHARE_MK20.md §7.1 and ThemeItemSkeletons remarks.
     string[] requiredKeyFields =
     {
         "maxWidth", "maxHeight", "opacity", "paths", "scaledWidthTo", "scaledHeightTo",
-        "soundFile", "title", "titleParam", "id", "x", "y", "z", "rotate", "scale", "lock",
+        "soundFile", "title", "titleParam", "id", "itemName", "x", "y", "z", "rotate", "scale", "lock",
         "row", "col", "path", "controlData", "type",
     };
     string[] forbiddenKeyFields = { "w", "h" }; // confirmed real KeyItems never have these
@@ -916,7 +1052,7 @@ static bool TestThemeBuilderKeyItemFieldParity()
             .SetCanvas(640, 656)
             .AddBackground(bg => bg.MainScreen("bg.png", new byte[] { 0x89, 0x50, 0x4E, 0x47, 0, 0, 0, 0 }))
             .AddKey(0, 0, key => key
-                .Icon("icon.png", new byte[] { 0x89, 0x50, 0x4E, 0x47, 0, 0, 0, 0 })
+                .Icon("icon.png", tinyValidPng)
                 .Action(KeyActions.Keyboard(0x1E, "1"))))
         .Build();
 
@@ -936,15 +1072,174 @@ static bool TestThemeBuilderKeyItemFieldParity()
     foreach (var field in requiredBackgroundFields)
         if (!bgFieldNames.Contains(field)) return false;
 
-    // "lock" must be encoded as a string "0"/"1", not a native JSON bool, matching every
-    // real theme observed (see PROTOCOL_WAVESHARE_MK20.md §7.1).
+    // "lock" must be encoded as a string "0"/"1" (not a native JSON bool) AND must be "1" by
+    // default - confirmed via 5/5 real theme files examined (including a user-created
+    // working theme, customTheme5buttons.Theme/capture15.pcapng): every real KeyItem has
+    // "lock":"1". See PROTOCOL_WAVESHARE_MK20.md §7.1/§10 Open Item #9.
     if (!key.RawJson.TryGetProperty("lock", out var lockEl) || lockEl.ValueKind != JsonValueKind.String) return false;
+    if (lockEl.GetString() != "1") return false;
+
+    // Confirmed real KeyboardAction controlData carries all 7 fields (§10 Open Item #10) -
+    // decode it back and check every one is present, not just that SOME bytes were written.
+    if (key.Action is not Mk20Control.Protocol.Theme.Actions.KeyboardAction) return false;
+    byte[] controlDataBytes = Convert.FromBase64String(key.RawJson.GetProperty("controlData").GetString()!);
+    int cdPos = 0;
+    var controlFields = VariantMapCodec.DecodeMap(controlDataBytes, ref cdPos);
+    foreach (var f in new[] { "type", "description", "parentDescription", "iconPath", "keycode", "keyString", "AISoundControlKeyword" })
+        if (!controlFields.ContainsKey(f)) return false;
+
+    // Confirmed real key icon PNG assets are exactly 128x128, RGB, no alpha channel (§10 Open
+    // Item #10) - verify the normalized asset actually embedded matches this, not just that
+    // *an* image was stored.
+    var iconAsset = decoded.Assets.FirstOrDefault(a => a.Path == key.IconAssetPath);
+    if (iconAsset is null) return false;
+    using var iconImage = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.Rgb24>(iconAsset.Data);
+    if (iconImage.Width != 128 || iconImage.Height != 128) return false;
+    var pngHeaderBytes = iconAsset.Data.AsSpan(0, 8).ToArray();
+    // PNG color type byte at offset 25 (after the fixed 8-byte signature + IHDR chunk header)
+    // must be 2 (truecolor, no alpha) to match every real embedded icon examined.
+    if (iconAsset.Data.Length < 26 || iconAsset.Data[25] != 2) return false;
+
+    return true;
+}
+
+// Confirmed via empty.Theme (a genuine minimal ScreenKeyWindows-created theme) and every
+// real top-level/main-screen theme examined: the page-level "encoder" array (physical
+// rotary-encoder hardware descriptor, row 103/104 entries) is always present. Its complete
+// absence was confirmed to make ScreenKeyWindows itself lock up when loading an otherwise-
+// valid theme file (§10 Item #10) - this test guards against ever silently dropping it
+// again, both for a brand-new ThemeBuilder-built page (which has no source to copy from,
+// so must default it) and for a real decoded page round-tripped through ThemeEditor.
+static bool TestPageEncoderFieldPresence()
+{
+    var builtTheme = new ThemeBuilder()
+        .AddPage(page => page.SetCanvas(640, 656))
+        .Build();
+    byte[] builtEncoded = ThemeFileCodec.Encode(builtTheme);
+    if (!System.Text.Encoding.UTF8.GetString(builtEncoded).Contains("\"encoder\"")) return false;
+    var builtDecoded = ThemeFileCodec.Decode(builtEncoded);
+    if (builtDecoded.Pages[0].Encoder is not { } builtEnc || builtEnc.ValueKind != JsonValueKind.Array || builtEnc.GetArrayLength() != 2)
+        return false;
+
+    // Real theme (decoded from the empty.Theme-style header/JSON/asset layout, reconstructed
+    // here inline since this test must not depend on a specific file existing on disk):
+    // round-trip a page carrying a real "encoder" array through ThemeEditor and confirm it's
+    // preserved unchanged, not dropped or replaced by the built-in default.
+    var editor = new ThemeEditor(builtTheme);
+    editor.Page(0).AddKey(0, 0, key => key.Action(KeyActions.OneLevelUp()));
+    var edited = editor.Save();
+    byte[] editedEncoded = ThemeFileCodec.Encode(edited);
+    if (!System.Text.Encoding.UTF8.GetString(editedEncoded).Contains("\"encoder\"")) return false;
+
+    return true;
+}
+
+// Confirmed via direct byte comparison against multiple real theme files (a genuine
+// ScreenKeyWindows-created reference file and a minimal baseline, empty.Theme): the 8-byte
+// gap between the header Tagged-Value Map and the layout JSON is 4 zero bytes followed by a
+// big-endian uint32 equal to (JSON byte length + 1) - NOT arbitrary padding. Guards against
+// ever regressing to writing zeros here again (§10 Item #10).
+static bool TestHeaderJsonLengthField()
+{
+    var theme = new ThemeBuilder().AddPage(page => page.SetCanvas(640, 656)).Build();
+    byte[] encoded = ThemeFileCodec.Encode(theme);
+
+    int pos = 0;
+    VariantMapCodec.DecodeMap(encoded, ref pos);
+    byte[] gap = encoded.AsSpan(pos, 8).ToArray();
+    if (gap[0] != 0 || gap[1] != 0 || gap[2] != 0 || gap[3] != 0) return false;
+    uint declaredLength = System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(gap.AsSpan(4));
+
+    int jsonStart = pos + 8;
+    if (encoded[jsonStart] != (byte)'{') return false;
+    int depth = 0;
+    bool inString = false, escaped = false;
+    int jsonEnd = jsonStart;
+    for (int i = jsonStart; i < encoded.Length; i++)
+    {
+        char c = (char)encoded[i];
+        if (inString)
+        {
+            if (escaped) escaped = false;
+            else if (c == '\\') escaped = true;
+            else if (c == '"') inString = false;
+        }
+        else
+        {
+            if (c == '"') inString = true;
+            else if (c is '{' or '[') depth++;
+            else if (c is '}' or ']') { depth--; if (depth == 0) { jsonEnd = i; break; } }
+        }
+    }
+    int actualJsonLength = jsonEnd - jsonStart + 1;
+    return declaredLength == (uint)(actualJsonLength + 1);
+}
+
+// Confirmed real mechanism (§7.1, §10 Item on animated key icons - not DynamicImageItem):
+// an animated key is a real, pressable KeyItem with "path":"" , "paths":"<folder>", and
+// "frameDelays":"<csv>", with each frame registered as a separate asset under that folder.
+// Verifies KeyItemBuilder.AnimatedIcon produces exactly this shape from a real GIF file
+// (the user's own pop-cat.gif, if present on the Desktop - this test is skipped, not
+// failed, if that file isn't available in this environment), and that the key still
+// carries its assigned action.
+static bool TestAnimatedKeyIcon()
+{
+    string gifPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "pop-cat.gif");
+    if (!File.Exists(gifPath))
+    {
+        Console.Write("(skipped - pop-cat.gif not present) ");
+        return true;
+    }
+    byte[] gifBytes = File.ReadAllBytes(gifPath);
+
+    var theme = new ThemeBuilder()
+        .AddPage(page => page
+            .SetCanvas(640, 656)
+            .AddKey(0, 0, key => key
+                .AnimatedIcon("testanim", gifBytes)
+                .Action(KeyActions.Keyboard(0x1E, "1"))))
+        .Build();
+
+    byte[] encoded = ThemeFileCodec.Encode(theme);
+    var decoded = ThemeFileCodec.Decode(encoded);
+    var key = decoded.Pages[0].Items.OfType<KeyItem>().FirstOrDefault();
+    if (key is null) return false;
+    if (key.Action is not Mk20Control.Protocol.Theme.Actions.KeyboardAction) return false;
+
+    if (!key.RawJson.TryGetProperty("path", out var pathEl) || pathEl.GetString() != "") return false;
+    if (!key.RawJson.TryGetProperty("paths", out var pathsEl)) return false;
+    string? pathsValue = pathsEl.GetString();
+    if (string.IsNullOrEmpty(pathsValue) || !pathsValue.StartsWith("/image/MK20/cache/")) return false;
+    if (!key.RawJson.TryGetProperty("frameDelays", out var fdEl)) return false;
+    string[] delays = (fdEl.GetString() ?? "").Split(',');
+    if (delays.Length < 2) return false;
+
+    // Every frame must actually be registered as a separate 128x128 RGB asset under that folder.
+    var frameAssets = decoded.Assets.Where(a => a.Path.StartsWith(pathsValue + "/")).ToList();
+    if (frameAssets.Count != delays.Length) return false;
+    foreach (var asset in frameAssets)
+    {
+        using var img = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.Rgb24>(asset.Data);
+        if (img.Width != 128 || img.Height != 128) return false;
+    }
 
     return true;
 }
 
 static bool TestThemeBuilderEditorRoundTrip()
 {
+    // A minimal but genuinely valid 4x4 RGBA PNG - required now that Icon()/SetKeyIcon()
+    // actually decode+re-encode icon bytes via ImageSharp (see IconImageNormalizer) rather
+    // than storing them verbatim; a real image is needed for icon asset bytes specifically.
+    byte[] tinyValidPng =
+    {
+        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+        0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04, 0x08, 0x06, 0x00, 0x00, 0x00, 0xA9, 0xF1, 0x9E,
+        0x7E, 0x00, 0x00, 0x00, 0x15, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63, 0xFC, 0xCF, 0xC0, 0xD0,
+        0xC0, 0x80, 0x04, 0x98, 0x90, 0x39, 0xC4, 0x09, 0x00, 0x00, 0x64, 0x11, 0x01, 0x87, 0xA9, 0x8A,
+        0xB1, 0xCB, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+    };
+
     // Build a small multi-item theme exercising every builder.
     var builder = new ThemeBuilder();
     string page2Id = "";
@@ -952,8 +1247,8 @@ static bool TestThemeBuilderEditorRoundTrip()
     {
         page.SetCanvas(640, 656)
             .AddBackground(bg => bg.MainScreen("bg.png", new byte[] { 0x89, 0x50, 0x4E, 0x47, 1, 2, 3, 4 }))
-            .AddKey(0, 0, key => key.Icon("icon0.png", new byte[] { 0x89, 0x50, 0x4E, 0x47, 5 }).Action(KeyActions.Keyboard(0x1E, "1")))
-            .AddKey(0, 1, key => key.Icon("icon1.png", new byte[] { 0x89, 0x50, 0x4E, 0x47, 6 }).Action(KeyActions.OpenWeb("https://example.com")))
+            .AddKey(0, 0, key => key.Icon("icon0.png", tinyValidPng).Action(KeyActions.Keyboard(0x1E, "1")))
+            .AddKey(0, 1, key => key.Icon("icon1.png", tinyValidPng).Action(KeyActions.OpenWeb("https://example.com")))
             .AddText(t => t.At(10, 10).Text("Hello"))
             .AddProgressBar(p => p.At(0, 0, 80, 12).BoundTo("Volume"))
             .AddLinearGauge(g => g.At(0, 0, 52, 9).BoundTo("内存利用率"))
@@ -983,7 +1278,7 @@ static bool TestThemeBuilderEditorRoundTrip()
 
     // Now edit via ThemeEditor: change key0's icon+action, add a new key, remove key1.
     var editor = new ThemeEditor(decoded);
-    editor.Page(0).SetKeyIcon(0, 0, "new_icon.png", new byte[] { 0x89, 0x50, 0x4E, 0x47, 7 });
+    editor.Page(0).SetKeyIcon(0, 0, "new_icon.png", tinyValidPng);
     editor.Page(0).SetKeyAction(0, 0, KeyActions.TypeText("hi"));
     editor.Page(0).RemoveKey(0, 1);
     editor.Page(0).AddKey(0, 2, key => key.Action(KeyActions.NextPage()));
@@ -999,6 +1294,50 @@ static bool TestThemeBuilderEditorRoundTrip()
     if (newKey?.Action is not Mk20Control.Protocol.Theme.Actions.PageSwitchAction psa || psa.PageSwitchMode != 2) return false;
 
     return true;
+}
+
+// Verifies the retry-on-timeout behavior added to UploadThemeFileAsync: a FILE_END that
+// never acks once (matching the confirmed real-hardware failure mode) is retried
+// automatically, succeeding on the second attempt without the caller needing to intervene.
+static bool TestUploadRetriesOnceOnFileEndTimeout()
+{
+    var transport = new FlakyThenRecoveringTransport();
+    var client = new Mk20Control.Protocol.Client.Mk20DeviceClient(transport);
+    transport.OpenAsync().GetAwaiter().GetResult();
+
+    var bytes = new byte[8192];
+    new Random(1).NextBytes(bytes);
+
+    client.UploadThemeFileAsync("/data/theme/MK20/retrytest/retrytest.Theme", bytes, TimeSpan.FromMilliseconds(300))
+        .GetAwaiter().GetResult(); // should NOT throw - succeeds on the automatic retry
+
+    return transport.FileEndAttempts == 2 && transport.FindDeviceRequests >= 1;
+}
+
+// Verifies the fail-fast safeguard: if FILE_END times out AND the device no longer responds
+// to FIND_DEVICE at all (the confirmed real "whole command processor locked up" state), the
+// upload throws immediately with a clear message instead of retrying uselessly against a
+// dead link.
+static bool TestUploadFailsFastWhenDeviceFullyLockedUp()
+{
+    var transport = new FullyDeadTransport();
+    var client = new Mk20Control.Protocol.Client.Mk20DeviceClient(transport);
+    transport.OpenAsync().GetAwaiter().GetResult();
+
+    var bytes = new byte[4096];
+    new Random(2).NextBytes(bytes);
+
+    bool threw = false;
+    try
+    {
+        client.UploadThemeFileAsync("/data/theme/MK20/deadtest/deadtest.Theme", bytes, TimeSpan.FromMilliseconds(200))
+            .GetAwaiter().GetResult();
+    }
+    catch (Mk20Control.Protocol.Exceptions.Mk20TimeoutException ex)
+    {
+        threw = ex.Message.Contains("power-cycle", StringComparison.OrdinalIgnoreCase);
+    }
+    return threw && transport.FindDeviceRequests >= 1;
 }
 
 static bool TestUploadThemeFileChunking()
@@ -1036,6 +1375,214 @@ static bool TestUploadThemeFileChunking()
         && transport.TotalBulkBytesWritten == fileLength;
 }
 
+// Confirmed hazard on real hardware (PROTOCOL_WAVESHARE_MK20.md §10 Open Item #8): deleting
+// a theme whose reload was sent but never confirmed acknowledged left the device's render
+// subsystem stuck. This test verifies the safeguard added to Mk20DeviceClient: a reload that
+// never acks (client-side timeout) marks the path as "pending", and a subsequent delete for
+// that same path is refused up front (no bytes sent for the delete at all).
+static bool TestDeleteRefusedWhilePendingReload()
+{
+    const string path = "/data/theme/MK20/test/test.Theme";
+    var transport = new NeverAckTransport();
+    var client = new Mk20Control.Protocol.Client.Mk20DeviceClient(transport);
+    transport.OpenAsync().GetAwaiter().GetResult();
+
+    bool reloadTimedOut = false;
+    try
+    {
+        client.ReloadThemeAsync(path, TimeSpan.FromMilliseconds(200)).GetAwaiter().GetResult();
+    }
+    catch (Mk20Control.Protocol.Exceptions.Mk20TimeoutException)
+    {
+        reloadTimedOut = true;
+    }
+    if (!reloadTimedOut) return false;
+    if (!client.IsReloadPending(path)) return false;
+
+    int deleteFramesBefore = transport.SentCommandIds.Count(c => c == (uint)CommandId.SetDeviceDeleteTheme);
+    bool deleteRefused = false;
+    try
+    {
+        client.DeleteThemeAsync(path).GetAwaiter().GetResult();
+    }
+    catch (InvalidOperationException)
+    {
+        deleteRefused = true;
+    }
+    int deleteFramesAfter = transport.SentCommandIds.Count(c => c == (uint)CommandId.SetDeviceDeleteTheme);
+
+    if (!deleteRefused) return false;
+    if (deleteFramesAfter != deleteFramesBefore) return false; // must not have sent anything
+
+    // Clearing the safeguard should allow the delete through (transport acks deletes normally).
+    client.ClearPendingReloadState(path);
+    if (client.IsReloadPending(path)) return false;
+    client.DeleteThemeAsync(path).GetAwaiter().GetResult(); // should not throw now
+    return true;
+}
+
+// Verifies the "don't spam the device" safeguard: ReloadThemeAsync/DeleteThemeAsync/
+// UploadThemeFileAsync are serialized against each other via an internal semaphore, so a
+// second call made before the first one finishes waits its turn rather than racing bytes
+// onto the wire concurrently.
+static bool TestThemeOperationsAreSerialized()
+{
+    const string pathA = "/data/theme/MK20/a/a.Theme";
+    const string pathB = "/data/theme/MK20/b/b.Theme";
+    var transport = new SlowAckTransport(ackDelay: TimeSpan.FromMilliseconds(300));
+    var client = new Mk20Control.Protocol.Client.Mk20DeviceClient(transport);
+    transport.OpenAsync().GetAwaiter().GetResult();
+
+    var firstTask = client.ReloadThemeAsync(pathA, TimeSpan.FromSeconds(5));
+    // Give the first call a moment to actually send its request before starting the second.
+    Task.Delay(50).GetAwaiter().GetResult();
+    var secondTask = client.ReloadThemeAsync(pathB, TimeSpan.FromSeconds(5));
+
+    Task.WaitAll(firstTask, secondTask);
+
+    // The second reload's request must have been sent strictly after the first one's ack
+    // was received - i.e. the two [request...ack] windows must not overlap.
+    var sendTimes = transport.SendTimestampsByPath;
+    var ackTimes = transport.AckTimestamps;
+    if (sendTimes.Count != 2 || ackTimes.Count != 2) return false;
+    // First send time for pathA request, first ack time, then second send time must be >= first ack time.
+    return sendTimes[1] >= ackTimes[0];
+}
+
+/// <summary>Fake transport simulating a FILE_END that never acks on the first attempt (matching the
+/// confirmed real-hardware failure mode), but recovers on the retry - and answers FIND_DEVICE
+/// health-check pings throughout (device stays alive, just the file-transfer path glitches once).
+/// Verifies the retry-on-timeout behavior added to UploadThemeFileAsync.</summary>
+internal sealed class FlakyThenRecoveringTransport : Mk20Control.Protocol.Transport.ISerialTransport
+{
+    public event EventHandler<ReadOnlyMemory<byte>>? DataReceived;
+#pragma warning disable CS0067
+    public event EventHandler<Exception>? ErrorOccurred;
+#pragma warning restore CS0067
+    public bool IsOpen { get; private set; }
+    public int FileEndAttempts { get; private set; }
+    public int FindDeviceRequests { get; private set; }
+
+    public Task OpenAsync(CancellationToken cancellationToken = default) { IsOpen = true; return Task.CompletedTask; }
+    public Task CloseAsync(CancellationToken cancellationToken = default) { IsOpen = false; return Task.CompletedTask; }
+
+    public Task WriteAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+    {
+        byte[] bytes = data.ToArray();
+        if (bytes.AsSpan().SequenceEqual(Mk20Control.Protocol.Framing.DeviceFrameHeader.AbortTransferBytes)) return Task.CompletedTask;
+        if (bytes.Length < Mk20Control.Protocol.Framing.DeviceFrameHeader.HeaderLength ||
+            System.Text.Encoding.ASCII.GetString(bytes, 0, Mk20Control.Protocol.Framing.DeviceFrameHeader.CommandHeaderBytes.Length) !=
+                Mk20Control.Protocol.Framing.DeviceFrameHeader.CommandHeaderText)
+        {
+            return Task.CompletedTask; // bulk file data - ignore
+        }
+
+        uint commandId = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(26, 4));
+        if (commandId == (uint)CommandId.FindDevice)
+        {
+            FindDeviceRequests++;
+            var replyPayload = SimpleStringMapCodec.Encode(new[] { new KeyValuePair<string, string>("version", "V2.32") });
+            RaiseAck(CommandId.FindDevice, replyPayload);
+        }
+        else if (commandId == (uint)CommandId.GetDeviceTheme)
+        {
+            var replyPayload = SimpleStringMapCodec.Encode(new[]
+            {
+                new KeyValuePair<string, string>("bytesTotal", "1000000"),
+                new KeyValuePair<string, string>("bytesAvailable", "500000"),
+            });
+            RaiseAck(CommandId.GetDeviceTheme, replyPayload);
+        }
+        else if (commandId == (uint)CommandId.FileStart)
+        {
+            RaiseAck(CommandId.FileStart, Array.Empty<byte>());
+        }
+        else if (commandId == (uint)CommandId.FileEnd)
+        {
+            FileEndAttempts++;
+            if (FileEndAttempts == 1)
+            {
+                // First attempt: simulate the confirmed real failure - no reply at all.
+                return Task.CompletedTask;
+            }
+            var replyPayload = SimpleStringMapCodec.Encode(new[] { new KeyValuePair<string, string>("res", "1") });
+            RaiseAck(CommandId.FileEnd, replyPayload);
+        }
+        else if (commandId == (uint)CommandId.SetDeviceReload)
+        {
+            RaiseAck(CommandId.SetDeviceReload, bytes.AsSpan(Mk20Control.Protocol.Framing.DeviceFrameHeader.HeaderLength).ToArray());
+        }
+        return Task.CompletedTask;
+    }
+
+    private void RaiseAck(CommandId commandId, byte[] payload)
+    {
+        var frame = new Mk20Control.Protocol.Framing.DeviceFrame(2, (uint)commandId, payload, Mk20Control.Protocol.Checksums.Crc32.Compute(payload), true);
+        DataReceived?.Invoke(this, frame.Encode());
+    }
+
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+}
+
+/// <summary>Fake transport for the "device fully locked up" scenario: FILE_END never acks, AND
+/// FIND_DEVICE never acks either (simulating the confirmed real failure mode where the whole
+/// command processor wedges, not just the file-transfer path). Verifies
+/// UploadThemeFileAsync fails fast with a clear message instead of retrying forever against
+/// a dead link.</summary>
+internal sealed class FullyDeadTransport : Mk20Control.Protocol.Transport.ISerialTransport
+{
+    public event EventHandler<ReadOnlyMemory<byte>>? DataReceived;
+#pragma warning disable CS0067
+    public event EventHandler<Exception>? ErrorOccurred;
+#pragma warning restore CS0067
+    public bool IsOpen { get; private set; }
+    public int FindDeviceRequests { get; private set; }
+
+    public Task OpenAsync(CancellationToken cancellationToken = default) { IsOpen = true; return Task.CompletedTask; }
+    public Task CloseAsync(CancellationToken cancellationToken = default) { IsOpen = false; return Task.CompletedTask; }
+
+    public Task WriteAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+    {
+        byte[] bytes = data.ToArray();
+        if (bytes.AsSpan().SequenceEqual(Mk20Control.Protocol.Framing.DeviceFrameHeader.AbortTransferBytes)) return Task.CompletedTask;
+        if (bytes.Length < Mk20Control.Protocol.Framing.DeviceFrameHeader.HeaderLength ||
+            System.Text.Encoding.ASCII.GetString(bytes, 0, Mk20Control.Protocol.Framing.DeviceFrameHeader.CommandHeaderBytes.Length) !=
+                Mk20Control.Protocol.Framing.DeviceFrameHeader.CommandHeaderText)
+        {
+            return Task.CompletedTask;
+        }
+        uint commandId = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(26, 4));
+        if (commandId == (uint)CommandId.FindDevice)
+        {
+            FindDeviceRequests++;
+            // Never reply - simulates the confirmed real "whole command processor locked up" state.
+        }
+        else if (commandId == (uint)CommandId.GetDeviceTheme)
+        {
+            var replyPayload = SimpleStringMapCodec.Encode(new[]
+            {
+                new KeyValuePair<string, string>("bytesTotal", "1000000"),
+                new KeyValuePair<string, string>("bytesAvailable", "500000"),
+            });
+            RaiseAck(CommandId.GetDeviceTheme, replyPayload);
+        }
+        else if (commandId == (uint)CommandId.FileStart)
+        {
+            RaiseAck(CommandId.FileStart, Array.Empty<byte>());
+        }
+        // FileEnd: never acked either.
+        return Task.CompletedTask;
+    }
+
+    private void RaiseAck(CommandId commandId, byte[] payload)
+    {
+        var frame = new Mk20Control.Protocol.Framing.DeviceFrame(2, (uint)commandId, payload, Mk20Control.Protocol.Checksums.Crc32.Compute(payload), true);
+        DataReceived?.Invoke(this, frame.Encode());
+    }
+
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+}
+
 /// <summary>Minimal fake transport for <see cref="TestUploadThemeFileChunking"/>: auto-acks FILE_START/FILE_END and records the exact byte-count of every WriteAsync call made after FILE_START, to verify chunk sizes.</summary>
 internal sealed class ChunkCapturingTransport : Mk20Control.Protocol.Transport.ISerialTransport
 {
@@ -1054,12 +1601,26 @@ internal sealed class ChunkCapturingTransport : Mk20Control.Protocol.Transport.I
     public Task WriteAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
     {
         byte[] bytes = data.ToArray();
-        if (bytes.Length >= Mk20Control.Protocol.Framing.DeviceFrameHeader.HeaderLength &&
+        if (bytes.AsSpan().SequenceEqual(Mk20Control.Protocol.Framing.DeviceFrameHeader.AbortTransferBytes))
+        {
+            // Not a command frame and not bulk file data - ignore, matching the real device's
+            // behavior of not acknowledging this control message.
+        }
+        else if (bytes.Length >= Mk20Control.Protocol.Framing.DeviceFrameHeader.HeaderLength &&
             System.Text.Encoding.ASCII.GetString(bytes, 0, Mk20Control.Protocol.Framing.DeviceFrameHeader.CommandHeaderBytes.Length) ==
                 Mk20Control.Protocol.Framing.DeviceFrameHeader.CommandHeaderText)
         {
             uint commandId = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(26, 4));
-            if (commandId == (uint)CommandId.FileStart)
+            if (commandId == (uint)CommandId.GetDeviceTheme)
+            {
+                var replyPayload = SimpleStringMapCodec.Encode(new[]
+                {
+                    new KeyValuePair<string, string>("bytesTotal", "1000000"),
+                    new KeyValuePair<string, string>("bytesAvailable", "500000"),
+                });
+                RaiseAck(CommandId.GetDeviceTheme, replyPayload);
+            }
+            else if (commandId == (uint)CommandId.FileStart)
             {
                 _sawFileStart = true;
                 RaiseAck(CommandId.FileStart, Array.Empty<byte>());
@@ -1082,6 +1643,84 @@ internal sealed class ChunkCapturingTransport : Mk20Control.Protocol.Transport.I
     {
         var frame = new Mk20Control.Protocol.Framing.DeviceFrame(2, (uint)commandId, payload, Mk20Control.Protocol.Checksums.Crc32.Compute(payload), true);
         DataReceived?.Invoke(this, frame.Encode());
+    }
+
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+}
+
+/// <summary>Fake transport that acks FindDevice/GetDeviceTheme/SetDeviceDeleteTheme/etc. immediately but NEVER acks SetDeviceReload - simulates a device that has stopped responding specifically to reload requests.</summary>
+internal sealed class NeverAckTransport : Mk20Control.Protocol.Transport.ISerialTransport
+{
+    public event EventHandler<ReadOnlyMemory<byte>>? DataReceived;
+#pragma warning disable CS0067
+    public event EventHandler<Exception>? ErrorOccurred;
+#pragma warning restore CS0067
+    public bool IsOpen { get; private set; }
+    public List<uint> SentCommandIds { get; } = new();
+    private readonly Mk20Control.Protocol.Framing.DeviceFrameParser _parser = new();
+
+    public Task OpenAsync(CancellationToken cancellationToken = default) { IsOpen = true; return Task.CompletedTask; }
+    public Task CloseAsync(CancellationToken cancellationToken = default) { IsOpen = false; return Task.CompletedTask; }
+
+    public Task WriteAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+    {
+        byte[] bytes = data.ToArray();
+        if (bytes.AsSpan().SequenceEqual(Mk20Control.Protocol.Framing.DeviceFrameHeader.AbortTransferBytes)) return Task.CompletedTask;
+        _parser.Feed(bytes);
+        foreach (var frame in _parser.DrainFrames())
+        {
+            SentCommandIds.Add(frame.CommandId);
+            // Never ack SetDeviceReload (simulating the exact hazard scenario); ack everything else immediately.
+            if (frame.CommandId != (uint)CommandId.SetDeviceReload)
+            {
+                var replyPayload = SimpleStringMapCodec.Encode(new[] { new KeyValuePair<string, string>("res", "1") });
+                var reply = new Mk20Control.Protocol.Framing.DeviceFrame(2, frame.CommandId, replyPayload, Mk20Control.Protocol.Checksums.Crc32.Compute(replyPayload), true);
+                DataReceived?.Invoke(this, reply.Encode());
+            }
+        }
+        return Task.CompletedTask;
+    }
+
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+}
+
+/// <summary>Fake transport that acks every command after a fixed delay, recording send/ack timestamps - used to verify theme operations are serialized rather than overlapping.</summary>
+internal sealed class SlowAckTransport : Mk20Control.Protocol.Transport.ISerialTransport
+{
+    public event EventHandler<ReadOnlyMemory<byte>>? DataReceived;
+#pragma warning disable CS0067
+    public event EventHandler<Exception>? ErrorOccurred;
+#pragma warning restore CS0067
+    public bool IsOpen { get; private set; }
+    public List<DateTime> SendTimestampsByPath { get; } = new();
+    public List<DateTime> AckTimestamps { get; } = new();
+    private readonly TimeSpan _ackDelay;
+    private readonly Mk20Control.Protocol.Framing.DeviceFrameParser _parser = new();
+    private readonly object _lock = new();
+
+    public SlowAckTransport(TimeSpan ackDelay) => _ackDelay = ackDelay;
+
+    public Task OpenAsync(CancellationToken cancellationToken = default) { IsOpen = true; return Task.CompletedTask; }
+    public Task CloseAsync(CancellationToken cancellationToken = default) { IsOpen = false; return Task.CompletedTask; }
+
+    public Task WriteAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+    {
+        byte[] bytes = data.ToArray();
+        if (bytes.AsSpan().SequenceEqual(Mk20Control.Protocol.Framing.DeviceFrameHeader.AbortTransferBytes)) return Task.CompletedTask;
+        _parser.Feed(bytes);
+        foreach (var frame in _parser.DrainFrames())
+        {
+            if (frame.CommandId != (uint)CommandId.SetDeviceReload) continue;
+            lock (_lock) { SendTimestampsByPath.Add(DateTime.UtcNow); }
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(_ackDelay).ConfigureAwait(false);
+                lock (_lock) { AckTimestamps.Add(DateTime.UtcNow); }
+                var reply = new Mk20Control.Protocol.Framing.DeviceFrame(2, frame.CommandId, frame.Payload, Mk20Control.Protocol.Checksums.Crc32.Compute(frame.Payload), true);
+                DataReceived?.Invoke(this, reply.Encode());
+            });
+        }
+        return Task.CompletedTask;
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;

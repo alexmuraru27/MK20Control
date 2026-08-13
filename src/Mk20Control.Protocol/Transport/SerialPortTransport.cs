@@ -35,6 +35,15 @@ public sealed class SerialPortTransport : ISerialTransport
             Handshake = Handshake.None,
             ReadTimeout = 2000,
             WriteTimeout = 2000,
+            // CDC-ACM devices commonly require DTR (and often RTS) asserted to consider the
+            // host "connected"/ready - .NET's SerialPort defaults both to false, which the
+            // real vendor app (almost certainly using a serial library that asserts these by
+            // default) would not do. Also raise the write buffer above its 2048-byte default
+            // so it comfortably exceeds our 4096-byte bulk chunk size.
+            DtrEnable = true,
+            RtsEnable = true,
+            WriteBufferSize = 16384,
+            ReadBufferSize = 16384,
         };
     }
 
@@ -76,7 +85,31 @@ public sealed class SerialPortTransport : ISerialTransport
         var array = data.ToArray();
         _logger.LogDebug("Writing {ByteCount} byte(s) to {PortName}.", array.Length, _port.PortName);
         _port.Write(array, 0, array.Length);
-        return Task.CompletedTask;
+        return DrainWriteBufferAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Blocks (async) until the OS/driver-side write buffer has actually drained, rather than
+    /// returning as soon as <see cref="SerialPort.Write"/> queues the bytes. Confirmed via a
+    /// wire-level log that, without this, a multi-megabyte bulk transfer gets queued into the
+    /// driver buffer in well under a second - far faster than the device can plausibly consume
+    /// it - after which the device sometimes stops acknowledging (FILE_END/SET_DEVICE_RELOAD
+    /// never replies, and the command processor itself can lock up). This provides real
+    /// backpressure so bulk chunks are only written once the previous chunk has genuinely left
+    /// the host.
+    /// </summary>
+    private async Task DrainWriteBufferAsync(CancellationToken cancellationToken)
+    {
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+        while (_port.IsOpen && _port.BytesToWrite > 0)
+        {
+            if (DateTime.UtcNow > deadline)
+            {
+                _logger.LogWarning("Write buffer for {PortName} did not drain within 10s ({Remaining} byte(s) still queued); continuing anyway.", _port.PortName, _port.BytesToWrite);
+                break;
+            }
+            await Task.Delay(2, cancellationToken).ConfigureAwait(false);
+        }
     }
 
     private async Task ReadLoopAsync(CancellationToken cancellationToken)

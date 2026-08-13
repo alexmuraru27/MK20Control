@@ -92,16 +92,36 @@ against real hardware captures or only ordering-inferred from firmware strings.
 logs a warning rather than silently pretending confidence it doesn't have.
 `UploadThemeFileAsync` builds/edits a theme locally (via
 `Mk20Control.Protocol.Codecs.ThemeFileCodec` and the `Mk20Control.Protocol.Theme` model)
-and pushes it to the device end-to-end: `FILE_START` -> raw 4096-byte bulk chunks ->
-`FILE_END` -> `SET_DEVICE_RELOAD` to activate it - **fully confirmed** by capturing a real
-theme install and reconstructing the transferred bytes byte-for-byte from the capture (see
-below).
+and pushes it to the device end-to-end: an abort-transfer control message -> `FILE_START` ->
+raw 4096-byte bulk chunks -> `FILE_END` -> another abort-transfer message -> `SET_DEVICE_RELOAD`
+to activate it (the last three are pipelined without waiting for `FILE_END`'s reply first,
+matching the confirmed real host sequencing - see PROTOCOL_WAVESHARE_MK20.md §3.1/§10 Open
+Item #6) - **fully confirmed** by capturing a real theme install, reconstructing the
+transferred bytes byte-for-byte from the capture, and by two consecutive successful
+end-to-end uploads against real hardware after fixing the sequencing/transport issues that
+previously caused the device to stop acknowledging `FILE_END`/`SET_DEVICE_RELOAD` (missing
+abort-transfer message, waiting for `FILE_END`'s reply before pipelining the reload request,
+and `SerialPortTransport` not asserting `DtrEnable`/`RtsEnable`).
+
+**Operation safeguards:** `ReloadThemeAsync`, `DeleteThemeAsync`, and `UploadThemeFileAsync`
+are automatically serialized against each other (never more than one in flight at once,
+matching the real host's observed behavior - see PROTOCOL_WAVESHARE_MK20.md §6.7), and
+`DeleteThemeAsync` refuses up front to delete a theme whose reload was sent but never
+confirmed acknowledged (a confirmed real-hardware hazard - see §10 Open Item #8) - use
+`IsReloadPending`/`ClearPendingReloadState` to inspect or override this. `UploadThemeFileAsync`
+also automatically retries the whole upload (up to 3 attempts) if `FILE_END`/`SET_DEVICE_RELOAD`
+times out - a confirmed, low-probability, non-deterministic real-hardware condition (see §10
+Open Item #9) - first verifying via a `FIND_DEVICE` ping that the device is still alive before
+retrying; if the device has stopped responding entirely, it fails fast with a message stating a
+physical power-cycle is required, rather than retrying uselessly.
 
 ### Building/editing themes without hand-writing JSON
 
 `Mk20Control.Protocol.Theme.Building` provides a fluent API for exactly this - "set a
-picture on button N and make it type X", "set the background", "add a CPU-usage gauge" -
-without touching raw JSON:
+picture on button N and make it type X", "set the background", "add a CPU-usage gauge",
+"navigate between multiple pages" - without touching raw JSON.
+
+#### Quick start
 
 ```csharp
 using Mk20Control.Protocol.Theme.Building;
@@ -123,22 +143,129 @@ byte[] themeBytes = ThemeFileCodec.Encode(theme);
 await client.UploadThemeFileAsync("/data/theme/MK20/mytheme/mytheme.Theme", themeBytes);
 ```
 
+#### `ThemeBuilder` - the top-level object
+
+One `ThemeBuilder` = one `.Theme` file. Call `.AddPage(configure)` once per page (a page is
+a full-screen 640x656 canvas of keys/items - the confirmed real main-screen grid is 4 rows x
+5 columns of 128x128 key cells, origin at `(0, 144)`, with the top 144px reserved for the
+system status bar). The **first page added becomes the theme's initial/current page**.
+`.Build()` produces an immutable `ThemeFile`; pass it to `ThemeFileCodec.Encode(...)` to get
+the final on-disk bytes.
+
+`ThemeBuilder.Language` (default `0`) and `.LayoutVersion` (default `"V3.0"`, matching every
+real theme examined) can be overridden if needed, but the defaults should not normally be
+changed.
+
+#### `ThemePageBuilder` - one page's canvas + items
+
+Obtained via `AddPage(configure)` (or the no-arg `AddPage()` overload, which returns the
+page builder directly for imperative-style chaining instead of a lambda).
+
+| Method | Purpose |
+|---|---|
+| `.SetCanvas(width, height, showUnit=true)` | Canvas size - always `640, 656` for the confirmed real main screen; call before adding items that depend on it (e.g. a full-bleed background). |
+| `.AddKey(row, col, configure)` | Adds a physical key (see `KeyItemBuilder` below). |
+| `.AddBackground(configure)` | Adds a background image/video (see `BackgroundItemBuilder`). |
+| `.AddText(configure)` | Static or data-bound text label. |
+| `.AddProgressBar(configure)` | Data-bound circular/linear progress bar. |
+| `.AddLinearGauge(configure)` | Data-bound solid-color bar gauge. |
+| `.AddRadialGauge(configure)` | Data-bound arc/radial gauge with gradient stops. |
+| `.AddDigitalClockField(configure)` | One clock field (`"hour"`/`"minute"`/`"second"`) - combine 2-3 adjacent items for a full clock. |
+| `.AddDynamicImage(configure)` | A **non-interactive, decorative** animated GIF (type 114) - NOT pressable and carries no key action. For a pressable animated **key**, use `KeyItemBuilder.AnimatedIcon` instead (see below) - these are two entirely different mechanisms; using the wrong one for "I want an animated button" is a common mistake. |
+| `.PageId` | This page's auto-generated GUID id - reference it from `KeyActions.OpenPage(pageId)` for folder-style navigation to a *specific* page (as opposed to `PreviousPage()`/`NextPage()`, which are always relative to the current page, not absolute). |
+
+Every page **must** carry a page-level `"encoder"` array describing the device's physical
+rotary-encoder hardware - `ThemeBuilder`/`ThemeFileCodec` handle this automatically (a
+confirmed real default value is used for brand-new pages); you never need to set it
+yourself, but be aware it exists if you inspect a generated file's raw JSON.
+
+#### `KeyItemBuilder` - one physical key
+
+Obtained via `AddKey(row, column, configure)`. `row`/`column` are 0-based grid coordinates;
+`x`/`y`/`z` (pixel position/stacking order) are auto-derived assuming 128x128 cells at the
+confirmed grid origin `(0, 144)` - override only via `.At(x, y, z)` if you need a
+non-grid-aligned position (uncommon).
+
+| Method | Fills in |
+|---|---|
+| `.Icon(fileName, pngBytes)` | Static icon. Automatically resized/reformatted to the confirmed real-hardware format (128x128, 24-bit RGB, no alpha) regardless of the source image's size/format/transparency - you never need to pre-process icons yourself. Sets JSON `"path"` to a newly-registered asset. |
+| `.AnimatedIcon(folderName, gifBytes)` | Makes the **key itself** animated (still fully pressable, still takes an `.Action(...)`) - decodes every frame of the GIF, normalizes each to 128x128 RGB, and registers them as separate assets under `"/image/MK20/cache/<folderName>/frame_N.png"`. Sets JSON `"path"` to `""` (explicitly empty, not omitted) and `"paths"`/`"frameDelays"` to the folder path and a comma-separated per-frame millisecond delay list - this exact shape was confirmed against a real user-created theme. |
+| `.IconAssetPath(rawPath)` | Sets `"path"` to an arbitrary string directly, without registering any new asset - use this to reference an already-registered asset (e.g. shared icon across several keys) **or** one of the device's built-in static system icons, e.g. `"/static/icon/dark/PageSwitch.png"` (the confirmed real icon used by every real page-navigation key - see `KeyActions.PreviousPage`/`NextPage` example below). |
+| `.Action(keyAction)` | Assigns the key's behavior - build one via `KeyActions` (see table below). |
+| `.Title(text)` | On-screen label text (rendered per `titleParam.ShowTitle`; empty by default, matching most real keys). |
+| `.IconSize(width, height)` | Overrides the *rendered* icon size in pixels (defaults to 128x128, matching every real theme). |
+| `.Locked(locked=true)` | Real key items always have `"lock":"1"`; defaults to locked to match - very unlikely you'd ever need `false`. |
+
+#### `KeyActions` - assignable key behaviors
+
+Every factory method here produces a `KeyAction` for `KeyItemBuilder.Action(...)`, with all
+confirmed-required fixed fields (icon paths, description text, etc.) already filled in to
+match real theme files exactly - you do not need to supply these yourself.
+
+| Factory | Behavior | Confirmed real hardware notes |
+|---|---|---|
+| `KeyActions.Keyboard(keycode, keyLabel)` | Emit a keystroke. `keycode` is a USB HID keyboard usage code (e.g. `4`='A' .. `29`='Z', `0x1E`(30)='1' .. `0x26`(38)='9', `0x27`(39)='0'). | Sets the confirmed real fixed fields `description="Keyboard"`, `parentDescription="System input control"`, `iconPath="/static/icon/dark/keyboard.png"`, `AISoundControlKeyword=""`. |
+| `KeyActions.OpenWeb(url)` | Open a URL in the default browser. | |
+| `KeyActions.Mouse(mouseKey, mouseEvent, x, y, vScroll, hScroll)` | Mouse click/move/scroll. | Raw integers not individually enumerated/confirmed for every option - see `MouseAction` remarks. |
+| `KeyActions.PreviousPage()` / `.NextPage()` | Relative page navigation (always relative to the *current* page - not an absolute jump). | Confirmed real fixed fields: `description="Page switching"`, `parentDescription="Page switching"`, `iconPath="/static/icon/dark/PageSwitch.png"`. **Set the key's own icon to match** via `.IconAssetPath("/static/icon/dark/PageSwitch.png")` (do not register a custom asset for these keys - real ones never do). |
+| `KeyActions.OpenPage(pageId)` | Jump to a *specific* page (e.g. entering a "folder" of keys) - `pageId` is another page's `ThemePageBuilder.PageId`. | |
+| `KeyActions.OneLevelUp()` | Navigate back to the parent page. | Uses the fixed sentinel `"parentPage"`, not a real page id. |
+| `KeyActions.TypeText(text, pressEnterAfter, useCopyPaste)` | Type literal text, optionally pressing Enter or using clipboard paste instead of keystrokes. | |
+| `KeyActions.AudioVolume(deviceClass, targetDeviceName, adjustMode, adjustValue, switchDefaultDevice)` | Adjust a named OS audio device's volume. | |
+| `KeyActions.KeyboardSwitch()` | Toggle/switch the active keyboard layout. | No extra fields beyond the common base. |
+| `KeyActions.EncoderKeyboard(...)` / `.EncoderFunction(...)` | Bind a rotary encoder's rotate-left/click/rotate-right actions. | For a key/theme's encoder *action* assignment - unrelated to the required page-level `"encoder"` hardware-descriptor array, which is handled automatically. |
+
+#### Multi-page themes with page navigation
+
+A common pattern - N pages of content keys, with the bottom-left/bottom-right keys
+switching pages (confirmed real convention, e.g. every multi-page vendor theme examined):
+
+```csharp
+var builder = new ThemeBuilder();
+for (int p = 0; p < pageCount; p++)
+{
+    builder.AddPage(page =>
+    {
+        page.SetCanvas(640, 656);
+        // bottom-left = previous page, bottom-right = next page (row 3 = last row of a 4-row grid)
+        page.AddKey(3, 0, key => key.IconAssetPath("/static/icon/dark/PageSwitch.png").Action(KeyActions.PreviousPage()));
+        page.AddKey(3, 4, key => key.IconAssetPath("/static/icon/dark/PageSwitch.png").Action(KeyActions.NextPage()));
+        // ... add your other 18 content keys per page here ...
+    });
+}
+```
+
+Because `PreviousPage()`/`NextPage()` are always relative, this naturally forms a ring - the
+last page's "next" wraps to the first page and vice versa, with no special-casing needed.
+See `Mk20Control.App`'s `BuildSixPageThemeFromScratch` (`--build-6page-scratch` CLI flag) for
+a complete, runnable 6-page/120-key example mixing static icons, animated keys, and page
+navigation, verified round-trip and structurally checked against real theme files.
+
+#### Editing an existing theme
+
 To edit an existing theme (e.g. one just downloaded from the device or loaded from disk)
-rather than building from scratch, use `ThemeEditor`:
+rather than building from scratch, use `ThemeEditor` - same `KeyItemBuilder`/`KeyActions`
+API, applied to a decoded `ThemeFile`:
 
 ```csharp
 var editor = new ThemeEditor(ThemeFileCodec.Decode(existingThemeBytes));
 editor.Page(0).SetKeyIcon(row: 0, column: 2, "new_icon.png", File.ReadAllBytes("new_icon.png"));
 editor.Page(0).SetKeyAction(row: 0, column: 2, KeyActions.TypeText("hello"));
+editor.Page(0).AddKey(row: 1, column: 0, key => key.Icon("icon_05.png", ...).Action(KeyActions.Keyboard(0x22, "5")));
 byte[] updatedBytes = ThemeFileCodec.Encode(editor.Save());
 ```
 
-`KeyActions` covers every confirmed action variant from the `.Theme` file format spec
-(keyboard, URL, mouse, page navigation, typed text, audio volume, keyboard-layout switch,
-encoder functions) - see PROTOCOL_WAVESHARE_MK20.md §7.3 for the full list and the
-cross-check performed against real theme files (`CaptureAnalyzer --builder-byte-diff
-<file.Theme>` decodes a real theme, rebuilds it purely through this API from the
-interpreted data, and reports both a byte diff and a structured field-level comparison).
+`ThemeEditor.PageEditor` additionally exposes `.FindKey(row, col)`, `.RemoveKey(row, col)`,
+and `.SetMainBackground(...)`, and preserves every other field of the source theme
+(including its page-level `"encoder"` array) unchanged.
+
+See PROTOCOL_WAVESHARE_MK20.md §7.3 for the full item-type/action reference and the
+cross-check methodology performed against real theme files (`CaptureAnalyzer
+--builder-byte-diff <file.Theme>` decodes a real theme, rebuilds it purely through this API
+from the interpreted data, and reports both a byte diff and a structured field-level
+comparison) - and §10 Item #10 for the complete history of every confirmed real-format
+requirement this API had to match to be accepted by ScreenKeyWindows itself, not just
+decodable by this library's own codec.
 
 ## Real wire format (confirmed via USBPcap capture)
 

@@ -20,8 +20,15 @@ public static class KeyActions
     public static KeyboardAction Keyboard(int keycode, string? keyLabel = null, string? description = null) => new()
     {
         RawType = "keyboard",
-        Description = description,
-        RawFields = Empty,
+        // Confirmed via --dump-raw-json against real hardware themes: every real KeyboardAction
+        // carries "description":"Keyboard", "parentDescription":"System input control",
+        // "iconPath":"/static/icon/dark/keyboard.png", and an (empty) "AISoundControlKeyword" -
+        // omitting these (as this builder previously did, leaving them null/absent) produced a
+        // structurally incomplete controlData blob compared to every real key observed.
+        Description = description ?? "Keyboard",
+        ParentDescription = "System input control",
+        IconPath = "/static/icon/dark/keyboard.png",
+        RawFields = new Dictionary<string, TaggedValue> { ["AISoundControlKeyword"] = TaggedValue.Of("") },
         Keycode = keycode,
         KeyLabel = keyLabel,
     };
@@ -53,8 +60,14 @@ public static class KeyActions
     public static PageSwitchAction PreviousPage(string? description = null) => new()
     {
         RawType = "pageSwitch",
-        Description = description,
-        RawFields = Empty,
+        // Confirmed via a real DEVICE_ProactiveEscalationCMD key-press event
+        // (PROTOCOL_WAVESHARE_MK20.md §9.4): real page-switch keys carry
+        // parentDescription="Page switching", description="Page switching", and
+        // iconPath="/static/icon/dark/PageSwitch.png".
+        Description = description ?? "Page switching",
+        ParentDescription = "Page switching",
+        IconPath = "/static/icon/dark/PageSwitch.png",
+        RawFields = new Dictionary<string, TaggedValue> { ["AISoundControlKeyword"] = TaggedValue.Of("") },
         PageSwitchMode = 1,
     };
 
@@ -62,8 +75,10 @@ public static class KeyActions
     public static PageSwitchAction NextPage(string? description = null) => new()
     {
         RawType = "pageSwitch",
-        Description = description,
-        RawFields = Empty,
+        Description = description ?? "Page switching",
+        ParentDescription = "Page switching",
+        IconPath = "/static/icon/dark/PageSwitch.png",
+        RawFields = new Dictionary<string, TaggedValue> { ["AISoundControlKeyword"] = TaggedValue.Of("") },
         PageSwitchMode = 2,
     };
 

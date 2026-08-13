@@ -70,6 +70,18 @@ no payload:
 Observed sent host→device around file-transfer sequences (see §4, `FILE_START`/`FILE_END`).
 Not a command frame — do not attempt to parse a header out of it.
 
+**CONFIRMED exact placement** (message-by-message across every real capture examined, zero
+exceptions): exactly one abort-transfer message is sent immediately before every
+`FILE_START`, and exactly one more immediately after `FILE_END` and before
+`SET_DEVICE_RELOAD` — the host does **not** wait for `FILE_END`'s reply before sending the
+abort-transfer + `SET_DEVICE_RELOAD` that follows it; all three requests are pipelined
+back-to-back (typically 1-7ms apart) and replies are collected afterward in FIFO order
+(`FILE_END`'s reply arrives first, then `SET_DEVICE_RELOAD`'s). A **standalone** reload of
+an already-installed theme (no re-upload) is *not* preceded by an abort-transfer message.
+Omitting this message and/or waiting for `FILE_END`'s reply before sending the reload
+request (this client's original behavior) was confirmed via real-hardware testing to cause
+the device to never acknowledge `FILE_END`/`SET_DEVICE_RELOAD` — see §10 Open Item #6.
+
 ### 3.2 Parser resynchronization
 
 A receiver must scan for the ASCII sequence `AA551234` to locate a frame boundary in a
@@ -319,6 +331,35 @@ request entry is an empty string - the path itself is the only meaningful data, 
 the map *key* (the same "path as dictionary key" shape used by `GET_DEVICE_THEME`, §5.1).
 Deleting the currently-active theme was not tested; behavior in that case is unconfirmed.
 
+### 6.7 Client-side operational discipline (why this matters on real hardware)
+
+The protocol itself has **no confirmed device-side "cancel" or "reset stuck operation"
+command** beyond the abort-transfer control message (§3.1), which is sent proactively
+*before* starting a new file-transfer/reload operation, not as a runtime recovery signal for
+an operation already in flight. This means correctness depends on the *host* behaving
+disciplined, not on the device protecting itself from a confused host. Message-by-message
+analysis of every real capture shows the real ScreenKeyWindows host follows two rules that
+this library now enforces automatically in `Mk20DeviceClient`:
+
+1. **Never overlap theme-mutating operations.** Every real capture examined shows exactly
+   one `FILE_START`/`FILE_END`/`SET_DEVICE_RELOAD`/`SET_DEVICE_DELETE_THEME` sequence in
+   flight at a time - the host always finishes (or gives up on) one before starting another.
+   `Mk20DeviceClient` serializes `ReloadThemeAsync`, `DeleteThemeAsync`, and
+   `UploadThemeFileAsync` against each other via an internal lock so a second call made
+   before the first finishes simply waits its turn rather than racing bytes onto the wire.
+2. **Never delete a theme whose reload hasn't been confirmed.** This was not directly
+   observed in a capture (no capture contains a delete immediately following an
+   unacknowledged reload of the same theme), but was confirmed as a real hazard through
+   direct testing: deleting a theme while its `SET_DEVICE_RELOAD` was still unacknowledged
+   (including one that had already timed out client-side - a timeout does **not** prove the
+   device gave up processing it) left the device's render subsystem stuck, requiring a
+   physical power-cycle to recover, while `FIND_DEVICE`/`GET_DEVICE_THEME` kept responding
+   normally throughout. `Mk20DeviceClient.DeleteThemeAsync` now refuses to delete a path
+   with an unconfirmed pending reload, throwing `InvalidOperationException` with a clear
+   explanation before sending anything; use `IsReloadPending`/`ClearPendingReloadState` to
+   inspect or explicitly override this safeguard once you've independently confirmed it's
+   safe (e.g. after a power-cycle).
+
 ---
 
 ## 7. `.Theme` File Format
@@ -327,7 +368,8 @@ Themes are delivered to the device as a single binary file with this layout:
 
 ```
 [header: Tagged-Value Map — language(int), keyMacroValue(bytes), keyMacro(bytes|null)]
-[8 bytes reserved — not reliably meaningful; do not rely on any field here as a JSON length]
+[8 bytes — 4 zero bytes + a big-endian uint32 equal to (JSON byte length + 1); CONFIRMED
+ via direct byte comparison against multiple real files - NOT arbitrary padding]
 [UTF-8 JSON — layout: {"main":{"currentPage","version"},"pages":[...]}]
 [1 byte reserved, observed 0x0A]
 [assetCount(u32 BE)]
@@ -337,11 +379,47 @@ assetCount × {
 }
 ```
 
-The JSON section's true length must be found by scanning for balanced `{}`/`[]` (respecting
-quoted-string escapes) — the reserved field preceding it is not a trustworthy length prefix.
+Decoding does not need to trust the 8-byte length field - scanning for balanced `{}`/`[]`
+(respecting quoted-string escapes) finds the JSON's true end correctly regardless - but
+**encoding must write the correct value**: a themed file whose header claims the wrong JSON
+length was one of several confirmed contributing causes of ScreenKeyWindows itself locking
+up when loading a file this library produced (see §10 Item #10).
+
+**Confirmed real JSON formatting** (matters for producing a file ScreenKeyWindows accepts,
+not just one this codec can decode): 4-space indentation, Unix `\n` line endings (not
+`\r\n`), object keys in alphabetical order at every nesting level, and minimal string
+escaping (`\"` for a literal quote, not `\u0022`).
 
 **Note:** all numeric-looking JSON fields (`x`, `y`, `z`, `w`, `h`, `rotate`, `scale`, `id`,
 …) are serialized as **JSON strings**, not JSON numbers.
+
+**Page count:** a theme is NOT required to have more than 1 page - confirmed by a real,
+user-created, working theme (`customTheme5buttons.Theme`, 5 keys, no background, exactly 1
+page) that uploaded/reloaded normally on real hardware. An earlier hypothesis based on every
+*named* theme shipped with ScreenKeyWindows having 2+ pages was disproven this way - those
+themes simply happen to use multiple pages for their own content/folder navigation, not
+because the device requires it. See §10 Open Item #9 for the real explanation of the
+device-side hangs that had been (incorrectly) attributed to page count.
+
+**Confirmed required page-level field: `"encoder"`.** Every top-level/main-screen theme
+page examined (all 13 vendor themes, `customTheme7buttonsSoftware.Theme`,
+`empty.Theme`) carries a page-level `"encoder"` array alongside `"canvas"`/`"items"`/
+`"pageName"`:
+```json
+"encoder": [
+    {"col": 0, "keyString": "", "keycode": 0, "row": 103},
+    {"col": 0, "keyString": "", "keycode": 0, "row": 104}
+]
+```
+This describes the device's physical rotary-encoder hardware (not yet individually modeled
+beyond round-tripping) and is absent only from legitimately different secondary-screen/
+sub-page theme files (`Key/*.theme`, `SecondaryScreen/*.theme`,
+`Encoder/relatedTheme/*.Theme`). **Omitting this field entirely from a main-screen theme
+(as this library's codec did before being fixed) was confirmed to make ScreenKeyWindows
+itself lock up when loading the file** - independent of every key/item field being otherwise
+completely correct (see §10 Item #10). `ThemeFileCodec` now always emits this field:
+preserved from the source page if decoded from a real file, or defaulted to the value shown
+above for a brand-new page built via `ThemeBuilder`.
 
 ### 7.1 Page item types (`items[].type`)
 
@@ -358,14 +436,49 @@ quoted-string escapes) — the reserved field preceding it is not a trustworthy 
 
 **Confirmed required fields for a type-115 Key item** (observed on every real key item;
 omitting several of these caused a real device to hang indefinitely on `SET_DEVICE_RELOAD`
-during testing — see §10 note): `id`, `x`, `y`, `z`, `rotate`, `scale`, `lock`, `row`, `col`,
+during testing — see §10 note): `id`, `itemName` (e.g. `"control1"` - confirmed always
+present; omitting it, as `KeyItemBuilder` did before being fixed per §10 Item #10, was one
+of two confirmed causes of ScreenKeyWindows itself locking up when loading a built theme),
+`x`, `y`, `z`, `rotate`, `scale`, `lock`, `row`, `col`,
 `path`, `controlData`, `maxWidth`, `maxHeight`, `scaledWidthTo`, `scaledHeightTo`, `opacity`,
 `paths` (usually empty string), `soundFile` (usually empty string), `title` (usually empty
 string), `titleParam` (a JSON-string-encoded object with `FontFamily`/`FontSize`/etc.).
 **Key items never carry `w`/`h`** — unlike Background items (type 100), which carry `w`/`h`
 *and* `maxWidth`/`maxHeight` together. All boolean-looking fields (e.g. `lock`) are encoded
 as the strings `"0"`/`"1"`, not JSON `true`/`false`, consistent with the numeric-string
-convention noted above.
+convention noted above. **`lock` is `"1"` on every real key item examined (5/5 real theme
+files)** — always set `"lock":"1"` on key items to match; see §10 Open Item #9 for the
+current (not fully conclusive) evidence on this field's effect on device-side reload
+behavior.
+
+**Confirmed required `controlData` fields for a `keyboard`-type action** (base64-decoded
+tagged-value map, §5.2): `type` (`"keyboard"`), `description` (`"Keyboard"`),
+`parentDescription` (`"System input control"`), `iconPath`
+(`"/static/icon/dark/keyboard.png"`), `keycode`, `keyString`, `AISoundControlKeyword`
+(empty string). Omitting `description`/`parentDescription`/`iconPath`/`AISoundControlKeyword`
+(as `KeyActions.Keyboard` did before being fixed per §10 Item #10) produced a `controlData`
+blob with only 3 of the 7 real fields — confirmed to make ScreenKeyWindows itself lock up
+when loading the resulting theme file, independent of this client or the device.
+
+**Confirmed required key icon PNG asset format:** every real key icon PNG examined from a
+shipped vendor theme is exactly **128x128 pixels, RGB (no alpha channel), 8-bit depth** -
+the `scaledWidthTo`/`scaledHeightTo` JSON fields (128 in every sample) describe the
+*rendered* size but do not substitute for the asset itself already being that exact
+size/format. A structurally-correct key item (every JSON field present, `controlData`
+complete) whose icon asset was a different size or carried an alpha channel was confirmed
+to make ScreenKeyWindows itself lock up when loading the theme file (see §10 Item #10) -
+independent of any JSON-level correctness. `KeyItemBuilder.Icon`/`ThemeEditor.SetKeyIcon`
+now normalize any input image to this exact format automatically.
+
+**Animated key icons:** a key item can show a multi-frame animation instead of a static
+icon by leaving `path` empty and instead setting `paths` to a folder path (e.g.
+`/image/MK20/cache/pop-cat_1`) plus `frameDelays` as a comma-separated per-frame delay list
+in milliseconds (e.g. `"100,100"` for a 2-frame animation) - confirmed from a real
+user-created theme with a 2-frame GIF-derived icon (`customTheme5buttons.Theme`, updated
+version). Each frame is a separate PNG asset under that folder path (e.g. `frame_0.png`,
+`frame_1.png`), not a single embedded `.gif` file - this is a different mechanism from the
+type-114 Dynamic Image item's single embedded GIF asset (§7.1 above), even though both
+ultimately render an animation.
 
 ### 7.2 Key actions (`controlData`, base64 of a Tagged-Value Map)
 
@@ -603,6 +716,11 @@ Request, 48-byte payload (plain UTF-8, no length prefix):
 Confirmed from a real theme install (capture14.pcapng): uploading `可爱按键.Theme`
 (743,649 bytes, CRC-32 `3131160337`).
 
+**Confirmed sequencing (5/5 independent real upload sequences checked, zero exceptions):**
+`GET_DEVICE_THEME` request/reply, then the abort-transfer control message, then
+`FILE_START`. Every real upload examined sends a fresh theme-listing request immediately
+before starting the transfer.
+
 `FILE_START` request (90-byte payload — `{path: totalSize}`):
 ```
 4141353531323334204649584544434D44484541442000000000060000005800000086D75F53
@@ -743,9 +861,14 @@ picture vs. GIF vs. video — only a bigger/smaller asset entry inside the same 
 | 3 | `ControlFlow` action with actual configured steps | **U** — only an empty/never-configured instance observed |
 | 4 | Achievable telemetry push rate | **U** — not benchmarked |
 | 5 | Bulk-transfer resilience: whether the device rejects/retries on a corrupt chunk or dropped connection mid-transfer | **U** — a retried upload was observed in the confirming capture but the retry-trigger condition was not isolated |
-| 6 | Consequence of an under-specified Key (type 115) item JSON | **Diagnosed and re-tested, freeze recurred — root cause NOT the KeyItem JSON fields.** A synthesized theme's key items originally omitted `maxWidth`/`maxHeight`/`scaledWidthTo`/`scaledHeightTo`/`opacity`/`paths`/`soundFile`/`title`/`titleParam` (and carried a spurious `w`/`h`, which real key items never have), which correlated with `SET_DEVICE_RELOAD` hangs on two attempts. §7.1's field-set fix was applied and locally round-trip verified, then re-uploaded to real hardware a third time (after deleting the stale broken `test5.Theme` first) — **this attempt hung even earlier, during `FILE_END` of the upload itself** (previously the upload always completed and only the later reload hung), and this time the device stopped responding even to `FIND_DEVICE`/ping (previously it stayed ping-responsive while frozen). This is a *worse* and *different* failure mode than before, indicating the KeyItem field fix, while still correct per the confirmed real-theme JSON structure, is **not the (or not the only) root cause of the freeze**. Suspect candidates not yet ruled out: repeated upload/delete/re-upload cycles to the same theme name/path degrading on-device flash-management state; a timing/back-pressure issue in the bulk chunk transfer that only manifests intermittently; or an unrelated device-side fault unrelated to theme content. Device required a third physical power-cycle. **Recommendation: do not re-attempt hardware uploads of synthetic/test themes without first doing a byte-for-byte comparison of the exact wire bytes sent against a known-good captured upload (e.g. capture14) to rule out a transport-level discrepancy, and consider testing on a freshly power-cycled device without any prior delete/upload cycles in the same session.** |
+| 6 | Root cause of `FILE_END`/`SET_DEVICE_RELOAD` hangs on real hardware | **RESOLVED — confirmed root cause was NOT theme content, it was three transport/sequencing bugs in this client.** Exhaustive message-by-message, timestamp-by-timestamp analysis of every capture in `tools/Captures/` (14 files, ~4,900 decoded frames total) revealed three discrepancies between this client and the real ScreenKeyWindows host, all now fixed in `Mk20DeviceClient`/`SerialPortTransport`: **(a)** the real host always sends a standalone `"AA551234 Abort file transfer 123455AA"` control message immediately before every `FILE_START` and, separately, between `FILE_END` and `SET_DEVICE_RELOAD` (100% consistent across 34 real `FileStart` and 32 real `FileEnd`→reload instances checked) - this client never sent it at all; **(b)** the real host pipelines `FILE_END` → abort → `SET_DEVICE_RELOAD` back-to-back (1-7ms apart) without waiting for `FILE_END`'s reply first (also 100% consistent across every instance) - this client previously awaited `FILE_END`'s ack synchronously before ever building the reload request; **(c)** `SerialPortTransport` never asserted `DtrEnable`/`RtsEnable` (both default `false` in `System.IO.Ports.SerialPort`) and used the default 2048-byte `WriteBufferSize`, smaller than the 4096-byte bulk chunk size - both are common CDC-ACM pitfalls. Frame-encoding correctness was separately verified as byte-for-byte identical to real capture bytes (via `CaptureAnalyzer --emit-frame-hex`) before investigating transport-level causes, ruling out any payload/framing bug. After fixing all three, two consecutive full real-hardware uploads of the confirmed baseline `可爱按键.Theme` (743,649 bytes) succeeded end-to-end (upload ack + reload ack + correct CRC in the device's theme listing), plus a standalone reload of `defaultTheme.Theme` - device stayed fully responsive throughout, with zero freezes. See `Mk20Control.Protocol.Transport.WireLoggingTransport` (a live-capture substitute logging exact bytes written/read) for reproducing this analysis on a fresh test. |
+| 7 | A specific 1-page/5-key synthesized test theme reloads far slower than any real theme of similar or larger size | **Open, low severity.** After fixing Item 6, this exact same tiny (13,804-byte) synthesized theme uploads successfully and does NOT freeze the device, but its `SET_DEVICE_RELOAD` ack was not observed even after 60 seconds (vs. 1-16s for every real theme tested, including the 33MB `defaultTheme.Theme`). The device remained fully ping-responsive throughout and the upload's CRC verified correctly in the theme listing - this is a slow/uncompleted reload, not a hang. Not yet isolated to a specific structural cause (candidates: single-page-only structure, an unusual combination of item types not seen together in any real theme, or something about this specific background/key arrangement) - deprioritized since it no longer risks freezing the device. |
+| 8 | Deleting a theme while its `SET_DEVICE_RELOAD` may still be pending/unacknowledged leaves the device's render engine stuck | **CONFIRMED HAZARD - now guarded in code (`Mk20DeviceClient`, see §6.7).** After Item 7's theme timed out waiting for a reload ack, that theme file was deleted via `SET_DEVICE_DELETE_THEME` (which itself succeeded normally) while the device may have still been internally processing the prior reload. Afterward, the device continued responding normally to `FIND_DEVICE`/`GET_DEVICE_THEME`, but `SET_DEVICE_RELOAD` for ANY theme (including a previously-confirmed-good one) stopped being acknowledged, and the physical display appeared visually frozen - i.e. the freeze was isolated specifically to the render/reload subsystem, not the whole command processor. Only a physical power-cycle is confirmed to recover from this state. `DeleteThemeAsync` now tracks unconfirmed-reload paths and throws `InvalidOperationException` up front rather than sending anything if the target path's reload was never confirmed acknowledged; `ReloadThemeAsync`/`DeleteThemeAsync`/`UploadThemeFileAsync` are also now serialized against each other (never more than one in flight) matching the real host's observed behavior. |
+| 9 | Root cause of synthetic-theme reload problems (Item 7) | **RESOLVED (multi-part fix), plus a residual low-probability device-firmware hang now mitigated by retry logic. Fully validated: all 13 real vendor `.Theme` files uploaded successfully to fresh device paths.** Three distinct, independently-confirmed fixes were required, each found via direct byte/timestamp analysis of the real `.pcapng` captures (not prior text dumps or assumptions): **(a)** `lock` field - every real `KeyItem` has `"lock":"1"`; `KeyItemBuilder` now defaults to `true` (see §7.1). **(b)** Missing `GET_DEVICE_THEME` call before upload - 5/5 real upload sequences checked (`capture.pcapng`, `capture11.pcapng` x3, `capture14.pcapng`, `capture15.pcapng`, `capture16.pcapng`) send `GET_DEVICE_THEME` immediately before the abort+`FILE_START` pair; `UploadThemeFileAsync` now does this too. **(c)** Missing write backpressure - a precise byte/timestamp analysis (`tools/Captures/bulk_timing_analysis.py`, `analyze_wirelog.py`) found `SerialPortTransport.WriteAsync` previously returned as soon as `SerialPort.Write()` queued bytes into the OS/driver buffer, without confirming the device had actually received them (a 1MB+ file could be fully queued in under 200ms of wall-clock time - implausibly fast for genuine on-wire delivery). `WriteAsync` now drains `_port.BytesToWrite` to 0 before returning, providing real backpressure. **A residual, low-probability, non-deterministic device-firmware hang remains** even with all three fixes active: two vendor themes (`快捷键.Theme`, `AI.Theme`) each hit one `FILE_END` timeout followed by a full command-processor lockup (device stopped responding even to `FIND_DEVICE`) during this test campaign, not reproducible by file size or content (both files reloaded cleanly on an immediate retest after a power-cycle). **Directly confirmed via live testing:** this specific hang does NOT recover by closing/reopening the serial port or by waiting (tested 45s) - only a physical power-cycle recovers it, meaning it is a genuine device-firmware-side wedge, not a host/driver/session issue. Mitigation: `UploadThemeFileAsync` now retries the whole operation up to 3 times on a `FILE_END`/`SET_DEVICE_RELOAD` timeout, first verifying via `TryPingAsync` that the device is still alive before retrying (failing fast with a clear "physical power-cycle required" message if not, rather than retrying uselessly against a dead link) - confirmed working correctly on real hardware for both directions (once caught the device fully locked up and failed fast correctly; both times the SAME theme succeeded cleanly on the next attempt after a user power-cycle). Discovered and fixed a related concurrency bug while adding this: `Dispatch` previously stopped at the first (possibly already-timed-out) queued waiter for a command, which could silently starve every subsequent waiter for that command - now it skips completed entries. Covered by 2 new self-tests (`TestUploadRetriesOnceOnFileEndTimeout`, `TestUploadFailsFastWhenDeviceFullyLockedUp`), 14/14 total passing. **Final validation: all 13 real ScreenKeyWindows-shipped `.Theme` files** (`defaultTheme`, `PS`, `饮料`, `pixso`, `时尚按键`, `字母`, `海洋馆蜡笔小新`, `快捷键`, `可爱按键`, `AI`, `AE`, `机械按键`, `海边吹风` - sizes ranging 275KB to 33MB) **were uploaded to fresh device paths and confirmed working**, giving high confidence in the combined fix set for general use by other products built on this library. |
+| 10 | `ThemeEditor`/`KeyItemBuilder`-produced `.Theme` files caused ScreenKeyWindows itself (not just this client/the device) to lock up when loading them | **RESOLVED AND CONFIRMED ON THE VENDOR SOFTWARE.** Resolved via a genuine byte-for-byte diff against a real ScreenKeyWindows-created file, per the user's explicit demand ("customTheme7buttons.Theme is not byte identical to customTheme7buttonsSoftware.Theme"). After 5 rounds of field-level fixes (missing `itemName`; incomplete `KeyboardAction.controlData`; wrong icon PNG format/size; wrong asset path namespace/field order; missing page-level `"encoder"` array) still didn't resolve the lockup, a full byte-by-byte diff of the two files (not just the fields already checked) found **three more, purely mechanical serialization-format bugs** that had nothing to do with item/field content: **(a)** the 8-byte header gap between the Tagged-Value Map and the layout JSON is NOT arbitrary padding - it is 4 zero bytes followed by a big-endian uint32 equal to `(JSON byte length + 1)`, confirmed identical across every real file examined; this codec always wrote zero here. **(b)** the layout JSON itself is written 4-space indented with `\n` line endings and object keys in alphabetical order at every level, not the compact/insertion-ordered output `JsonObject.ToJsonString()` produces by default. **(c)** string values are escaped with `\"` (minimal escaping), not .NET's default `JavaScriptEncoder.Default` which produces `\u0022` for every quote character. All three fixed in `ThemeFileCodec.Encode`/`BuildLayoutJson`: the header now computes and writes the real length value; the JSON is re-parsed and recursively key-sorted before being written via `Utf8JsonWriter` with explicit 4-space/`\n`/`JavaScriptEncoder.UnsafeRelaxedJsonEscaping` options. After these three fixes, a full byte-diff against the genuine reference file showed only expected content differences remaining (different keycode/id/GUID values for the specific key/action chosen) - every structural/formatting byte, including the header length field, JSON indentation, key ordering, and string escaping, matched exactly. Covered by a new self-test (`TestHeaderJsonLengthField`). **CONFIRMED: the user successfully loaded the corrected `customTheme7buttons.Theme` in ScreenKeyWindows itself** ("at least now it loads :D") - this closes the loop definitively; the theme-building/editing API now produces files ScreenKeyWindows accepts, not just files this codec can decode. 16/16 self-tests passing. **Full fix history for this item (6 rounds total):** (1) `itemName` + `KeyboardAction.controlData` fields, (2) icon PNG format/size (`IconImageNormalizer`), (3) asset path namespace + `controlData` field order, (4) an architectural "clone a template key" attempt that was tried and explicitly reverted per user feedback, (5) the page-level `"encoder"` array, (6) the three serialization-format bugs (header length, JSON formatting, string escaping) found via the final full byte-diff. All fixes remain in place together. |
 
 ---
+
 
 
 ## 11. Reference Implementation Map

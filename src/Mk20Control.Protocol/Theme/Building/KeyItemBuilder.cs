@@ -19,9 +19,12 @@ public sealed class KeyItemBuilder
     private double _scaledWidthTo = 128;
     private double _scaledHeightTo = 128;
     private string? _iconAssetPath;
+    private string? _animatedFolderPath;
+    private string? _animatedFrameDelays;
     private Actions.KeyAction? _action;
     private string _title = "";
-    private bool _locked;
+    // Real key items always have "lock":"1"; default to locked to match.
+    private bool _locked = true;
 
     internal KeyItemBuilder(IThemeAssetRegistry owner, int row, int column, double canvasWidth, double canvasHeight)
     {
@@ -49,10 +52,32 @@ public sealed class KeyItemBuilder
         return this;
     }
 
-    /// <summary>Sets this key's icon by registering <paramref name="pngOrGifBytes"/> as a new theme asset.</summary>
+    /// <summary>Sets this key's icon by registering <paramref name="pngOrGifBytes"/> as a new theme asset. The image is automatically normalized to the confirmed real-hardware key icon format (128x128, RGB/no-alpha PNG) - callers do not need to pre-resize or flatten their own images.</summary>
     public KeyItemBuilder Icon(string suggestedFileName, byte[] pngOrGifBytes)
     {
-        _iconAssetPath = _owner.RegisterAsset(suggestedFileName, pngOrGifBytes);
+        _iconAssetPath = _owner.RegisterAsset(suggestedFileName, IconImageNormalizer.NormalizeToKeyIcon(pngOrGifBytes));
+        return this;
+    }
+
+    /// <summary>
+    /// Sets this key to show a multi-frame animation (e.g. from an animated GIF) instead of
+    /// a static icon - this makes the KEY ITSELF animated (still fully pressable/assignable
+    /// an action via <see cref="Action"/>), unlike <see cref="ThemePageBuilder.AddDynamicImage"/>
+    /// (type 114), which is a separate, non-interactive decorative image with no key
+    /// behavior. Confirmed real mechanism: each frame is registered as a separate PNG asset
+    /// under a folder path (e.g. "/image/MK20/cache/&lt;name&gt;/frame_0.png",
+    /// "frame_1.png", ...), with "paths" set to that folder and "frameDelays" set to a
+    /// comma-separated per-frame delay list in milliseconds - "path" is left empty (see
+    /// PROTOCOL_WAVESHARE_MK20.md §7.1). <paramref name="gifBytes"/> is decoded and its
+    /// frames re-encoded via <see cref="IconImageNormalizer"/> to the confirmed real icon
+    /// format (128x128, RGB PNG) automatically.
+    /// </summary>
+    public KeyItemBuilder AnimatedIcon(string suggestedFolderName, byte[] gifBytes)
+    {
+        var (folderPath, frameDelaysCsv) = IconImageNormalizer.RegisterAnimatedIcon(_owner, suggestedFolderName, gifBytes);
+        _iconAssetPath = null;
+        _animatedFolderPath = folderPath;
+        _animatedFrameDelays = frameDelaysCsv;
         return this;
     }
 
@@ -77,27 +102,42 @@ public sealed class KeyItemBuilder
         return this;
     }
 
-    /// <summary>Marks the key as locked in the editor (position-locked; does not affect device behavior). Real themes typically set this to true/"1".</summary>
+    /// <summary>Marks the key as locked/unlocked. Real key items always have "lock":"1"; defaults to locked to match.</summary>
     public KeyItemBuilder Locked(bool locked = true)
     {
         _locked = locked;
         return this;
     }
 
-    internal ThemeItem Build() => new KeyItem
+    internal ThemeItem Build()
     {
-        RawTypeCode = "115",
-        Id = _owner.AllocateItemId(),
-        X = _x,
-        Y = _y,
-        Z = _z,
-        Rotate = 0,
-        Scale = 1,
-        IsLocked = _locked,
-        Row = _row,
-        Column = _column,
-        IconAssetPath = _iconAssetPath,
-        Action = _action,
-        RawJson = ThemeItemSkeletons.KeyItem(_maxWidth, _maxHeight, _scaledWidthTo, _scaledHeightTo, _title),
-    };
+        string id = _owner.AllocateItemId();
+        return new KeyItem
+        {
+            RawTypeCode = "115",
+            Id = id,
+            // Confirmed via --dump-raw-json against real hardware themes: every real KeyItem
+            // has an "itemName" (e.g. "control1", "control2", ...) - previously omitted here,
+            // leaving newly-built/added keys without this field entirely (SetOrRemove strips
+            // a null value's key rather than emitting it empty).
+            ItemName = $"control{id}",
+            X = _x,
+            Y = _y,
+            Z = _z,
+            Rotate = 0,
+            Scale = 1,
+            IsLocked = _locked,
+            Row = _row,
+            Column = _column,
+            // For an animated key, "path" must stay "" (see ThemeItemSkeletons.KeyItem) and
+            // only "paths" (the folder) is set - IconAssetPath must NOT be populated here,
+            // since ThemeFileCodec.BuildItemJson uses it to overwrite "path" directly.
+            IconAssetPath = _iconAssetPath,
+            Action = _action,
+            RawJson = ThemeItemSkeletons.KeyItem(
+                _maxWidth, _maxHeight, _scaledWidthTo, _scaledHeightTo, _title,
+                paths: _animatedFolderPath ?? "",
+                frameDelays: _animatedFrameDelays),
+        };
+    }
 }

@@ -31,6 +31,14 @@ namespace Mk20Control.Protocol.Client;
 /// This type is not thread-safe for concurrent calls to the same operation kind beyond the
 /// FIFO request/reply correlation described in <see cref="SendRawCommandAsync"/>; serialize
 /// calls from a single logical caller (typical usage pattern for a device client).
+///
+/// Operation safeguards (added after a confirmed real-hardware freeze - see
+/// PROTOCOL_WAVESHARE_MK20.md §10 Open Item #8): <see cref="ReloadThemeAsync"/>,
+/// <see cref="DeleteThemeAsync"/>, and <see cref="UploadThemeFileAsync"/> are automatically
+/// serialized against each other (a second call simply waits for the first to fully finish
+/// rather than racing on the wire), and <see cref="DeleteThemeAsync"/> refuses to delete a
+/// theme whose reload was sent but never confirmed acknowledged - see
+/// <see cref="IsReloadPending"/>/<see cref="ClearPendingReloadState"/>.
 /// </summary>
 public sealed class Mk20DeviceClient : IAsyncDisposable
 {
@@ -40,6 +48,29 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
     private readonly DeviceFrameParser _parser = new();
     private readonly object _parserLock = new();
     private readonly ConcurrentDictionary<uint, ConcurrentQueue<TaskCompletionSource<DeviceFrame>>> _pendingByCommand = new();
+
+    /// <summary>
+    /// Serializes every theme-mutating operation (<see cref="ReloadThemeAsync"/>,
+    /// <see cref="DeleteThemeAsync"/>, <see cref="UploadThemeFileAsync"/>) so this client
+    /// never has more than one such operation in flight at a time, even if a caller invokes
+    /// them concurrently without awaiting - this is the "don't spam the device with
+    /// operations" safeguard: a second call simply waits for the first to fully finish
+    /// (success, protocol error, or timeout) before starting, matching how the real
+    /// ScreenKeyWindows host appears to behave (every real capture examined shows exactly
+    /// one theme operation in flight at a time; see PROTOCOL_WAVESHARE_MK20.md §10).
+    /// </summary>
+    private readonly SemaphoreSlim _themeOperationLock = new(1, 1);
+
+    /// <summary>
+    /// Device-side theme paths whose <see cref="ReloadThemeAsync"/> (or the equivalent
+    /// reload phase inside <see cref="UploadThemeFileAsync"/>) was sent but not yet confirmed
+    /// acknowledged - "not yet confirmed" includes a call that timed out, since a client-side
+    /// timeout does NOT prove the device gave up (it may still be processing). This is the
+    /// "wait for the device to ack, don't delete out from under it" safeguard: see
+    /// <see cref="DeleteThemeAsync"/>, which refuses to delete a path while it's in this set.
+    /// A path is removed only once its reload is positively confirmed acknowledged.
+    /// </summary>
+    private readonly ConcurrentDictionary<string, byte> _pendingReloadPaths = new();
 
     /// <summary>Command identifiers whose payload schema has been individually confirmed against real hardware traffic.</summary>
     private static readonly HashSet<CommandId> ConfirmedCommands = new()
@@ -217,10 +248,48 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
     public async Task ReloadThemeAsync(string deviceThemePath, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(deviceThemePath);
-        var waitTask = WaitForReplyAsync(CommandId.SetDeviceReload, timeout ?? _options.DefaultRequestTimeout, cancellationToken);
-        await SendRequestAsync(CommandId.SetDeviceReload, Encoding.UTF8.GetBytes(deviceThemePath), cancellationToken).ConfigureAwait(false);
-        await waitTask.ConfigureAwait(false); // confirms the device echoed the reload command back
-        _logger.LogInformation("Theme reload acknowledged for {Path}.", deviceThemePath);
+        await _themeOperationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            _pendingReloadPaths[deviceThemePath] = 0;
+            var waitTask = WaitForReplyAsync(CommandId.SetDeviceReload, timeout ?? _options.DefaultRequestTimeout, cancellationToken);
+            // NOTE: unlike the upload pipeline (UploadThemeFileAsync, which always precedes
+            // SET_DEVICE_RELOAD with an abort-transfer immediately after FILE_END), a *standalone*
+            // reload of an already-installed theme (no re-upload) was observed in the confirming
+            // capture WITHOUT any preceding abort-transfer message - so this method intentionally
+            // does not send one, matching that real-world sequencing exactly.
+            await SendRequestAsync(CommandId.SetDeviceReload, Encoding.UTF8.GetBytes(deviceThemePath), cancellationToken).ConfigureAwait(false);
+            await waitTask.ConfigureAwait(false); // confirms the device echoed the reload command back
+            _pendingReloadPaths.TryRemove(deviceThemePath, out _);
+            _logger.LogInformation("Theme reload acknowledged for {Path}.", deviceThemePath);
+        }
+        finally
+        {
+            _themeOperationLock.Release();
+        }
+    }
+
+    /// <summary>
+    /// True if <paramref name="deviceThemePath"/> has a reload that was sent but never
+    /// confirmed acknowledged (including one that timed out) - see
+    /// <see cref="_pendingReloadPaths"/> remarks. <see cref="DeleteThemeAsync"/> refuses to
+    /// delete such a path; call <see cref="ClearPendingReloadState"/> to override once you
+    /// have independently confirmed it is safe to do so (e.g. after power-cycling the device).
+    /// </summary>
+    public bool IsReloadPending(string deviceThemePath) => _pendingReloadPaths.ContainsKey(deviceThemePath);
+
+    /// <summary>
+    /// Clears the "pending reload" safeguard tracked for <paramref name="deviceThemePath"/>
+    /// (or every tracked path, if null) - see <see cref="_pendingReloadPaths"/> remarks. Only
+    /// call this once you have independently confirmed it's safe (e.g. the device was just
+    /// power-cycled, or a subsequent successful reload/ping proves it recovered) - this
+    /// safeguard exists specifically because a confirmed real-hardware hazard was observed
+    /// when it was bypassed (see PROTOCOL_WAVESHARE_MK20.md §10 Open Item #8).
+    /// </summary>
+    public void ClearPendingReloadState(string? deviceThemePath = null)
+    {
+        if (deviceThemePath is null) { _pendingReloadPaths.Clear(); return; }
+        _pendingReloadPaths.TryRemove(deviceThemePath, out _);
     }
 
     /// <summary>
@@ -230,47 +299,81 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
     /// an empty string value: {path: ""}. The device replies with a
     /// <see cref="Codecs.SimpleStringMapCodec"/> map {"res":"1"} on success; this method
     /// throws <see cref="Mk20ProtocolException"/> if "res" is not "1".
+    ///
+    /// SAFEGUARD (confirmed hazard on real hardware): this method throws
+    /// <see cref="InvalidOperationException"/> up front, before sending anything, if
+    /// <paramref name="deviceThemePath"/> has a reload that was sent but never confirmed
+    /// acknowledged (including one that timed out) - see <see cref="IsReloadPending"/>.
+    /// Deleting a theme while its reload may still be in flight was observed to leave the
+    /// device's render/reload subsystem stuck (it keeps responding normally to
+    /// <see cref="TryPingAsync"/>/<see cref="GetInstalledThemesAsync"/>, but every subsequent
+    /// <see cref="ReloadThemeAsync"/> call - even for a different, previously-working theme -
+    /// stops being acknowledged, and the physical display appears frozen). Only a physical
+    /// power-cycle was confirmed to recover from that state; see
+    /// PROTOCOL_WAVESHARE_MK20.md §10 Open Item #8. Call
+    /// <see cref="ClearPendingReloadState"/> first if you have independently confirmed it's
+    /// safe to proceed anyway.
     /// </summary>
     public async Task DeleteThemeAsync(string deviceThemePath, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(deviceThemePath);
-        byte[] payload = SimpleStringMapCodec.Encode(new[] { new KeyValuePair<string, string>(deviceThemePath, "") });
-
-        var waitTask = WaitForReplyAsync(CommandId.SetDeviceDeleteTheme, timeout ?? _options.DefaultRequestTimeout, cancellationToken);
-        await SendRequestAsync(CommandId.SetDeviceDeleteTheme, payload, cancellationToken).ConfigureAwait(false);
-        DeviceFrame frame = await waitTask.ConfigureAwait(false);
-
-        var fields = SimpleStringMapCodec.Decode(frame.Payload);
-        string? result = fields.FirstOrDefault(kv => kv.Key == "res").Value;
-        if (result != "1")
+        if (_pendingReloadPaths.ContainsKey(deviceThemePath))
         {
-            throw new Mk20ProtocolException(
-                $"Theme deletion for '{deviceThemePath}' was not acknowledged as successful (device replied res={result ?? "<missing>"}).");
+            throw new InvalidOperationException(
+                $"Refusing to delete '{deviceThemePath}': its SET_DEVICE_RELOAD was sent but never confirmed " +
+                "acknowledged (this includes a call that timed out - a client-side timeout does not prove the " +
+                "device gave up on it). Deleting a theme while its reload may still be in flight was confirmed " +
+                "on real hardware to leave the device's render subsystem stuck, requiring a physical power-cycle " +
+                "to recover. Call ClearPendingReloadState(deviceThemePath) first if you have independently " +
+                "confirmed it's safe to proceed (e.g. the device was just power-cycled).");
         }
-        _logger.LogInformation("Theme deleted: {Path}.", deviceThemePath);
+
+        await _themeOperationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            byte[] payload = SimpleStringMapCodec.Encode(new[] { new KeyValuePair<string, string>(deviceThemePath, "") });
+
+            var waitTask = WaitForReplyAsync(CommandId.SetDeviceDeleteTheme, timeout ?? _options.DefaultRequestTimeout, cancellationToken);
+            await SendRequestAsync(CommandId.SetDeviceDeleteTheme, payload, cancellationToken).ConfigureAwait(false);
+            DeviceFrame frame = await waitTask.ConfigureAwait(false);
+
+            var fields = SimpleStringMapCodec.Decode(frame.Payload);
+            string? result = fields.FirstOrDefault(kv => kv.Key == "res").Value;
+            if (result != "1")
+            {
+                throw new Mk20ProtocolException(
+                    $"Theme deletion for '{deviceThemePath}' was not acknowledged as successful (device replied res={result ?? "<missing>"}).");
+            }
+            _logger.LogInformation("Theme deleted: {Path}.", deviceThemePath);
+        }
+        finally
+        {
+            _themeOperationLock.Release();
+        }
     }
 
     /// <summary>
     /// CONFIRMED: uploads theme file bytes to the device and activates it. This is a
-    /// three-step sequence, fully confirmed by capturing a real theme install
-    /// (capture14.pcapng) and byte-for-byte reconstructing the transferred file from the
-    /// capture, verifying it against both the original file's bytes and the CRC-32 the
-    /// device echoed back in the FILE_END reply:
+    /// three-step sequence, fully confirmed by capturing real theme installs and
+    /// byte-for-byte reconstructing the transferred file from the capture, verifying it
+    /// against both the original file's bytes and the CRC-32 the device echoed back in the
+    /// FILE_END reply:
     ///
-    ///   1. FILE_START request: a Simple String Map with one entry {path: totalSize}.
+    ///   1. FILE_START request: a Simple String Map with one entry {path: totalSize}, preceded
+    ///      by an "Abort file transfer" control message.
     ///   2. The raw file bytes are written directly to the transport in fixed-size 4096-byte
     ///      chunks (a final shorter chunk carries the remainder) - CONFIRMED to carry NO
     ///      additional per-chunk framing/header of any kind; it is exactly the file's bytes,
     ///      split at 4096-byte boundaries. There is no chunk acknowledgment observed between
     ///      chunks (they are written back-to-back).
     ///   3. FILE_END request: a Simple String Map with one entry {path: crc32AsDecimalText}.
+    ///   4. Once FILE_END's reply confirms the write succeeded: another "Abort file transfer"
+    ///      control message, then a SET_DEVICE_RELOAD request for the same path.
     ///
     /// The device replies to FILE_START (empty payload) and FILE_END ({"res":"1","fileName":path})
     /// as confirmed in <see cref="CommandId.FileStart"/>/<see cref="CommandId.FileEnd"/>, but
     /// this method does not require the FILE_START reply before starting the bulk write
-    /// (matching the timing observed in the confirming capture). After a successful FILE_END
-    /// reply, this method calls <see cref="ReloadThemeAsync"/> to activate the newly uploaded
-    /// theme, matching the observed real sequence.
+    /// (matching the timing observed in the confirming capture).
     /// </summary>
     /// <param name="deviceThemePath">The device-side path to store/activate the theme at, e.g. "/data/theme/MK20/&lt;name&gt;/&lt;name&gt;.Theme".</param>
     /// <param name="themeFileBytes">The complete .Theme file bytes (see <c>Mk20Control.Protocol.Codecs.ThemeFileCodec</c> to build one).</param>
@@ -280,41 +383,111 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
         ArgumentException.ThrowIfNullOrWhiteSpace(deviceThemePath);
         ArgumentNullException.ThrowIfNull(themeFileBytes);
 
-        const int chunkSize = 4096;
-        uint crc = Crc32.Compute(themeFileBytes);
-        TimeSpan effectiveTimeout = timeout ?? _options.DefaultRequestTimeout;
-
-        _logger.LogInformation("Uploading theme {Path} ({Length} bytes, crc32={Crc}).", deviceThemePath, themeFileBytes.Length, crc);
-
-        byte[] fileStartPayload = SimpleStringMapCodec.Encode(
-            new[] { new KeyValuePair<string, string>(deviceThemePath, themeFileBytes.Length.ToString()) });
-        await SendRequestAsync(CommandId.FileStart, fileStartPayload, cancellationToken).ConfigureAwait(false);
-
-        if (!_transport.IsOpen)
-            throw new InvalidOperationException("Cannot upload a theme file: the client is not connected.");
-
-        for (int offset = 0; offset < themeFileBytes.Length; offset += chunkSize)
+        if (_pendingReloadPaths.ContainsKey(deviceThemePath))
         {
-            int length = Math.Min(chunkSize, themeFileBytes.Length - offset);
-            await _transport.WriteAsync(themeFileBytes.AsMemory(offset, length), cancellationToken).ConfigureAwait(false);
+            _logger.LogWarning(
+                "Re-uploading '{Path}' while its previous SET_DEVICE_RELOAD is still unconfirmed - proceeding " +
+                "(unlike DeleteThemeAsync, re-uploading/re-activating the same theme is not known to be hazardous), " +
+                "but if the device is unresponsive consider verifying/power-cycling first.", deviceThemePath);
         }
 
-        byte[] fileEndPayload = SimpleStringMapCodec.Encode(
-            new[] { new KeyValuePair<string, string>(deviceThemePath, crc.ToString()) });
-        var waitTask = WaitForReplyAsync(CommandId.FileEnd, effectiveTimeout, cancellationToken);
-        await SendRequestAsync(CommandId.FileEnd, fileEndPayload, cancellationToken).ConfigureAwait(false);
-        DeviceFrame frame = await waitTask.ConfigureAwait(false);
-
-        var fields = SimpleStringMapCodec.Decode(frame.Payload);
-        string? result = fields.FirstOrDefault(kv => kv.Key == "res").Value;
-        if (result != "1")
+        const int maxAttempts = 3;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
         {
-            throw new Mk20ProtocolException(
-                $"Theme upload for '{deviceThemePath}' was not acknowledged as successful (device replied res={result ?? "<missing>"}).");
+            try
+            {
+                await UploadThemeFileAttemptAsync(deviceThemePath, themeFileBytes, timeout, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+            catch (Mk20TimeoutException ex) when (attempt < maxAttempts)
+            {
+                // Confirmed on real hardware (PROTOCOL_WAVESHARE_MK20.md §10 Open Item #9):
+                // FILE_END/SET_DEVICE_RELOAD occasionally never gets acknowledged even for a
+                // byte-identical transfer that succeeds moments later - a low-probability,
+                // non-deterministic device-firmware condition, not tied to file size or
+                // content. A same-session retry (without power-cycling) has been directly
+                // confirmed NOT to help once the device's whole command processor has locked
+                // up (FIND_DEVICE itself stops replying), so before retrying we first confirm
+                // the device is still alive; if it isn't, we fail fast with a clear message
+                // instead of silently retrying against a dead link.
+                _logger.LogWarning(ex, "Upload attempt {Attempt}/{Max} for {Path} timed out; checking device health before retrying.", attempt, maxAttempts, deviceThemePath);
+                DeviceIdentity? identity = await TryPingAsync(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false);
+                if (identity is null)
+                {
+                    throw new Mk20TimeoutException(
+                        $"Upload for '{deviceThemePath}' timed out and the device is no longer responding to FIND_DEVICE " +
+                        "(the whole command processor appears locked up, not just the reload path) - a physical power-cycle " +
+                        "is required before any further attempt will succeed.");
+                }
+                _pendingReloadPaths.TryRemove(deviceThemePath, out _);
+            }
         }
+    }
 
-        _logger.LogInformation("Theme upload acknowledged for {Path}; activating.", deviceThemePath);
-        await ReloadThemeAsync(deviceThemePath, effectiveTimeout, cancellationToken).ConfigureAwait(false);
+    private async Task UploadThemeFileAttemptAsync(string deviceThemePath, byte[] themeFileBytes, TimeSpan? timeout, CancellationToken cancellationToken)
+    {
+        await _themeOperationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            const int chunkSize = 4096;
+            uint crc = Crc32.Compute(themeFileBytes);
+            TimeSpan effectiveTimeout = timeout ?? _options.DefaultRequestTimeout;
+
+            _logger.LogInformation("Uploading theme {Path} ({Length} bytes, crc32={Crc}).", deviceThemePath, themeFileBytes.Length, crc);
+
+            byte[] fileStartPayload = SimpleStringMapCodec.Encode(
+                new[] { new KeyValuePair<string, string>(deviceThemePath, themeFileBytes.Length.ToString()) });
+            // Confirmed in every real capture examined (capture, capture11, capture14,
+            // capture15, capture16 - 5/5): the host sends GET_DEVICE_THEME immediately before
+            // the abort+FILE_START pair that starts an upload.
+            await GetInstalledThemesAsync(effectiveTimeout, cancellationToken).ConfigureAwait(false);
+            // The host sends one "Abort file transfer" control message immediately before
+            // FILE_START, resetting the device's file-transfer state machine before a new
+            // upload. See SendAbortFileTransferAsync remarks.
+            await SendAbortFileTransferAsync(cancellationToken).ConfigureAwait(false);
+            await SendRequestAsync(CommandId.FileStart, fileStartPayload, cancellationToken).ConfigureAwait(false);
+
+            if (!_transport.IsOpen)
+                throw new InvalidOperationException("Cannot upload a theme file: the client is not connected.");
+
+            for (int offset = 0; offset < themeFileBytes.Length; offset += chunkSize)
+            {
+                int length = Math.Min(chunkSize, themeFileBytes.Length - offset);
+                await _transport.WriteAsync(themeFileBytes.AsMemory(offset, length), cancellationToken).ConfigureAwait(false);
+            }
+
+            byte[] fileEndPayload = SimpleStringMapCodec.Encode(
+                new[] { new KeyValuePair<string, string>(deviceThemePath, crc.ToString()) });
+
+            var fileEndWaitTask = WaitForReplyAsync(CommandId.FileEnd, effectiveTimeout, cancellationToken);
+            await SendRequestAsync(CommandId.FileEnd, fileEndPayload, cancellationToken).ConfigureAwait(false);
+            DeviceFrame frame = await fileEndWaitTask.ConfigureAwait(false);
+
+            var fields = SimpleStringMapCodec.Decode(frame.Payload);
+            string? result = fields.FirstOrDefault(kv => kv.Key == "res").Value;
+            if (result != "1")
+            {
+                throw new Mk20ProtocolException(
+                    $"Theme upload for '{deviceThemePath}' was not acknowledged as successful (device replied res={result ?? "<missing>"}).");
+            }
+
+            _logger.LogInformation("Theme upload acknowledged for {Path}; activating.", deviceThemePath);
+
+            // The device replies to FILE_END before the file is actually reloadable, so only
+            // send SET_DEVICE_RELOAD once FILE_END's reply confirms the write succeeded -
+            // preceded by the same abort-transfer control message sent before FILE_START.
+            _pendingReloadPaths[deviceThemePath] = 0;
+            var reloadWaitTask = WaitForReplyAsync(CommandId.SetDeviceReload, effectiveTimeout, cancellationToken);
+            await SendAbortFileTransferAsync(cancellationToken).ConfigureAwait(false);
+            await SendRequestAsync(CommandId.SetDeviceReload, Encoding.UTF8.GetBytes(deviceThemePath), cancellationToken).ConfigureAwait(false);
+            await reloadWaitTask.ConfigureAwait(false); // confirms the device echoed the reload command back
+            _pendingReloadPaths.TryRemove(deviceThemePath, out _);
+            _logger.LogInformation("Theme reload acknowledged for {Path}.", deviceThemePath);
+        }
+        finally
+        {
+            _themeOperationLock.Release();
+        }
     }
 
     /// <summary>
@@ -367,6 +540,25 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
         var frame = DeviceFrame.CreateRequest((uint)command, payload);
         _logger.LogDebug("Sending command {CommandId} with {PayloadLength} byte(s) of payload.", command, payload.Length);
         await _transport.WriteAsync(frame.Encode(), cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// CONFIRMED: sends the standalone "Abort file transfer" control message (the fixed
+    /// ASCII literal <see cref="DeviceFrameHeader.AbortTransferText"/>, no length prefix or
+    /// checksum - not a normal command frame). The real host sends exactly one of these
+    /// immediately before every <see cref="CommandId.FileStart"/> and every
+    /// <see cref="CommandId.SetDeviceReload"/> request, resetting the device's
+    /// file-transfer/reload state machine before starting a new operation. The device never
+    /// acknowledges this message (it carries no reply), so this method returns as soon as
+    /// the bytes are written.
+    /// </summary>
+    public async Task SendAbortFileTransferAsync(CancellationToken cancellationToken = default)
+    {
+        if (!_transport.IsOpen)
+            throw new InvalidOperationException("Cannot send a command: the client is not connected. Call ConnectAsync first.");
+
+        _logger.LogDebug("Sending 'Abort file transfer' control message.");
+        await _transport.WriteAsync(DeviceFrameHeader.AbortTransferBytes, cancellationToken).ConfigureAwait(false);
     }
 
     private Task<DeviceFrame> WaitForReplyAsync(CommandId command, TimeSpan timeout, CancellationToken cancellationToken)
@@ -428,10 +620,17 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
             frame.PacketType, frame.CommandId, frame.Payload.Length);
 
         if (frame.PacketType == (uint)Model.PacketType.AckReply &&
-            _pendingByCommand.TryGetValue(frame.CommandId, out var queue) &&
-            queue.TryDequeue(out var pending))
+            _pendingByCommand.TryGetValue(frame.CommandId, out var queue))
         {
-            pending.TrySetResult(frame);
+            // Skip any already-completed waiters (e.g. ones that already timed out) rather
+            // than stopping at the first entry - a timed-out TaskCompletionSource left in the
+            // queue would otherwise silently "consume" this reply and starve every subsequent
+            // waiter for the same command, which is exactly the bug a retry-after-timeout
+            // (see UploadThemeFileAsync) would trigger.
+            while (queue.TryDequeue(out var pending))
+            {
+                if (pending.TrySetResult(frame)) break;
+            }
         }
 
         if (frame.CommandId == (uint)CommandId.DeviceProactiveEscalationCommand)

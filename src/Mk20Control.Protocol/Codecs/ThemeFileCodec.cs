@@ -65,7 +65,12 @@ public static class ThemeFileCodec
 
         byte[]? keyMacro = header.TryGetValue("keyMacro", out var km) && !km.IsNull ? km.AsByteArray : null;
 
-        // Skip the 8 bytes of reserved/unclear-purpose header padding.
+        // 8-byte field: 4 zero bytes followed by a big-endian uint32 equal to
+        // (JSON byte length + 1) - CONFIRMED via direct byte comparison against multiple
+        // real theme files (a genuine ScreenKeyWindows-created reference file and a minimal
+        // baseline). Not used for parsing here (the balanced-brace scan below is a correct,
+        // simpler way to find the JSON's end regardless of this field), but Encode() writes
+        // the correct value to match real files exactly - see PROTOCOL_WAVESHARE_MK20.md §7.
         const int reservedGapLength = 8;
         if (pos + reservedGapLength > fileBytes.Length)
             throw new InvalidDataException("File is truncated: missing the 8-byte header gap after the theme header map.");
@@ -129,6 +134,7 @@ public static class ThemeFileCodec
     {
         var canvas = pageEl.TryGetProperty("canvas", out var canvasEl) ? DecodeCanvas(canvasEl) : new ThemeCanvas();
         string? pageName = pageEl.TryGetProperty("pageName", out var pn) ? pn.GetString() : null;
+        JsonElement? encoder = pageEl.TryGetProperty("encoder", out var encEl) ? encEl.Clone() : null;
 
         var items = new List<ThemeItem>();
         if (pageEl.TryGetProperty("items", out var itemsEl) && itemsEl.ValueKind == JsonValueKind.Array)
@@ -139,7 +145,7 @@ public static class ThemeFileCodec
             }
         }
 
-        return new ThemePage { PageName = pageName, Canvas = canvas, Items = items };
+        return new ThemePage { PageName = pageName, Canvas = canvas, Items = items, Encoder = encoder };
     }
 
     private static ThemeCanvas DecodeCanvas(JsonElement canvasEl) => new()
@@ -412,12 +418,23 @@ public static class ThemeFileCodec
         };
         VariantMapCodec.WriteMap(stream, header);
 
-        // 8 bytes of reserved/unclear-purpose header padding - written as zero, matching
-        // every real theme file observed so far.
-        stream.Write(new byte[8]);
-
         string layoutJson = BuildLayoutJson(theme);
-        stream.Write(Encoding.UTF8.GetBytes(layoutJson));
+        byte[] layoutJsonBytes = Encoding.UTF8.GetBytes(layoutJson);
+
+        // Confirmed via direct byte comparison against multiple real theme files (including
+        // a genuine ScreenKeyWindows-created reference file, customTheme7buttonsSoftware.Theme,
+        // and a minimal empty.Theme baseline): this 8-byte field is NOT arbitrary padding -
+        // it is 4 zero bytes followed by a big-endian uint32 equal to (JSON byte length + 1).
+        // Every real file examined matches this exactly (e.g. an 11,626-byte JSON section is
+        // followed by the big-endian value 11627). Previously written as all zeros, which -
+        // while tolerated by this codec's own balanced-brace JSON-end scanning on decode -
+        // does not match any real file and was one contributing factor in ScreenKeyWindows
+        // itself failing to load an Encode()-produced theme file (see PROTOCOL_WAVESHARE_MK20.md
+        // §10 Item #10).
+        stream.Write(new byte[4]);
+        WriteUInt32BigEndian(stream, (uint)(layoutJsonBytes.Length + 1));
+
+        stream.Write(layoutJsonBytes);
         stream.WriteByte(HeaderReservedByte);
 
         WriteUInt32BigEndian(stream, (uint)theme.Assets.Count);
@@ -441,7 +458,51 @@ public static class ThemeFileCodec
             },
             ["pages"] = new JsonArray(theme.Pages.Select(p => (JsonNode)BuildPageJson(p)).ToArray()),
         };
-        return root.ToJsonString();
+        // Confirmed via direct byte comparison against real theme files (a genuine
+        // ScreenKeyWindows-created reference file and a minimal baseline, empty.Theme): the
+        // real JSON is written 4-space indented with object keys in alphabetical order at
+        // every level - not compact, insertion-ordered JSON as this codec previously
+        // produced. Matched here for maximum fidelity with real files. Re-parsed into a
+        // fresh JsonDocument first since JsonNode instances cannot be reparented into a new
+        // tree while still attached to their original parent.
+        using var doc = JsonDocument.Parse(root.ToJsonString());
+        JsonNode sortedRoot = SortObjectKeysRecursively(doc.RootElement);
+        // Confirmed via direct byte comparison: real files use 4-space indentation, Unix-
+        // style \n line endings, and minimal string escaping (\" not \u0022) - not .NET's
+        // defaults (\r\n, and JavaScriptEncoder.Default which escapes more characters than
+        // strictly necessary, e.g. every '"') - write via Utf8JsonWriter directly with a
+        // relaxed encoder for full control over all three.
+        using var ms = new MemoryStream();
+        var writerOptions = new JsonWriterOptions
+        {
+            Indented = true,
+            IndentCharacter = ' ',
+            IndentSize = 4,
+            NewLine = "\n",
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        };
+        using (var writer = new Utf8JsonWriter(ms, writerOptions))
+            sortedRoot.WriteTo(writer);
+        return Encoding.UTF8.GetString(ms.ToArray());
+    }
+
+    private static JsonNode SortObjectKeysRecursively(JsonElement element)
+    {
+        switch (element.ValueKind)
+        {
+            case JsonValueKind.Object:
+                var obj = new JsonObject();
+                foreach (var prop in element.EnumerateObject().OrderBy(p => p.Name, StringComparer.Ordinal))
+                    obj[prop.Name] = SortObjectKeysRecursively(prop.Value);
+                return obj;
+            case JsonValueKind.Array:
+                var arr = new JsonArray();
+                foreach (var item in element.EnumerateArray())
+                    arr.Add(SortObjectKeysRecursively(item));
+                return arr;
+            default:
+                return JsonNode.Parse(element.GetRawText())!;
+        }
     }
 
     private static JsonObject BuildPageJson(ThemePage page)
@@ -456,8 +517,18 @@ public static class ThemeFileCodec
         var obj = new JsonObject
         {
             ["canvas"] = canvas,
-            ["items"] = new JsonArray(page.Items.Select(i => (JsonNode)BuildItemJson(i)).ToArray()),
         };
+        // Confirmed present on every real top-level/main-screen theme file examined (absent
+        // only from secondary/sub-page theme files) - preserved from the source page if this
+        // page was decoded from a real file, or defaulted to the confirmed real fixed value
+        // (two encoder rotation entries, row 103/104, both with keycode/keyString unset) for
+        // a brand-new page built via ThemeBuilder, where no source page exists to copy it
+        // from. See PROTOCOL_WAVESHARE_MK20.md §10 Item #10 - its complete absence was
+        // confirmed to make ScreenKeyWindows itself lock up when loading the theme file.
+        obj["encoder"] = page.Encoder is { } enc
+            ? JsonNode.Parse(enc.GetRawText())
+            : JsonNode.Parse("""[{"col":0,"keyString":"","keycode":0,"row":103},{"col":0,"keyString":"","keycode":0,"row":104}]""");
+        obj["items"] = new JsonArray(page.Items.Select(i => (JsonNode)BuildItemJson(i)).ToArray());
         if (page.PageName is not null) obj["pageName"] = page.PageName;
         return obj;
     }
@@ -554,6 +625,28 @@ public static class ThemeFileCodec
     {
         ArgumentNullException.ThrowIfNull(action);
 
+        // Confirmed via a real ScreenKeyWindows-created reference theme
+        // (customTheme7buttonsSoftware.Theme): a real KeyboardAction's controlData map has
+        // fields in this exact order: type, parentDescription, keycode, keyString, iconPath,
+        // description, AISoundControlKeyword. Field order should not matter for a proper
+        // tagged-value map parser, but is matched exactly here for maximum fidelity with a
+        // known-working reference file, since the actual parser's strictness is unconfirmed.
+        if (action is KeyboardAction kbd)
+        {
+            var kbdFields = new Dictionary<string, TaggedValue>
+            {
+                ["type"] = TaggedValue.Of(action.RawType),
+            };
+            SetIfNotNull(kbdFields, "parentDescription", action.ParentDescription);
+            kbdFields["keycode"] = TaggedValue.Of(kbd.Keycode);
+            SetIfNotNull(kbdFields, "keyString", kbd.KeyLabel);
+            SetIfNotNull(kbdFields, "iconPath", action.IconPath);
+            SetIfNotNull(kbdFields, "description", action.Description);
+            foreach (var (k, v) in action.RawFields)
+                if (!kbdFields.ContainsKey(k)) kbdFields[k] = v;
+            return VariantMapCodec.EncodeMap(kbdFields);
+        }
+
         // Start from the action's original decoded fields so any unmodeled fields survive,
         // then overwrite every field this library models.
         var fields = new Dictionary<string, TaggedValue>(action.RawFields)
@@ -566,10 +659,6 @@ public static class ThemeFileCodec
 
         switch (action)
         {
-            case KeyboardAction k:
-                fields["keycode"] = TaggedValue.Of(k.Keycode);
-                SetIfNotNull(fields, "keyString", k.KeyLabel);
-                break;
             case OpenWebAction w:
                 fields["Url"] = TaggedValue.Of(w.Url);
                 break;
