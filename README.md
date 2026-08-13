@@ -7,7 +7,10 @@ derived entirely from live USB capture of the vendor ScreenKeyWindows app and di
 interrogation of physical hardware (not from static disassembly or the official wiki's
 guesses). This README covers build/usage instructions and additional narrative detail on
 how each protocol fact was derived; the datasheet is the single source of truth for the
-wire format itself.
+wire format itself. If you want to **consume `Mk20Control.Protocol` as a library** from
+another .NET project (e.g. a SimHub plugin or a custom button-box controller), see
+[`Mk20Control.Protocol.API.md`](./Mk20Control.Protocol.API.md) - a consumer-facing API
+reference with runnable examples for every public entry point.
 
 This is **experimentation code**, not a polished production client. A few details (some
 command IDs' payload schemas, achievable telemetry push rate) remain unconfirmed - see the

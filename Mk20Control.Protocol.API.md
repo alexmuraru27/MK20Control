@@ -8,8 +8,10 @@ programmatically from any .NET application (e.g. a SimHub plugin, a custom butto
 controller, or any app that wants to reflect its own state on the device's buttons).
 
 For the underlying wire protocol and file format specification, see
-`PROTOCOL_WAVESHARE_MK20.md`. This document covers only the library's public API surface
-and how to use it.
+[`PROTOCOL_WAVESHARE_MK20.md`](./PROTOCOL_WAVESHARE_MK20.md). For build/run instructions,
+project layout, and the full derivation history behind every confirmed protocol fact, see
+[`README.md`](./README.md). This document covers only the library's public API surface and
+how to use it.
 
 ---
 
@@ -142,10 +144,18 @@ await client.PushSystemDataAsync(new Dictionary<string, string>
     ["GPU Temperature"] = "61℃",
 });
 ```
-Key names are theme-defined (bound via `system_data_name` in the theme's JSON) — push
-whatever keys the currently loaded theme declares via its `deviceRequestSystemData`
-contract (sent automatically after every `SET_DEVICE_RELOAD`). Most integrations simply
-push their own known key set on a timer.
+Key names are theme-defined (bound via `system_data_name` in the theme's JSON, set through
+each widget builder's `.BoundTo(...)` — see §5.5) — push whatever keys the currently
+loaded theme declares via its `deviceRequestSystemData` contract (sent automatically after
+every `SET_DEVICE_RELOAD`). There is no fixed/reserved key set: any string you bind a
+widget to in the theme is a valid key to push, including custom ones like `"Speed"` or
+`"LapTime"`. Most integrations simply push their own known key set on a timer.
+
+Confirmed real-hardware convention: values are pushed as **pre-formatted display
+strings**, not bare numbers — even for a widget bound with a numeric `min`/`max` range
+(e.g. `"22%"`, `"61℃"`, `"20 GB"`). The device/renderer parses the leading numeric portion
+for gauge fill level and displays the whole string as text; a non-numeric string on a
+numeric-bound gauge does not error, it is simply not usable as a fill percentage.
 
 ### Operational safety (built-in)
 
@@ -337,6 +347,80 @@ image survives the crop (e.g. keep the top of a GIF visible instead of its cente
 only affects which source pixels are kept; it does not change the item's on-device
 x/y/w/h rectangle. Animated GIF sources keep their frame count/delays/loop count.
 
+### Widgets — gauges, text, and clocks
+
+Beyond keys and backgrounds, a page can carry any number of display widgets — progress
+bars, gauges, text, and clock fields — each optionally data-bound via `.BoundTo(...)` and
+updated at runtime with `PushSystemDataAsync` (§3). Builders live in
+`Mk20Control.Protocol.Theme.Building.Widgets`; resulting item types in
+`Mk20Control.Protocol.Theme.Items.Widgets`.
+
+| Widget | `ThemePageBuilder` method | Item type | Key configuration methods |
+|---|---|---|---|
+| Progress bar | `.AddProgressBar(configure)` | 102 | `.At(x, y, w, h, z=1)`, `.BoundTo(name, min=0, max=100)`, `.Colors(front, back, border, borderWidth=2, cornerRadius=5)` |
+| Linear gauge | `.AddLinearGauge(configure)` | 103 | `.At(x, y, w, h, z=1)`, `.BoundTo(name, min, max)`, `.Colors(front, back, border, borderWidth=2)` |
+| Radial gauge | `.AddRadialGauge(configure)` | 109 | `.At(x, y, z=1, scale=0.5)`, `.BoundTo(name, min, max)`, `.AngleRange(minDeg=225, maxDeg=315)`, `.Gradient(c1, c2?, c3?)`, `.Direction(clockwise=true)` |
+| Circular gauge | `.AddCircularGauge(configure)` | 101 | `.At(x, y, z=1)`, `.BoundTo(name, min, max)`, `.Colors(front, back)`, `.Geometry(margin=20, radius=100)` |
+| Segmented circular gauge | `.AddSegmentedCircularGauge(configure)` | 104 | Same as circular gauge (identical JSON shape; renders as a segmented/notched ring) |
+| Light-shadow gauge | `.AddLightShadowGauge(configure)` | 110 | `.At(x, y, z=1)`, `.BoundTo(name, min, max)`, `.Colors(back, arc, arcWidth=6)`, `.Geometry(radius=50, clockwise=true, displayDirection=1)`, `.LightShadow(color, lighter=100, position=80)` |
+| Text | `.AddText(configure)` | 113 | `.At(x, y, z=1)`, `.Text(string)` or `.BoundTo(name)`, `.Font(descriptor, scale=1)`, `.Color(rgba)` |
+| Multiline text | `.AddMultilineText(configure)` | 116 | `.At(x, y, w=200, h=100, z=1)`, `.Text(...)`/`.BoundTo(name)`, `.Font(descriptor)`, `.Color(rgba)` |
+| Shadow text | `.AddShadowText(configure)` | 117 | `.At(x, y, z=1)`, `.Text(...)`/`.BoundTo(name)`, `.Font(descriptor)`, `.Color(rgba)`, `.Border(rgba, width=5)`, `.Shadow(rgba, size=10)` |
+| Digital clock field | `.AddDigitalClockField(configure)` | 111 | `.At(x, y, w=128, h=128, z=1)`, `.Field("hour"\|"minute"\|"second", displayDigits=2)`, `.Font(descriptor)`, `.Colors(front, back, border)` |
+
+Colors are `"r=<0-255>,g=<0-255>,b=<0-255>,a=<0-255>"` strings throughout. Font descriptors
+follow the confirmed real format `"family,size,-1,5,weight,0,0,0,0,0[,style]"` (e.g.
+`"Microsoft YaHei,20,-1,5,50,0,0,0,0,0"`).
+
+**The digital clock is host-driven, not device-RTC-driven.** Confirmed via a real capture
+(`tools/Captures/capture17_multiple_theme_set.pcapng`): ScreenKeyWindows pushes `hour`,
+`minute`, and `second` through `SEND_SYSTEM_DATA_TO_DEVICE` once per second, exactly like
+any other telemetry value — the device does not keep its own clock. A clock widget in your
+theme will show a static `00:00` (or whatever it was last set to) unless your application
+pushes these three keys on a timer, same as any other gauge.
+
+```csharp
+using Mk20Control.Protocol.Theme.Building;
+using Mk20Control.Protocol.Theme.Building.Widgets;
+using Mk20Control.Protocol.Codecs;
+
+var theme = new ThemeBuilder()
+    .AddPage(page => page
+        .SetCanvas(640, 656)
+        .AddProgressBar(pb => pb.At(20, 20, 200, 30).BoundTo("CPU Usage", 0, 100)
+            .Colors("r=0,g=170,b=255,a=220", "r=255,g=255,b=255,a=140", "r=0,g=0,b=0,a=180"))
+        .AddText(t => t.At(20, 55).BoundTo("CPU Usage").Font("Microsoft YaHei,14,-1,5,50,0,0,0,0,0"))
+        .AddRadialGauge(rg => rg.At(300, 20, scale: 0.4).BoundTo("GPU Usage", 0, 100)
+            .Gradient("r=0,g=170,b=255,a=255", "r=255,g=200,b=0,a=255", "r=255,g=0,b=0,a=255"))
+        .AddDigitalClockField(c => c.At(500, 20, 40, 40).Field("hour"))
+        .AddDigitalClockField(c => c.At(545, 20, 40, 40).Field("minute")))
+    .Build();
+
+await client.UploadThemeFileAsync("/data/theme/MK20/dashboard/dashboard.Theme", ThemeFileCodec.Encode(theme));
+
+// Push live values every second - the clock fields need this too (host-driven, not RTC-driven).
+var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+while (await timer.WaitForNextTickAsync())
+{
+    var now = DateTime.Now;
+    await client.PushSystemDataAsync(new Dictionary<string, string>
+    {
+        ["CPU Usage"] = $"{GetCpuUsagePercent()}%",
+        ["GPU Usage"] = $"{GetGpuUsagePercent()}%",
+        ["hour"] = now.Hour.ToString(),
+        ["minute"] = now.Minute.ToString(),
+    });
+}
+```
+
+See `src/Mk20Control.IntegrationTests/OfflineThemeTests/MainScreenAllWidgetTypesThemeTests.cs`
+for a complete, runnable example exercising every single widget type at once (each bound to
+its own test channel, `test1`-`test9`, plus a live clock), and
+`HardwareTests/MainScreenAllWidgetTypesUploadTests.cs` for the live-hardware variant that
+pumps varied random/ramp/sine-wave values so each widget's live update behavior can be
+visually verified — run it with `dotnet test --environment MK20_COM_PORT=COM7
+--environment MK20_UPLOAD_DEVICE_PATH=/data/theme/MK20/widgettest/widgettest.Theme`.
+
 ---
 
 ## 6. Editing an existing theme
@@ -420,7 +504,10 @@ var theme = new ThemeBuilder()
     .AddPage(page => page
         .SetCanvas(640, 656)
         .AddKey(0, 0, key => key.Icon("pit_limiter.png", pitLimiterIconBytes)
-            .Title("Pit Limiter").Action(KeyActions.Keyboard(HidKey.P))))
+            .Title("Pit Limiter").Action(KeyActions.Keyboard(HidKey.P)))
+        // A speed gauge on the secondary screen - system_data_name is your own choice.
+        .AddProgressBar(pb => pb.At(20, 20, 200, 30).BoundTo("Speed", 0, 300)
+            .Colors("r=0,g=170,b=255,a=220", "r=255,g=255,b=255,a=140", "r=0,g=0,b=0,a=180")))
     .Build();
 await client.UploadThemeFileAsync("/data/theme/MK20/SimHub/SimHub.Theme", ThemeFileCodec.Encode(theme));
 
@@ -484,5 +571,6 @@ var client = new Mk20DeviceClient(logging);
 
 ---
 
-*See `PROTOCOL_WAVESHARE_MK20.md` for the full wire protocol and `.Theme` file format
-specification this library implements.*
+*See [`PROTOCOL_WAVESHARE_MK20.md`](./PROTOCOL_WAVESHARE_MK20.md) for the full wire
+protocol and `.Theme` file format specification this library implements, and
+[`README.md`](./README.md) for build/run instructions and project layout.*

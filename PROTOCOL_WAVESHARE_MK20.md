@@ -5,6 +5,10 @@
 **Status:** Confirmed by USB capture and live-device testing (see §12 for method)
 **Reference implementation:** `Mk20Control.Protocol` (this repository)
 
+For build/run instructions and project layout, see [`README.md`](./README.md). For the
+`Mk20Control.Protocol` library's consumer-facing API surface (connecting, building/editing
+themes, uploading, widgets), see [`Mk20Control.Protocol.API.md`](./Mk20Control.Protocol.API.md).
+
 ---
 
 ## 1. Scope
