@@ -27,7 +27,7 @@ how to use it.
 | `Mk20Control.Protocol.Theme.Items` | Core page item types (`KeyItem`, `BackgroundItem`, `DynamicImageItem`) |
 | `Mk20Control.Protocol.Theme.Items.Widgets` | Data-bound widget item types (`TextItem`, `MultilineTextItem`, `ShadowTextItem`, `ProgressBarItem`, `LinearGaugeItem`, `RadialGaugeItem`, `CircularGaugeItem`, `SegmentedCircularGaugeItem`, `LightShadowGaugeItem`, `DigitalClockItem`) |
 | `Mk20Control.Protocol.Theme.Actions` | Key action types (`KeyboardAction`, `PageSwitchAction`, etc.) |
-| `Mk20Control.Protocol.Theme.Building` | `ThemeBuilder`, `ThemeEditor`, `ThemePageBuilder`, `KeyActions`, `HidKey`, `KeyModifiers` — fluent theme construction/editing |
+| `Mk20Control.Protocol.Theme.Building` | `ThemeBuilder`, `ThemeEditor`, `ThemePageBuilder`, `KeyActions`, `HidKey`, `KeyModifiers`, `EncoderFunctionType` — fluent theme construction/editing |
 | `Mk20Control.Protocol.Theme.Building.Widgets` | Fluent builders for the widget item types above (`TextItemBuilder`, `ProgressBarItemBuilder`, `RadialGaugeItemBuilder`, etc.) |
 | `Mk20Control.Protocol.Exceptions` | `Mk20ProtocolException` and subtypes |
 
@@ -230,7 +230,7 @@ check `RawControlDataBase64` in that case). Concrete types in
 | `AudioVolumeAction` | `Microphone`/`Loudspeaker` | `DeviceClass`, `TargetDeviceName`, `VolumeAdjustMode`/`Value` |
 | `KeyboardSwitchAction` | `keyboard_switch` | — |
 | `EncoderKeyboardAction` | `encoder_keyboard` | `LeftKeycode`/`MiddleKeycode`/`RightKeycode` (+ labels) |
-| `EncoderFunctionAction` | `encoder_system_volume`/etc. | `RelatedThemePath` |
+| `EncoderFunctionAction` | `encoder_system_volume`/`encoder_device_brightness`/`encoder_system_media` | `RelatedThemePath`. Build via `KeyActions.EncoderFunction(EncoderFunctionType.___)`. |
 | `ControlFlowAction` | `ControlFlow` | `ControlDataList` (raw bytes; populated-step schema unconfirmed) |
 | `UnknownKeyAction` | any other | `RawFields` only |
 
@@ -313,7 +313,8 @@ KeyActions.TypeText("hello", pressEnterAfter: true)
 KeyActions.AudioVolume(AudioDeviceClass.Loudspeaker, "Speakers", adjustMode, adjustValue)
 KeyActions.KeyboardSwitch()
 KeyActions.EncoderKeyboard(leftKeycode, leftLabel, middleKeycode, middleLabel, rightKeycode, rightLabel)
-KeyActions.EncoderFunction("encoder_system_volume", relatedThemePath: null)
+KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume, relatedThemePath: null)  // strongly typed
+KeyActions.EncoderFunction("encoder_system_volume", relatedThemePath: null)          // raw-string fallback
 ```
 
 `HidKey` is an enum of the standard USB HID keyboard usage table (`A`-`Z`, `Digit0`-`Digit9`,
@@ -346,6 +347,57 @@ source's aspect ratio doesn't match the target and you want to control which par
 image survives the crop (e.g. keep the top of a GIF visible instead of its center). This
 only affects which source pixels are kept; it does not change the item's on-device
 x/y/w/h rectangle. Animated GIF sources keep their frame count/delays/loop count.
+
+### Physical rotary encoders
+
+The MK20 has two physical rotary encoders on the secondary screen. Confirmed real-hardware
+layout (cross-checked against `defaultTheme.Theme` and `海边吹风.Theme`): an encoder
+function is a normal `KeyItem` positioned at a fixed coordinate — not part of the row/column
+key grid — with its action set via `KeyActions.EncoderFunction(...)`:
+
+| Encoder | Fixed position |
+|---|---|
+| Left | `x=106, y=0` |
+| Right | `x=320, y=0` |
+
+```csharp
+using Mk20Control.Protocol.Theme.Building;
+
+// Left encoder -> system volume
+page.AddKey(0, 0, key => key
+    .At(106, 0)
+    .IconAssetPath("/static/icon/white/systemVolume_.png")
+    .Action(KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume)));
+
+// Right encoder -> device (screen) brightness
+page.AddKey(0, 0, key => key
+    .At(320, 0)
+    .IconAssetPath("/static/icon/white/deviceBrightness_.png")
+    .Action(KeyActions.EncoderFunction(EncoderFunctionType.DeviceBrightness)));
+```
+
+`EncoderFunctionType` (`SystemVolume`, `DeviceBrightness`, `SystemMedia`) is a strongly-typed
+enum for the confirmed real function-type strings; a raw `string rawType` overload of
+`EncoderFunction` remains available for any future/unconfirmed function type.
+
+A live progress-bar/text readout of the current value can optionally be placed near the
+encoder (bound to `"Volume"`/`"device_bl"` — see §5.5), matching the real vendor theme
+layout. The encoder function works regardless of whether anything is visibly rendered — set
+the key's icon to `.Opacity(0)` and any accompanying progress-bar/text colors to a fully
+transparent `"r=0,g=0,b=0,a=0"` if you don't want anything shown on the secondary screen:
+
+```csharp
+page.AddKey(0, 0, key => key.At(106, 0).IconAssetPath("/static/icon/white/systemVolume_.png")
+    .Opacity(0) // fully invisible, encoder still works
+    .Action(KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume)));
+page.AddProgressBar(pb => pb.At(204, 96, 100, 12).BoundTo("Volume", 0, 100)
+    .Colors("r=0,g=0,b=0,a=0", "r=0,g=0,b=0,a=0", "r=0,g=0,b=0,a=0"));
+```
+
+Confirmed working on real hardware in both variants (visible and invisible) — see
+`src/Mk20Control.IntegrationTests/OfflineThemeTests/EncoderVolumeAndBrightnessThemeTests.cs`
+for a complete, runnable example, and `HardwareTests/EncoderVolumeAndBrightnessUploadTests.cs`
+for the upload+live-telemetry-pump variant.
 
 ### Widgets — gauges, text, and clocks
 

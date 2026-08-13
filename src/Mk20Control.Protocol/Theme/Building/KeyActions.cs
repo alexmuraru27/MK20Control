@@ -186,6 +186,8 @@ public static class KeyActions
     /// A built-in encoder function - "encoder_system_volume", "encoder_system_media", or
     /// "encoder_device_brightness". The volume/brightness variants optionally reference a
     /// separate <c>.Theme</c> file shown on the encoder's small display while active.
+    /// Prefer the <see cref="EncoderFunctionType"/> overload below for compile-time-checked
+    /// values; this raw-string overload remains for any future/unconfirmed function type.
     /// </summary>
     public static EncoderFunctionAction EncoderFunction(string rawType, string? relatedThemePath = null, string? description = null) => new()
     {
@@ -195,4 +197,11 @@ public static class KeyActions
         Category = "encoder",
         RelatedThemePath = relatedThemePath,
     };
+
+    /// <summary>
+    /// A built-in encoder function, strongly typed via <see cref="EncoderFunctionType"/>
+    /// instead of a raw string (e.g. <c>KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume)</c>).
+    /// </summary>
+    public static EncoderFunctionAction EncoderFunction(EncoderFunctionType type, string? relatedThemePath = null, string? description = null)
+        => EncoderFunction(type.ToRawType(), relatedThemePath, description);
 }

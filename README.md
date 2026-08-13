@@ -241,7 +241,7 @@ match real theme files exactly - you do not need to supply these yourself.
 | `KeyActions.TypeText(text, pressEnterAfter, useCopyPaste)` | Type literal text, optionally pressing Enter or using clipboard paste instead of keystrokes. | |
 | `KeyActions.AudioVolume(deviceClass, targetDeviceName, adjustMode, adjustValue, switchDefaultDevice)` | Adjust a named OS audio device's volume. | |
 | `KeyActions.KeyboardSwitch()` | Toggle/switch the active keyboard layout. | No extra fields beyond the common base. |
-| `KeyActions.EncoderKeyboard(...)` / `.EncoderFunction(...)` | Bind a rotary encoder's rotate-left/click/rotate-right actions. | For a key/theme's encoder *action* assignment - unrelated to the required page-level `"encoder"` hardware-descriptor array, which is handled automatically. |
+| `KeyActions.EncoderKeyboard(...)` / `.EncoderFunction(EncoderFunctionType.SystemVolume, ...)` | Bind a rotary encoder's rotate-left/click/rotate-right actions, or a built-in function (`SystemVolume`/`DeviceBrightness`/`SystemMedia` - strongly typed via `EncoderFunctionType`, a raw-string overload also exists for unconfirmed future types). | For a key/theme's encoder *action* assignment - unrelated to the required page-level `"encoder"` hardware-descriptor array, which is handled automatically. |
 
 #### Keyboard modifiers and combos (`KeyModifiers` + `HidKey`)
 
@@ -418,6 +418,59 @@ complete, runnable example exercising every single widget type at once, each bou
 own test channel (`test1`-`test9`) plus a live clock, fed by a background loop that pushes
 varied random/ramp/sine-wave values so each widget's live update behavior can be visually
 verified on real hardware.
+
+#### Physical rotary encoders
+
+The MK20 has two physical rotary encoder knobs on the secondary screen, each independently
+bindable to a built-in function. **Confirmed real-hardware layout** (cross-checked against
+`defaultTheme.Theme` and `海边吹风.Theme`): an encoder function is just a normal `KeyItem`
+positioned at a fixed coordinate — not part of the row/column key grid — with its action
+set via `KeyActions.EncoderFunction(...)`:
+
+| Encoder | Fixed position |
+|---|---|
+| Left | `x=106, y=0` |
+| Right | `x=320, y=0` |
+
+```csharp
+using Mk20Control.Protocol.Theme.Building;
+
+// Left encoder -> system volume
+page.AddKey(0, 0, key => key
+    .At(106, 0)
+    .IconAssetPath("/static/icon/white/systemVolume_.png")
+    .Action(KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume)));
+
+// Right encoder -> device (screen) brightness
+page.AddKey(0, 0, key => key
+    .At(320, 0)
+    .IconAssetPath("/static/icon/white/deviceBrightness_.png")
+    .Action(KeyActions.EncoderFunction(EncoderFunctionType.DeviceBrightness)));
+```
+
+`EncoderFunctionType` (`SystemVolume`, `DeviceBrightness`, `SystemMedia`) is a strongly-typed
+enum for the confirmed real function-type strings — use it instead of a raw string; a raw
+`string rawType` overload remains available for any future/unconfirmed function type.
+
+A live progress-bar/text readout of the current value can optionally be placed near the
+encoder (bound to `"Volume"`/`"device_bl"`), matching the real vendor theme layout. If you
+don't want anything visibly drawn — the encoder function works regardless of whether
+anything is rendered — set the key's icon to `.Opacity(0)` and any accompanying
+progress-bar/text colors to a fully transparent `"r=0,g=0,b=0,a=0"`:
+
+```csharp
+page.AddKey(0, 0, key => key.At(106, 0).IconAssetPath("/static/icon/white/systemVolume_.png")
+    .Opacity(0) // fully invisible, encoder still works
+    .Action(KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume)));
+page.AddProgressBar(pb => pb.At(204, 96, 100, 12).BoundTo("Volume", 0, 100)
+    .Colors("r=0,g=0,b=0,a=0", "r=0,g=0,b=0,a=0", "r=0,g=0,b=0,a=0"));
+```
+
+See `Mk20Control.IntegrationTests`'s `EncoderVolumeAndBrightnessThemeTests.BuildTheme()` for
+a complete, runnable example (left encoder = system volume, right encoder = device
+brightness, both fully invisible on the secondary screen) confirmed working on real
+hardware, and `HardwareTests.EncoderVolumeAndBrightnessUploadTests` for the upload+pump
+variant.
 
 #### Multi-page themes with page navigation
 
@@ -902,6 +955,7 @@ dotnet test --filter "FullyQualifiedName~PingDeviceTests" --environment MK20_COM
 | `ThemeEditorAddKeyAndUploadTests` | 16 (edit+upload) | `MK20_EDIT_LOCAL_THEME_PATH`, `MK20_EDIT_ROW`, `MK20_EDIT_COL`, `MK20_EDIT_ICON_FILE`, `MK20_EDIT_KEYCODE`, `MK20_EDIT_KEY_LABEL`, `MK20_UPLOAD_DEVICE_PATH` (all required) |
 | `SecondaryScreenGaugesOverlayUploadTests` | 17 **[sandbox]** (cat-GIF + gauges, secondary screen) | `MK20_UPLOAD_DEVICE_PATH` (required), `MK20_PUMP_SECONDS` (optional, default 15) |
 | `MainScreenAllWidgetTypesUploadTests` | 18 **[sandbox]** (every widget type, main screen) | `MK20_UPLOAD_DEVICE_PATH` (required), `MK20_PUMP_SECONDS` (optional, default 15) - see [Widgets - gauges, text, and clocks](#widgets---gauges-text-and-clocks) |
+| `EncoderVolumeAndBrightnessUploadTests` | n/a (new) | `MK20_UPLOAD_DEVICE_PATH` (required), `MK20_PUMP_SECONDS` (optional, default 15) - see [Physical rotary encoders](#physical-rotary-encoders) |
 
 Tests marked **[sandbox]** exercise throwaway exploratory scenarios (not part of the
 confirmed/stable API surface) kept for quick manual verification against real hardware -
@@ -926,6 +980,7 @@ confirmation - there's exactly one implementation of each scenario, not two.
 | `SecondaryGifOffsetTests` | `--build-secondary-gif-offset-test` | The secondary-screen GIF background at several different crop offsets, confirming the pan behavior actually changes the output. |
 | `SecondaryScreenGaugesOverlayThemeTests` | `--build-gauges-scratch` | Cat GIF + every gauge/text type overlaid on the secondary screen. |
 | `MainScreenAllWidgetTypesThemeTests` | `--build-widget-test-scratch` | One instance of every widget type on the main screen, each bound to its own test channel. |
+| `EncoderVolumeAndBrightnessThemeTests` | n/a (new) | Left rotary encoder bound to system volume, right bound to device brightness (both invisible on the secondary screen). |
 | `SixPageThemeBuilderTests` | `--build-6page-scratch` | 6 pages of 20 keys each, with page navigation and mixed static/animated icons. |
 | `DumpRawJsonTests` | `--dump-raw-json` | (Diagnostic helper) prints every distinct item type's raw JSON found in a theme's bytes. |
 | `ThemeEditorAddKeyTests` | `--add-key-local` / menu option 16 | Adds one key to an existing theme via `ThemeEditor`. |
