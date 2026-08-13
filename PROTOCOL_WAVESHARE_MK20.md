@@ -361,23 +361,11 @@ sequenceDiagram
 A theme containing an animated GIF is simply a larger `.Theme` file (embedded assets) —
 GIFs, videos (`.mp4`), and PNGs are not distinct wire concepts.
 
-**Which page the device opens to after activation.** The layout JSON's
-`"main"."currentPage"` field (§7) names the page GUID the device renders immediately after
-a successful `SET_DEVICE_RELOAD` — it is **not** necessarily the first entry in the
-`"pages"` array; nothing in the wire protocol or file format requires them to match. A
-`.Theme` file re-saved by ScreenKeyWindows (or edited via `ThemeEditor`) can end up with
-`currentPage` pointing at whatever page was last open/selected at save time, so a
-multi-page theme can silently activate showing e.g. page 4 instead of page 1 even though
-its bytes are otherwise perfectly valid and load correctly. **Confirmed via direct
-comparison**: decoding `customTheme6pages.Theme` showed `currentPage` pointing at the
-theme's 4th page even though `ThemeBuilder` always sets it to the first page's id at
-`Build()` time — meaning the value can drift after the file leaves this library's control
-(e.g. after being opened/re-saved elsewhere, or reused as an editing base). `Mk20DeviceClient
-.UploadThemeFileAsync` now defends against this automatically: it decodes the file it's
-about to send, and if `currentPage` doesn't match the first page in `"pages"`, it
-re-encodes with `currentPage` corrected before the FILE_START/bulk-transfer sequence begins
-— so every upload through this client always activates on page 1, regardless of what value
-was embedded in the bytes handed to it. See `Mk20DeviceClient.NormalizeToFirstPage`.
+**Which page opens after activation.** `"main"."currentPage"` (a page GUID) names the page
+shown immediately after `SET_DEVICE_RELOAD` — it is not required to match `pages[0]` and
+can drift (e.g. after re-saving in an external editor). `Mk20DeviceClient.UploadThemeFileAsync`
+normalizes this automatically: before every upload it re-encodes the file with `currentPage`
+set to `pages[0]` if they don't already match.
 
 ### 6.5 Secondary screen
 
@@ -385,47 +373,33 @@ A secondary-screen theme uses the identical `GET_DEVICE_THEME` / `FILE_START` / 
 / `SET_DEVICE_RELOAD` sequence and the same `deviceRequestSystemData` contract as a
 main-screen theme — it is simply another theme file/slot, not a separate protocol path.
 
-**Embedding secondary-screen content inside a main-screen theme file.** A separate
-`.Theme` file with a 428x142 canvas (confirmed via
-`theme/MK20/SecondaryScreen/<N>/<N>.theme`) is one way to show secondary-screen content,
-but **not the only one** — a real main-screen theme (`defaultTheme.Theme`) confirms the
-secondary screen's own background image/GIF can instead be embedded directly inside a
-640x656 main-screen page, as a type-114 `DynamicImageItem` at the fixed position
-`x=106, y=0, w=428, h=142` carrying `"backgroundType":"secondary"` (plus `"backupX":"0"`,
-`"backupY":"0"` — editor bookkeeping, not confirmed load-bearing). This lets one theme
-file drive both the main 20-key grid *and* the secondary screen's background
-simultaneously, rather than requiring two separate uploads/slots. See
-`DynamicImageItemBuilder.SecondaryScreenBackground(...)`. **Confirmed working with an
-animated GIF on real hardware** (user confirmed seeing the GIF animate on the secondary
-screen).
+**Embedding secondary-screen content in a main-screen file.** A dedicated `.Theme` file
+with a 428x142 canvas (`theme/MK20/SecondaryScreen/<N>/<N>.theme`) is one option. A second,
+confirmed option: embed a `DynamicImageItem` (type 114) at the fixed position
+`x=106, y=0, w=428, h=142` with `"backgroundType":"secondary"` directly inside a 640x656
+main-screen page, driving both screens from one theme file. See
+`DynamicImageItemBuilder.SecondaryScreenBackground(...)`. Confirmed working with an
+animated GIF on real hardware.
 
-**Two distinct mechanisms for a main-screen background - `BackgroundItem` (type 100, video)
-vs. `DynamicImageItem` (type 114, picture/GIF).** Every real vendor-shipped theme's
-main-screen background examined (`defaultTheme`, `PS`, `pixso`, `AE`, `AI`, `字母`,
-`可爱按键`, `快捷键`, `时尚按键`, `机械按键`, `海洋馆蜡笔小新`, `海边吹风`, `饮料`) uses a
-type-100 `BackgroundItem` with an `.mp4` video path under `/theme/MK20-PLUS/MainScreen/
-<file>` — **none use a type-100 item with a static image or GIF**. This initially led to
-an incorrect conclusion that the main screen only supports video. **However, a genuine
-user-captured ScreenKeyWindows save** (adding a picture, then separately a GIF, as the
-main-screen background through the vendor editor's own UI) revealed the real mechanism:
-the vendor editor uses a **type-114 `DynamicImageItem`** — the SAME item type used for the
-secondary-screen background above — at the fixed position `x=0, y=144, w=640, h=512,
-z=-2` with `"backgroundType":"main"` and asset path `/image/640x656/cache/<file>` (a
-*third*, previously-unconfirmed asset namespace, distinct from both the key-icon one and
-the `.mp4` `BackgroundItem` one). **Confirmed working on real hardware for BOTH a static
-JPEG image and an animated GIF** — the item's JSON field set is identical between the two
-cases (only the referenced asset's content/extension differs): `backgroundType, h, id,
-lock, maxHeight, maxWidth, path, rotate, scale, type, w, x, y, z` — notably **no**
-`paths`/`system_data_flag` fields (present on other `DynamicImageItem` uses) and **no**
-`backupX`/`backupY` (present on the secondary-screen case above). One confirmed behavioral
-difference: a static image WAS resized/cropped by the vendor editor to exactly fill
-640x512, but a GIF was embedded at its **original, unresized size** (128x128, unchanged
-from the source file) — the device apparently does not stretch a GIF background to fill
-the area the way it does a static image. See `DynamicImageItemBuilder.MainScreenBackground(...)`.
-A `BackgroundItem`/`.mp4` video background remains a separate, also-valid mechanism for
-video content specifically (this library still has no MP4 encoder, so cannot construct
-one from scratch, but `BackgroundItemBuilder.MainScreen(...)` remains available for
-embedding pre-encoded MP4 bytes).
+**Main-screen background: two independent mechanisms.**
+
+| Mechanism | Item type | Content | Asset path | Position |
+|---|---|---|---|---|
+| Video background | `BackgroundItem` (100) | `.mp4` only | `/theme/MK20-PLUS/MainScreen/<file>` | `x=0,y=144,w=640,h=512,z=-2` |
+| Picture/GIF background | `DynamicImageItem` (114), `backgroundType="main"` | static image or GIF | `/image/640x656/cache/<file>` | `x=0,y=144,w=640,h=512,z=-2` |
+
+Every vendor-shipped theme examined uses the video mechanism. The picture/GIF mechanism was
+confirmed by capturing a genuine ScreenKeyWindows save of a picture, then separately a GIF,
+as the main-screen background. Both item types occupy the identical position/size; only the
+item type, asset namespace, and content type differ. The `DynamicImageItem` field set is
+identical between the picture and GIF case (`backgroundType, h, id, lock, maxHeight,
+maxWidth, path, rotate, scale, type, w, x, y, z`, no `paths`/`system_data_flag`/
+`backupX`/`backupY`) — only the asset's extension/content differs. One confirmed rendering
+difference: a static image is resized/cropped to exactly fill 640x512; a GIF is embedded at
+its original, unresized size. This library has no MP4 encoder — `BackgroundItemBuilder
+.MainScreen(...)` accepts pre-encoded MP4 bytes; `DynamicImageItemBuilder
+.MainScreenBackground(...)` is the mechanism for a picture or GIF built from scratch.
+Confirmed visually on real hardware for both a static image and a GIF.
 
 ### 6.6 Deleting a theme
 
@@ -451,34 +425,24 @@ request entry is an empty string - the path itself is the only meaningful data, 
 the map *key* (the same "path as dictionary key" shape used by `GET_DEVICE_THEME`, §5.1).
 Deleting the currently-active theme was not tested; behavior in that case is unconfirmed.
 
-### 6.7 Client-side operational discipline (why this matters on real hardware)
+### 6.7 Client-side operational discipline
 
-The protocol itself has **no confirmed device-side "cancel" or "reset stuck operation"
-command** beyond the abort-transfer control message (§3.1), which is sent proactively
-*before* starting a new file-transfer/reload operation, not as a runtime recovery signal for
-an operation already in flight. This means correctness depends on the *host* behaving
-disciplined, not on the device protecting itself from a confused host. Message-by-message
-analysis of every real capture shows the real ScreenKeyWindows host follows two rules that
-this library now enforces automatically in `Mk20DeviceClient`:
+The protocol has no device-side "cancel" or "reset stuck operation" command beyond the
+abort-transfer control message (§3.1), which is sent proactively before a new operation,
+not as runtime recovery for one already in flight. Correctness therefore depends on host
+discipline. `Mk20DeviceClient` enforces two rules observed in every real capture:
 
-1. **Never overlap theme-mutating operations.** Every real capture examined shows exactly
-   one `FILE_START`/`FILE_END`/`SET_DEVICE_RELOAD`/`SET_DEVICE_DELETE_THEME` sequence in
-   flight at a time - the host always finishes (or gives up on) one before starting another.
-   `Mk20DeviceClient` serializes `ReloadThemeAsync`, `DeleteThemeAsync`, and
-   `UploadThemeFileAsync` against each other via an internal lock so a second call made
-   before the first finishes simply waits its turn rather than racing bytes onto the wire.
-2. **Never delete a theme whose reload hasn't been confirmed.** This was not directly
-   observed in a capture (no capture contains a delete immediately following an
-   unacknowledged reload of the same theme), but was confirmed as a real hazard through
-   direct testing: deleting a theme while its `SET_DEVICE_RELOAD` was still unacknowledged
-   (including one that had already timed out client-side - a timeout does **not** prove the
-   device gave up processing it) left the device's render subsystem stuck, requiring a
-   physical power-cycle to recover, while `FIND_DEVICE`/`GET_DEVICE_THEME` kept responding
-   normally throughout. `Mk20DeviceClient.DeleteThemeAsync` now refuses to delete a path
-   with an unconfirmed pending reload, throwing `InvalidOperationException` with a clear
-   explanation before sending anything; use `IsReloadPending`/`ClearPendingReloadState` to
-   inspect or explicitly override this safeguard once you've independently confirmed it's
-   safe (e.g. after a power-cycle).
+1. **Never overlap theme-mutating operations.** `ReloadThemeAsync`, `DeleteThemeAsync`, and
+   `UploadThemeFileAsync` are serialized against each other via an internal lock — a second
+   call made before the first finishes waits its turn.
+2. **Never delete a theme whose reload hasn't been confirmed.** Deleting a theme while its
+   `SET_DEVICE_RELOAD` was still unacknowledged (confirmed via direct testing; a client-side
+   timeout does not prove the device gave up) left the render subsystem stuck, requiring a
+   physical power-cycle — `FIND_DEVICE`/`GET_DEVICE_THEME` kept responding normally
+   throughout. `DeleteThemeAsync` now refuses to delete a path with an unconfirmed pending
+   reload, throwing `InvalidOperationException` before sending anything; use
+   `IsReloadPending`/`ClearPendingReloadState` to inspect or override once independently
+   confirmed safe (e.g. after a power-cycle).
 
 ```mermaid
 stateDiagram-v2
@@ -557,150 +521,103 @@ device renders immediately upon activation via `SET_DEVICE_RELOAD` - see §6.4 f
 confirmed drift hazard (it is not guaranteed to match `pages[0]`) and how
 `Mk20DeviceClient.UploadThemeFileAsync` now corrects it automatically before every upload.
 
-**Page count:** a theme is NOT required to have more than 1 page - confirmed by a real,
-user-created, working theme (`customTheme5buttons.Theme`, 5 keys, no background, exactly 1
-page) that uploaded/reloaded normally on real hardware. An earlier hypothesis based on every
-*named* theme shipped with ScreenKeyWindows having 2+ pages was disproven this way - those
-themes simply happen to use multiple pages for their own content/folder navigation, not
-because the device requires it. See §10 Open Item #9 for the real explanation of the
-device-side hangs that had been (incorrectly) attributed to page count.
+**Page count:** a theme is not required to have more than 1 page — confirmed by a real
+user-created theme (5 keys, no background, 1 page) reloading normally.
 
-**Confirmed required page-level field: `"encoder"`.** Every top-level/main-screen theme
-page examined (all 13 vendor themes, `customTheme7buttonsSoftware.Theme`,
-`empty.Theme`) carries a page-level `"encoder"` array alongside `"canvas"`/`"items"`/
-`"pageName"`:
+**Required page-level field `"encoder"`:** every main-screen page carries an `"encoder"`
+array alongside `"canvas"`/`"items"`/`"pageName"`, describing the physical rotary-encoder
+hardware:
 ```json
 "encoder": [
     {"col": 0, "keyString": "", "keycode": 0, "row": 103},
     {"col": 0, "keyString": "", "keycode": 0, "row": 104}
 ]
 ```
-This describes the device's physical rotary-encoder hardware (not yet individually modeled
-beyond round-tripping) and is absent only from legitimately different secondary-screen/
-sub-page theme files (`Key/*.theme`, `SecondaryScreen/*.theme`,
-`Encoder/relatedTheme/*.Theme`). **Omitting this field entirely from a main-screen theme
-(as this library's codec did before being fixed) was confirmed to make ScreenKeyWindows
-itself lock up when loading the file** - independent of every key/item field being otherwise
-completely correct (see §10 Item #10). `ThemeFileCodec` now always emits this field:
-preserved from the source page if decoded from a real file, or defaulted to the value shown
-above for a brand-new page built via `ThemeBuilder`.
+Absent only from secondary-screen/sub-page theme files (`Key/*.theme`,
+`SecondaryScreen/*.theme`, `Encoder/relatedTheme/*.Theme`). Omitting it from a main-screen
+theme causes ScreenKeyWindows to lock up when loading the file. `ThemeFileCodec` always
+emits this field, preserved from source or defaulted for a new page.
 
 ### 7.1 Page item types (`items[].type`)
 
 | Code | Name | Purpose | Key fields |
 |------|------|---------|-----------|
-| 100 | Background | Static image or video, main or secondary screen | `backgroundType`: `main`\|`secondary`, `path` |
+| 100 | Background | `.mp4` video background (main or secondary screen) | `backgroundType`: `main`\|`secondary`, `path` |
 | 102 | Progress bar | Data-bound circular/linear bar | `system_data_name`, `system_data_min_value`/`max_value` |
 | 103 | Linear gauge | Data-bound bar, solid front/back/border colors | `system_data_name`, `front_color`/`back_color`/`border_color` |
 | 109 | Radial gauge | Data-bound arc gauge, up to 3 gradient stops | `system_data_name`, `angleMinValue`/`angleMaxValue`, `gradientColor1`–`3` |
 | 111 | Digital clock | Live clock field (one item per field) | `system_data_name`: `hour`\|`minute`\|`second` |
 | 113 | Text | Static or data-bound text | `system_data_name`, `text_font`, `text_str` |
-| 114 | Dynamic image | Animated GIF | `path` → embedded `.gif` asset |
+| 114 | Dynamic image | Decorative animated GIF (item-local); also the mechanism for a main/secondary-screen picture or GIF background (`backgroundType`) — see §6.5 | `path` → embedded asset |
 | 115 | Key | Physical key definition | `row`, `col`, `path` (icon), `controlData` (base64, see §7.2) |
 
-**Confirmed required fields for a type-115 Key item** (observed on every real key item;
-omitting several of these caused a real device to hang indefinitely on `SET_DEVICE_RELOAD`
-during testing — see §10 note): `id`, `itemName` (e.g. `"control1"` - confirmed always
-present; omitting it, as `KeyItemBuilder` did before being fixed per §10 Item #10, was one
-of two confirmed causes of ScreenKeyWindows itself locking up when loading a built theme),
-`x`, `y`, `z`, `rotate`, `scale`, `lock`, `row`, `col`,
-`path`, `controlData`, `maxWidth`, `maxHeight`, `scaledWidthTo`, `scaledHeightTo`, `opacity`,
-`paths` (usually empty string), `soundFile` (usually empty string), `title` (usually empty
-string), `titleParam` (a JSON-string-encoded object with `FontFamily`/`FontSize`/etc.).
-**Key items never carry `w`/`h`** — unlike Background items (type 100), which carry `w`/`h`
-*and* `maxWidth`/`maxHeight` together. All boolean-looking fields (e.g. `lock`) are encoded
-as the strings `"0"`/`"1"`, not JSON `true`/`false`, consistent with the numeric-string
-convention noted above. **`lock` is `"1"` on every real key item examined (5/5 real theme
-files)** — always set `"lock":"1"` on key items to match; see §10 Open Item #9 for the
-current (not fully conclusive) evidence on this field's effect on device-side reload
-behavior.
+**Required fields for a type-115 Key item:** `id`, `itemName` (e.g. `"control1"`), `x`,
+`y`, `z`, `rotate`, `scale`, `lock`, `row`, `col`, `path`, `controlData`, `maxWidth`,
+`maxHeight`, `scaledWidthTo`, `scaledHeightTo`, `opacity`, `paths` (usually empty),
+`soundFile` (usually empty), `title` (usually empty), `titleParam` (JSON-string-encoded
+object with `FontFamily`/`FontSize`/etc.). Omitting any of these — most notably `itemName`
+— causes ScreenKeyWindows to lock up loading the file. Key items never carry `w`/`h`,
+unlike Background items (type 100), which carry `w`/`h` *and* `maxWidth`/`maxHeight`
+together. Boolean-looking fields (e.g. `lock`) are strings `"0"`/`"1"`, not JSON booleans.
+`lock` is always `"1"` on a real key item.
 
-**Confirmed required `controlData` fields for a `keyboard`-type action** (base64-decoded
-tagged-value map, §5.2): `type` (`"keyboard"`), `description` (`"Keyboard"`),
-`parentDescription` (`"System input control"`), `iconPath`
-(`"/static/icon/dark/keyboard.png"`), `keycode`, `keyString`, `AISoundControlKeyword`
-(empty string). Omitting `description`/`parentDescription`/`iconPath`/`AISoundControlKeyword`
-(as `KeyActions.Keyboard` did before being fixed per §10 Item #10) produced a `controlData`
-blob with only 3 of the 7 real fields — confirmed to make ScreenKeyWindows itself lock up
-when loading the resulting theme file, independent of this client or the device.
+**Required `controlData` fields for a `keyboard` action** (base64-decoded tagged-value
+map, §5.2): `type` (`"keyboard"`), `description` (`"Keyboard"`), `parentDescription`
+(`"System input control"`), `iconPath` (`"/static/icon/dark/keyboard.png"`), `keycode`,
+`keyString`, `AISoundControlKeyword` (empty string). Omitting any of these produces a
+`controlData` blob ScreenKeyWindows locks up loading.
 
-**Modifier combos (e.g. Ctrl+Alt+Del):** `keycode` is not always a plain USB HID usage
-code — a key with one or more held modifiers packs the standard USB HID keyboard-report
-modifier bitmask into the *upper byte* of the same 16-bit `keycode` field:
-`(modifierBitmask << 8) | baseKeycode`. **Confirmed via a real capture**
-(`tools/Captures/capture18_ctrlaltdel.pcapng` — a key assigned to Ctrl+Alt+Del in
-the vendor editor and saved, sanitized in-place via `tools/Captures/sanitize.ps1` to keep
-only the MK20's own USB traffic):
-`keycode = 0x054C`, decomposing as modifier byte `0x05` (bit0=Left Ctrl, bit2=Left Alt) +
-base keycode `0x4C` (USB HID Delete), with `keyString = "L Ctrl L Alt Del"`. This is the
-standard USB HID Boot Keyboard modifier-byte convention, just packed into `keycode`'s upper
-byte rather than sent as a separate field — no other combo has been individually confirmed
-against this device yet, but the same bit layout is expected to generalize (see
+**Modifier combos (e.g. Ctrl+Alt+Del):** a key with held modifiers packs the standard
+USB HID keyboard-report modifier bitmask into the *upper byte* of the same 16-bit
+`keycode` field: `(modifierBitmask << 8) | baseKeycode`. Confirmed via capture:
+`keycode = 0x054C` for Ctrl+Alt+Del, decomposing as modifier byte `0x05`
+(bit0=Left Ctrl, bit2=Left Alt) + base keycode `0x4C` (USB HID Delete), `keyString =
+"L Ctrl L Alt Del"`.
+This is the standard USB HID Boot Keyboard modifier-byte convention, packed into the upper
+byte rather than sent as a separate field — only Left Ctrl/Left Alt individually confirmed
+against this device; the same bit layout is expected to generalize (see
 `Mk20Control.Protocol.Theme.Building.KeyModifiers`):
 
 | Bit | Modifier | Confirmed? |
 |---|---|---|
-| 0 (`0x01`) | Left Ctrl | **C** (Ctrl+Alt+Del capture) |
-| 1 (`0x02`) | Left Shift | U (standard USB HID position, not individually captured) |
-| 2 (`0x04`) | Left Alt | **C** (Ctrl+Alt+Del capture) |
+| 0 (`0x01`) | Left Ctrl | **C** |
+| 1 (`0x02`) | Left Shift | U |
+| 2 (`0x04`) | Left Alt | **C** |
 | 3 (`0x08`) | Left Win | U |
 | 4 (`0x10`) | Right Ctrl | U |
 | 5 (`0x20`) | Right Shift | U |
 | 6 (`0x40`) | Right Alt | U |
 | 7 (`0x80`) | Right Win | U |
 
-Use `KeyActions.KeyboardCombo(modifiers, key, ...)` for any combo (combine `KeyModifiers`
-values with `|`, e.g. `KeyModifiers.LeftCtrl | KeyModifiers.LeftShift` for Ctrl+Shift+Esc,
-and pass the non-modifier key as a `Mk20Control.Protocol.Theme.Building.HidKey` enum value
-instead of a raw integer, e.g. `HidKey.Delete`/`HidKey.Escape`/`HidKey.Tab` - no dedicated
-per-combo method exists; every combo goes through this one strongly-typed function). See
-`README.md`'s "Keyboard modifiers and combos" section
-for worked examples.
+Use `KeyActions.KeyboardCombo(modifiers, key, ...)`, combining `KeyModifiers` with `|` and
+passing the base key as a `HidKey` enum value (e.g. `HidKey.Delete`) instead of a raw
+integer — every combo goes through this one strongly-typed function. See `README.md`'s
+"Keyboard modifiers and combos" section for worked examples.
 
-**Text/title over a button, and icon transparency (`title`/`opacity`/`titleParam`):**
-confirmed via a real capture (`tools/Captures/capture19_text_over_buttons_and_txtinput.pcapng`
-- the user used ScreenKeyWindows' own "title" and "transparency" editor controls on an
-existing button, then saved twice) that this is **not** a separate overlay item stacked on
-top of the key - it is the *same* `KeyItem` (same `id`/`itemName`, same `row`/`col`) simply
-gaining/changing three of its own JSON fields together:
-- `"title"`: the on-screen text string shown over the icon (e.g. `"text over"`).
-- `"opacity"`: lowered from the default `"100"` (fully opaque) to `"15"` in the capture -
-  the vendor UI's "transparency" control writes directly to this same field a key's icon
-  opacity already uses; it is not a distinct property.
-- `"path"`/action: in the same capture the key's icon was *also* changed to the fixed
-  static icon `/static/icon/dark/Text_128x128.png` and its action changed to a `text`-type
-  `TextInputAction` (see §7.2) - but this is incidental to *this* combination (the user
-  happened to also convert the key into a "type text" button in the same edit), not a
-  requirement of showing a title/transparency - `title`/`opacity` can be set independently
-  on a key with any other icon/action.
-`titleParam` (already documented above) controls the title's font/alignment/color and was
-observed unchanged (`Microsoft YaHei`, size 24, white, bottom-aligned) across both captured
-saves - i.e. it's independently settable but wasn't exercised by this particular test.
-Implemented as `KeyItemBuilder.Title(string)` (pre-existing), `KeyItemBuilder.Opacity(int
-0-100)` (new), and `KeyItemBuilder.TitleStyle(fontFamily, fontSize, alignment, colorHex)`
-(new, only overrides `titleParam` sub-fields explicitly passed) - plus
-`ThemeEditor.PageEditor.SetKeyOpacity(row, column, opacityPercent)` for editing an existing
-theme's key in place (alongside the pre-existing `SetKeyTitle`).
+**Text/title over a button and icon transparency** (`title`/`opacity`/`titleParam`):
+confirmed via capture that these are fields on the *same* `KeyItem`, not a separate overlay
+item:
+- `"title"`: on-screen text shown over the icon.
+- `"opacity"`: `"100"` (opaque, default) down to `"15"` observed — the vendor UI's
+  "transparency" control writes this same field a key's icon opacity already uses.
+- `titleParam`: JSON-string-encoded font/alignment/color object; observed values
+  `Microsoft YaHei`, size 24, white, `"top"`/`"bottom"` alignment only (`"center"` has no
+  visible effect on real hardware).
 
-**Confirmed required key icon PNG asset format:** every real key icon PNG examined from a
-shipped vendor theme is exactly **128x128 pixels, RGB (no alpha channel), 8-bit depth** -
-the `scaledWidthTo`/`scaledHeightTo` JSON fields (128 in every sample) describe the
-*rendered* size but do not substitute for the asset itself already being that exact
-size/format. A structurally-correct key item (every JSON field present, `controlData`
-complete) whose icon asset was a different size or carried an alpha channel was confirmed
-to make ScreenKeyWindows itself lock up when loading the theme file (see §10 Item #10) -
-independent of any JSON-level correctness. `KeyItemBuilder.Icon`/`ThemeEditor.SetKeyIcon`
-now normalize any input image to this exact format automatically.
+Implemented as `KeyItemBuilder.Title(string)`, `.Opacity(int 0-100)`, `.TitleStyle(fontFamily,
+fontSize, alignment, colorHex)`, and `ThemeEditor.PageEditor.SetKeyOpacity(row, column, opacityPercent)`.
 
-**Animated key icons:** a key item can show a multi-frame animation instead of a static
-icon by leaving `path` empty and instead setting `paths` to a folder path (e.g.
-`/image/MK20/cache/pop-cat_1`) plus `frameDelays` as a comma-separated per-frame delay list
-in milliseconds (e.g. `"100,100"` for a 2-frame animation) - confirmed from a real
-user-created theme with a 2-frame GIF-derived icon (`customTheme5buttons.Theme`, updated
-version). Each frame is a separate PNG asset under that folder path (e.g. `frame_0.png`,
-`frame_1.png`), not a single embedded `.gif` file - this is a different mechanism from the
-type-114 Dynamic Image item's single embedded GIF asset (§7.1 above), even though both
-ultimately render an animation.
+**Required key icon PNG format:** exactly 128x128 pixels, RGB (no alpha channel), 8-bit
+depth. `scaledWidthTo`/`scaledHeightTo` describe the *rendered* size but do not substitute
+for the asset itself being correctly sized — a wrong-size or alpha-carrying icon causes
+ScreenKeyWindows to lock up loading the file. `KeyItemBuilder.Icon`/`ThemeEditor.SetKeyIcon`
+normalize any input image to this format automatically.
+
+**Animated key icons:** leave `path` empty, set `paths` to a folder path (e.g.
+`/image/MK20/cache/pop-cat_1`) and `frameDelays` to a comma-separated per-frame delay list
+in milliseconds. Each frame is a separate PNG asset under that folder (`frame_0.png`,
+`frame_1.png`, ...) — distinct from the type-114 Dynamic Image item's single embedded GIF
+asset, even though both render an animation.
 
 ### 7.2 Key actions (`controlData`, base64 of a Tagged-Value Map)
 
@@ -721,102 +638,53 @@ ultimately render an animation.
 
 ### 7.3 Theme builder/editor API (`Mk20Control.Protocol.Theme.Building`)
 
-For programmatic theme construction/editing (set a picture on a button, assign its
-behavior, set a background, add a data gauge, ...) without hand-writing JSON, use:
+For programmatic theme construction/editing without hand-writing JSON:
 
-- **`ThemeBuilder`** — fluent builder for a brand-new `ThemeFile` from scratch. Chain
-  `.AddPage(page => ...)`, and within a page use `.AddKey(row, col, key => ...)`,
-  `.AddBackground(bg => ...)`, `.AddText(...)`, `.AddProgressBar(...)`,
-  `.AddLinearGauge(...)`, `.AddRadialGauge(...)`, `.AddDigitalClockField(...)`,
-  `.AddDynamicImage(...)`. Call `.Build()` to get an immutable `ThemeFile`, then
-  `ThemeFileCodec.Encode(...)` to get bytes ready for `Mk20DeviceClient.UploadThemeFileAsync`.
-- **`ThemeEditor`** — wraps an already-decoded `ThemeFile` (e.g. from `ThemeFileCodec.Decode`
-  on a real `.Theme` file) for targeted edits: `editor.Page(n).SetKeyIcon(row, col, ...)`,
-  `.SetKeyAction(row, col, ...)`, `.SetKeyTitle(...)`, `.AddKey(...)`, `.RemoveKey(...)`,
-  `.SetMainBackground(...)`. Call `editor.Save()` to get the updated `ThemeFile`.
-- **`KeyActions`** — factory methods for every confirmed `KeyAction` variant from §7.2
-  (`KeyActions.Keyboard(HidKey key, label)` / `.Keyboard(int keycode, label)`,
-  `.KeyboardCombo(KeyModifiers modifiers, HidKey key, label)`, `.OpenWeb(url)`, `.Mouse(...)`, `.PreviousPage()`/
-  `.NextPage()`, `.OpenPage(pageId)`, `.OneLevelUp()`, `.TypeText(...)`, `.AudioVolume(...)`,
-  `.KeyboardSwitch()`, `.EncoderKeyboard(...)`, `.EncoderFunction(rawType, ...)`).
+- **`ThemeBuilder`** — fluent builder for a new `ThemeFile`. Chain `.AddPage(page => ...)`,
+  and within a page use `.AddKey(row, col, key => ...)`, `.AddBackground(bg => ...)`,
+  `.AddText(...)`, `.AddProgressBar(...)`, `.AddLinearGauge(...)`, `.AddRadialGauge(...)`,
+  `.AddDigitalClockField(...)`, `.AddDynamicImage(...)`. Call `.Build()` then
+  `ThemeFileCodec.Encode(...)` for bytes ready for `Mk20DeviceClient.UploadThemeFileAsync`.
+- **`ThemeEditor`** — wraps a decoded `ThemeFile` for targeted edits:
+  `editor.Page(n).SetKeyIcon(row, col, ...)`, `.SetKeyAction(...)`, `.SetKeyTitle(...)`,
+  `.SetKeyOpacity(...)`, `.AddKey(...)`, `.RemoveKey(...)`, `.SetMainBackground(...)`. Call
+  `editor.Save()` for the updated `ThemeFile`.
+- **`KeyActions`** — factory methods for every `KeyAction` variant from §7.2
+  (`.Keyboard(HidKey key, label)` / `.Keyboard(int keycode, label)`,
+  `.KeyboardCombo(KeyModifiers modifiers, HidKey key, label)`, `.OpenWeb(url)`,
+  `.Mouse(...)`, `.PreviousPage()`/`.NextPage()`, `.OpenPage(pageId)`, `.OneLevelUp()`,
+  `.TypeText(...)`, `.AudioVolume(...)`, `.KeyboardSwitch()`, `.EncoderKeyboard(...)`,
+  `.EncoderFunction(rawType, ...)`).
 
-Every item produced by this API uses the confirmed-required JSON field skeleton from §7.1
-(no `w`/`h` on key items; `maxWidth`/`maxHeight`/`scaledWidthTo`/`scaledHeightTo`/`opacity`/
-`paths`/`soundFile`/`title`/`titleParam` present; `lock` as a `"0"`/`"1"` string) — this field
-set was cross-checked against multiple real theme files shipped with ScreenKeyWindows_v1_1
-(`defaultTheme.Theme`, `时尚按键.Theme`) as well as this project's own capture traces, not
-just a single sample.
-
-**Cross-check performed:** decoding a real theme file, rebuilding its Background+Key items
-purely through this API from the *decoded/interpreted* data (row/col, icon asset bytes,
-action), re-encoding, and re-decoding reproduces every physical (row/col-addressable) key's
-icon and action with **zero mismatches** across two real theme files (39/39 keys in
-`时尚按键.Theme`; 80/80 non-encoder-slot keys in `defaultTheme.Theme` — the only apparent
-"mismatches" there were encoder-function key entries, which share a fixed `row=0,col=0`
-sentinel rather than a unique grid position, an artifact of the comparison script's simple
-row/col lookup, not a builder defect). Exact byte-for-byte file equality is intentionally
-*not* the bar — the real ScreenKeyWindows editor embeds extra bookkeeping fields (`itemName`,
-`backupX`/`backupY`, JSON key ordering/whitespace) that have no confirmed effect on device
-behavior; see `CaptureAnalyzer --builder-byte-diff <file.Theme>` to reproduce this check.
+Every item produced by this API matches the confirmed-required JSON field skeleton from
+§7.1. Cross-check method: decode a real theme file, rebuild its items through this API from
+the decoded data, re-encode, re-decode, and diff — reproduces every key's icon and action
+with zero mismatches. Exact byte-for-byte file equality is not the bar (the real editor
+embeds bookkeeping fields with no confirmed device-behavior effect); see
+`CaptureAnalyzer --builder-byte-diff <file.Theme>` to reproduce this check.
 
 ---
 
-## 8. Command Reference — Practical Sequences
+## 8. Command Reference — Quick Index
 
-### 8.1 Connect and identify
+Practical sequences already illustrated in §6 (with sequence diagrams); this is a quick
+lookup table only.
 
-```
-→ FIND_DEVICE   (empty)
-← FIND_DEVICE   Simple String Map (§5.1) — device identity
-```
+| Task | Commands | See |
+|---|---|---|
+| Connect / identify | `FIND_DEVICE` | §6.1 |
+| Set backlight | `SET_DEVICE_BL "<0-100>"` | §4 |
+| Push telemetry | `SEND_SYSTEM_DATA_TO_DEVICE` | §6.2 |
+| List installed themes | `GET_DEVICE_THEME` | §8.4 below |
+| Load a theme | `SET_DEVICE_RELOAD` → `SEND_JSON` contract | §6.2 |
+| Upload + activate a theme | `GET_DEVICE_THEME` → `FILE_START` → bulk → `FILE_END` → `SET_DEVICE_RELOAD` | §6.4 |
+| Delete a theme | `SET_DEVICE_DELETE_THEME` | §6.6 |
 
-### 8.2 Set backlight
-
-```
-→ SET_DEVICE_BL   "80"        (ASCII decimal, 0–100)
-```
-
-### 8.3 Push telemetry (theme must already declare matching keys — see §6.2)
-
-```
-→ SEND_SYSTEM_DATA_TO_DEVICE   { "CPU Usage": "42%" }
-```
-
-### 8.4 List installed themes
+### 8.4 `GET_DEVICE_THEME` reply shape
 
 ```
-→ GET_DEVICE_THEME   (empty)
 ← GET_DEVICE_THEME   Simple String Map (§5.1) — bytesTotal/bytesAvailable + path→CRC pairs
 ```
-
-### 8.5 Load a theme
-
-```
-→ SET_DEVICE_RELOAD   "/data/theme/MK20/<name>/<name>.Theme"
-← SET_DEVICE_RELOAD    (ack)
-← SEND_JSON             deviceRequestSystemData contract (§6.2)
-```
-
-### 8.6 Upload and activate a new/edited theme
-
-```
-→ FILE_START   { path: totalSize }
-← FILE_START   (empty payload ack)
-  … raw file bytes, 4096-byte chunks, no framing, no per-chunk ack (confirmed, §4.1) …
-→ FILE_END     { path: crc32AsDecimalText }
-← FILE_END     { "res": "1", "fileName": path }
-→ SET_DEVICE_RELOAD   path                (activate)
-```
-
-### 8.7 Delete a theme from the device
-
-```
-→ SET_DEVICE_DELETE_THEME   { "/data/theme/MK20/<name>/<name>.Theme": "" }
-← SET_DEVICE_DELETE_THEME   { "res": "1" }
-```
-A subsequent `GET_DEVICE_THEME` no longer lists the deleted path. No corresponding file
-deletion confirmation was observed on the device's underlying filesystem (out of scope for
-this protocol) - only the theme-listing/reply contract is confirmed.
 
 ---
 
@@ -1117,7 +985,7 @@ picture vs. GIF vs. video — only a bigger/smaller asset entry inside the same 
 | 3 | `ControlFlow` action with actual configured steps | **U** — only an empty/never-configured instance observed |
 | 4 | Achievable telemetry push rate | **U** — not benchmarked |
 | 5 | Bulk-transfer resilience: whether the device rejects/retries on a corrupt chunk or dropped connection mid-transfer | **U** — a retried upload was observed in the confirming capture but the retry-trigger condition was not isolated |
-| 7 | A specific 1-page/5-key synthesized test theme reloads far slower than any real theme of similar or larger size | **Open, low severity.** After fixing Item 6 (below), this exact same tiny (13,804-byte) synthesized theme uploads successfully and does NOT freeze the device, but its `SET_DEVICE_RELOAD` ack was not observed even after 60 seconds (vs. 1-16s for every real theme tested, including the 33MB `defaultTheme.Theme`). The device remained fully ping-responsive throughout and the upload's CRC verified correctly in the theme listing - this is a slow/uncompleted reload, not a hang. Not yet isolated to a specific structural cause (candidates: single-page-only structure, an unusual combination of item types not seen together in any real theme, or something about this specific background/key arrangement) - deprioritized since it no longer risks freezing the device, and every real-world theme tested since (13/13 vendor themes, several from-scratch built themes) reloads normally. |
+| 7 | A specific 1-page/5-key synthesized test theme reloads far slower than any real theme | **Open, low severity.** Uploads successfully, does not freeze the device, CRC verifies correctly, but `SET_DEVICE_RELOAD` ack was not observed even after 60s (vs. 1-16s for real themes up to 33MB). Not isolated to a specific cause; deprioritized since every real-world theme tested (13/13 vendor themes) reloads normally. |
 
 ### Resolved items
 
@@ -1135,9 +1003,6 @@ Previously-open issues, now closed - kept as terse historical notes only.
 | 14 | How to set a main-screen + secondary-screen background | Both are `DynamicImageItem` (type 114), not `BackgroundItem` (which is `.mp4`-video-only). Main: `x=0,y=144,w=640,h=512`, path `/image/640x656/cache/<file>`. Secondary: `x=106,y=0,w=428,h=142`, path `/image/428x142/PhotoAlbum/<file>`. Confirmed visually on real hardware for both a static image and a GIF. Added `DynamicImageItemBuilder.MainScreenBackground`/`.SecondaryScreenBackground`. |
 
 ---
-
-
-
 
 ## 11. Reference Implementation Map
 
