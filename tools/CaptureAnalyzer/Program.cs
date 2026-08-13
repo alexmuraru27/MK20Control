@@ -830,6 +830,7 @@ static int RunSelfTest()
     allPassed &= RunNamedTest("Theme pages always emit the confirmed-required page-level 'encoder' field", TestPageEncoderFieldPresence);
     allPassed &= RunNamedTest("Theme file header's 8-byte gap encodes (JSON length + 1) matching real files", TestHeaderJsonLengthField);
     allPassed &= RunNamedTest("KeyItemBuilder.AnimatedIcon produces a real, pressable animated key (paths/frameDelays/path=\"\")", TestAnimatedKeyIcon);
+    allPassed &= RunNamedTest("KeyActions.KeyboardCombo(modifiers, HidKey.Delete) encodes as confirmed real modifier-packed keycode 0x054C", TestCtrlAltDelEncoding);
     allPassed &= RunNamedTest("ThemeBuilder+ThemeEditor full round-trip (build, encode, decode, edit, re-encode, re-decode)", TestThemeBuilderEditorRoundTrip);
     allPassed &= RunNamedTest("Mk20DeviceClient refuses DeleteThemeAsync while a reload is unconfirmed", TestDeleteRefusedWhilePendingReload);
     allPassed &= RunNamedTest("Mk20DeviceClient serializes concurrent theme operations", TestThemeOperationsAreSerialized);
@@ -1224,6 +1225,30 @@ static bool TestAnimatedKeyIcon()
     }
 
     return true;
+}
+
+static bool TestCtrlAltDelEncoding()
+{
+    // Confirmed via a real ScreenKeyWindows capture (tools/Captures/
+    // capture18_ctrlaltdel.pcapng): a key assigned to Ctrl+Alt+Del in the vendor
+    // editor round-trips to a KeyboardAction with keycode=0x054C (modifier byte 0x05 =
+    // LeftCtrl|LeftAlt packed into the upper byte, base keycode 0x4C = Delete) and
+    // keyString="L Ctrl L Alt Del".
+    var action = KeyActions.KeyboardCombo(KeyModifiers.LeftCtrl | KeyModifiers.LeftAlt, HidKey.Delete, "L Ctrl L Alt Del");
+    if (action.Keycode != 0x054C) return false;
+    if (action.KeyLabel != "L Ctrl L Alt Del") return false;
+
+    var theme = new ThemeBuilder()
+        .AddPage(page => page
+            .SetCanvas(640, 656)
+            .AddKey(0, 0, key => key
+                .IconAssetPath("/static/icon/dark/keyboard_128x128.png")
+                .Action(action)))
+        .Build();
+    byte[] encoded = ThemeFileCodec.Encode(theme);
+    var decoded = ThemeFileCodec.Decode(encoded);
+    var kbd = decoded.Pages[0].Items.OfType<KeyItem>().First().Action as Mk20Control.Protocol.Theme.Actions.KeyboardAction;
+    return kbd is not null && kbd.Keycode == 0x054C && kbd.KeyLabel == "L Ctrl L Alt Del";
 }
 
 static bool TestThemeBuilderEditorRoundTrip()

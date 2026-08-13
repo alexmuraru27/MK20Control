@@ -44,12 +44,16 @@ MK20Control/
 
 > **`tools/Captures/`** holds the raw `.pcapng` files (capture.pcapng, capture2-14.pcapng)
 > and their `*_decode_output.txt` text summaries used to derive every finding in this
-> document. The `.pcapng` files are **sanitized**: filtered down to only the MK20's own
-> USB traffic (by device address, matching VID `1d6b:0104`/`1234:5678`), stripping all
-> other USB devices/hubs/Bluetooth activity that happened to be on the same bus during
-> capture. They're excluded from version control via `.gitignore` (large binary files) -
-> the `*_decode_output.txt` summaries are tracked and are the practical artifact to read;
-> regenerate the `.pcapng`-derived output anytime with
+> document. The `.pcapng` files are **sanitized in-place**: filtered down to only the
+> MK20's own USB traffic (by device address, matching VID `1d6b:0104`/`1234:5678`),
+> stripping all other USB devices/hubs/Bluetooth activity that happened to be on the same
+> bus during capture - no separate `_sanitized` copy is kept, the original file is
+> overwritten directly. Re-run anytime with `tools/Captures/sanitize.ps1` (auto-detects
+> each file's MK20 device address via tshark, filters via `usb.device_address == N`,
+> skip-and-warns for any file where no matching VID:PID is found). They're excluded from
+> version control via `.gitignore` (large binary files) - the `*_decode_output.txt`
+> summaries are tracked and are the practical artifact to read; regenerate the
+> `.pcapng`-derived output anytime with
 > `dotnet run --project tools\CaptureAnalyzer -- tools\Captures\captureN.pcapng`.
 
 ## `Mk20Control.Protocol` - the reusable API surface
@@ -204,7 +208,9 @@ match real theme files exactly - you do not need to supply these yourself.
 
 | Factory | Behavior | Confirmed real hardware notes |
 |---|---|---|
-| `KeyActions.Keyboard(keycode, keyLabel)` | Emit a keystroke. `keycode` is a USB HID keyboard usage code (e.g. `4`='A' .. `29`='Z', `0x1E`(30)='1' .. `0x26`(38)='9', `0x27`(39)='0'). | Sets the confirmed real fixed fields `description="Keyboard"`, `parentDescription="System input control"`, `iconPath="/static/icon/dark/keyboard.png"`, `AISoundControlKeyword=""`. |
+| `KeyActions.Keyboard(HidKey key, keyLabel)` | Emit a keystroke, strongly typed via the `HidKey` enum (e.g. `HidKey.A`, `HidKey.Digit1` .. `HidKey.Digit9`, `HidKey.Digit0`, `HidKey.Enter`, `HidKey.Delete`, ...). | Sets the confirmed real fixed fields `description="Keyboard"`, `parentDescription="System input control"`, `iconPath="/static/icon/dark/keyboard.png"`, `AISoundControlKeyword=""`. |
+| `KeyActions.Keyboard(int keycode, keyLabel)` | Same as above but with a raw USB HID usage code, for any key not yet in the `HidKey` enum. | |
+| `KeyActions.KeyboardCombo(KeyModifiers modifiers, HidKey key, keyLabel)` | Emit a keystroke with one or more held modifiers (Ctrl/Alt/Shift/Win), e.g. Ctrl+Alt+Del - both fully strongly typed, no raw integers needed. | **Confirmed via a real capture** (`tools/Captures/capture18_ctrlaltdel.pcapng`): a combo packs the USB HID modifier bitmask into the *upper byte* of the same `keycode` field a plain keystroke uses - `(modifiers << 8) \| (int)key`. |
 | `KeyActions.OpenWeb(url)` | Open a URL in the default browser. | |
 | `KeyActions.Mouse(mouseKey, mouseEvent, x, y, vScroll, hScroll)` | Mouse click/move/scroll. | Raw integers not individually enumerated/confirmed for every option - see `MouseAction` remarks. |
 | `KeyActions.PreviousPage()` / `.NextPage()` | Relative page navigation (always relative to the *current* page - not an absolute jump). | Confirmed real fixed fields: `description="Page switching"`, `parentDescription="Page switching"`, `iconPath="/static/icon/dark/PageSwitch.png"`. **Set the key's own icon to match** via `.IconAssetPath("/static/icon/dark/PageSwitch.png")` (do not register a custom asset for these keys - real ones never do). |
@@ -215,7 +221,70 @@ match real theme files exactly - you do not need to supply these yourself.
 | `KeyActions.KeyboardSwitch()` | Toggle/switch the active keyboard layout. | No extra fields beyond the common base. |
 | `KeyActions.EncoderKeyboard(...)` / `.EncoderFunction(...)` | Bind a rotary encoder's rotate-left/click/rotate-right actions. | For a key/theme's encoder *action* assignment - unrelated to the required page-level `"encoder"` hardware-descriptor array, which is handled automatically. |
 
+#### Keyboard modifiers and combos (`KeyModifiers` + `HidKey`)
+
+`Mk20Control.Protocol.Theme.Building.HidKey` is an enum of standard USB HID keyboard usage
+codes (`A`..`Z`, `Digit0`..`Digit9`, `Enter`, `Escape`, `Tab`, `Delete`, `F1`..`F12`, arrow
+keys, `LeftCtrl`/`LeftAlt`/etc. as plain keys, and more) so you never need to look up or
+hard-code a raw USB HID integer yourself - pass `HidKey.A` instead of `4`, `HidKey.Delete`
+instead of `0x4C`, etc.
+
+`Mk20Control.Protocol.Theme.Building.KeyModifiers` is a `[Flags]` enum for holding one or
+more modifier keys down *together with* a base `HidKey` keystroke (e.g. Ctrl+Alt+Del,
+Ctrl+Shift+Esc, Alt+Tab):
+
+```csharp
+[Flags]
+public enum KeyModifiers
+{
+    None = 0,
+    LeftCtrl = 1 << 0,   // confirmed via a real capture (Ctrl+Alt+Del)
+    LeftShift = 1 << 1,
+    LeftAlt = 1 << 2,    // confirmed via a real capture (Ctrl+Alt+Del)
+    LeftWin = 1 << 3,
+    RightCtrl = 1 << 4,
+    RightShift = 1 << 5,
+    RightAlt = 1 << 6,
+    RightWin = 1 << 7,
+}
+```
+
+Combine modifiers with the bitwise-or operator (`|`) and pass them, along with a `HidKey`,
+to the single generic `KeyActions.KeyboardCombo(modifiers, key, keyLabel)` function - there
+is no dedicated per-combo method (e.g. no `CtrlAltDel()`); every combo, confirmed or not,
+goes through this one strongly-typed entry point:
+
+```csharp
+// Ctrl+Alt+Del
+key.Action(KeyActions.KeyboardCombo(KeyModifiers.LeftCtrl | KeyModifiers.LeftAlt, HidKey.Delete, "L Ctrl L Alt Del"));
+
+// Ctrl+Shift+Esc (Windows Task Manager)
+key.Action(KeyActions.KeyboardCombo(KeyModifiers.LeftCtrl | KeyModifiers.LeftShift, HidKey.Escape, "Ctrl Shift Esc"));
+
+// Alt+Tab
+key.Action(KeyActions.KeyboardCombo(KeyModifiers.LeftAlt, HidKey.Tab, "Alt Tab"));
+
+// Ctrl+C (copy)
+key.Action(KeyActions.KeyboardCombo(KeyModifiers.LeftCtrl, HidKey.C, "Ctrl C"));
+```
+
+If `keyLabel` is omitted, a readable default (e.g. `"LeftCtrl+LeftAlt+Delete"`) is generated
+automatically from the modifiers and key.
+
+**How it's encoded on the wire** (confirmed via a real capture,
+`tools/Captures/capture18_ctrlaltdel.pcapng` - a key assigned to Ctrl+Alt+Del in
+the vendor editor and saved): there is no separate "modifier" field in `controlData` - the
+modifier bitmask is packed into the **upper byte** of the same 16-bit `keycode` field a
+plain keystroke uses, i.e. `KeyboardAction.Keycode = ((int)modifiers << 8) | (int)key`.
+For Ctrl+Alt+Del this produces `keycode = 0x054C` (modifier byte `0x05` = `LeftCtrl (bit0)
+| LeftAlt (bit2)`, base keycode `0x4C` = `HidKey.Delete`) - exactly what the real capture showed.
+Only `LeftCtrl`/`LeftAlt` (and the letter/digit `HidKey` values) have been individually
+confirmed against this device so far; the remaining `HidKey`/`KeyModifiers` values follow
+the same well-known USB HID Boot Keyboard standard but haven't each been separately
+verified - see `PROTOCOL_WAVESHARE_MK20.md` §7.1/§10 Item #12 for the full derivation.
+
 #### Multi-page themes with page navigation
+
 
 A common pattern - N pages of content keys, with the bottom-left/bottom-right keys
 switching pages (confirmed real convention, e.g. every multi-page vendor theme examined):

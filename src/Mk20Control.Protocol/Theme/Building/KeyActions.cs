@@ -16,7 +16,7 @@ public static class KeyActions
 {
     private static readonly Dictionary<string, TaggedValue> Empty = new();
 
-    /// <summary>Emits a keyboard keystroke. <paramref name="keycode"/> is a USB HID keyboard usage code (e.g. 4='A', 0x1E=30='1').</summary>
+    /// <summary>Emits a keyboard keystroke. <paramref name="keycode"/> is a USB HID keyboard usage code (e.g. 4='A', 0x1E=30='1'). Prefer the <see cref="HidKey"/> overload for compile-time-checked key names.</summary>
     public static KeyboardAction Keyboard(int keycode, string? keyLabel = null, string? description = null) => new()
     {
         RawType = "keyboard",
@@ -32,6 +32,37 @@ public static class KeyActions
         Keycode = keycode,
         KeyLabel = keyLabel,
     };
+
+    /// <summary>Emits a keyboard keystroke, strongly typed via <see cref="HidKey"/> instead of a raw USB HID integer code.</summary>
+    public static KeyboardAction Keyboard(HidKey key, string? keyLabel = null, string? description = null) =>
+        Keyboard((int)key, keyLabel ?? key.ToString(), description);
+
+    /// <summary>
+    /// Emits a keyboard keystroke with one or more held modifiers (e.g. Ctrl+Alt+Del,
+    /// Ctrl+Shift+Esc, Alt+Tab), both fully strongly typed. Confirmed via a real
+    /// ScreenKeyWindows capture (tools/Captures/capture18_ctrlaltdel.pcapng, a key assigned
+    /// to Ctrl+Alt+Del in the vendor editor and saved): a modifier combo packs the USB HID
+    /// keyboard-report modifier bitmask into the upper byte of the same <c>keycode</c>
+    /// field a plain keystroke uses - <c>(modifiers &lt;&lt; 8) | baseKeycode</c> - rather
+    /// than sending a separate modifier field. E.g.
+    /// <c>KeyboardCombo(KeyModifiers.LeftCtrl | KeyModifiers.LeftAlt, HidKey.Delete)</c> for
+    /// Ctrl+Alt+Del - confirmed byte-for-byte to encode as keycode <c>0x054C</c>.
+    /// </summary>
+    public static KeyboardAction KeyboardCombo(KeyModifiers modifiers, HidKey key, string? keyLabel = null, string? description = null) =>
+        Keyboard(((int)modifiers << 8) | ((int)key & 0xFF), keyLabel ?? DescribeCombo(modifiers, key), description);
+
+    /// <summary>Builds a human-readable default label for a modifier combo, e.g. "LeftCtrl+LeftAlt+Delete", used when no explicit <c>keyLabel</c> is supplied to <see cref="KeyboardCombo"/>.</summary>
+    private static string DescribeCombo(KeyModifiers modifiers, HidKey key)
+    {
+        var parts = new List<string>();
+        foreach (KeyModifiers flag in System.Enum.GetValues(typeof(KeyModifiers)))
+        {
+            if (flag != KeyModifiers.None && modifiers.HasFlag(flag))
+                parts.Add(flag.ToString());
+        }
+        parts.Add(key.ToString());
+        return string.Join("+", parts);
+    }
 
     /// <summary>Opens a URL in the host's default browser.</summary>
     public static OpenWebAction OpenWeb(string url, string? description = null) => new()

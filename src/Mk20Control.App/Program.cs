@@ -326,19 +326,19 @@ static byte[]? BuildSevenKeyThemeFromScratch(string iconsDir)
     // animated-icon mechanism - paths/frameDelays - NOT a type-114 DynamicImageItem, which
     // is a separate non-interactive decoration with no key behavior) and a 7th plain
     // keyboard key - built entirely from scratch via ThemeBuilder (no editing of an existing
-    // file), using the confirmed real USB HID digit keycodes consistently (keycode
-    // N-1+0x1E => label matches the actual keypress; e.g. keycode 0x1E=30 really is '1',
-    // keycode 0x26=38 really is '9' - confirmed against the real theme's own key #1:
-    // keycode 30 with keyString "1").
-    (int iconNum, int keycode, string label)[] keyboardKeys =
+    // file), using the confirmed real USB HID digit keys consistently (HidKey.Digit1 => the
+    // label matches the actual keypress; e.g. HidKey.Digit1 really is '1', HidKey.Digit9
+    // really is '9' - confirmed against the real theme's own key #1: keycode 30 with
+    // keyString "1"). Strongly typed via HidKey instead of raw USB HID integers.
+    (int iconNum, HidKey key, string label)[] keyboardKeys =
     {
-        (16, 0x1E, "1"), // '1'=30
-        (32, 0x1F, "2"), // '2'=31
-        (28, 0x20, "3"), // '3'=32
-        (40, 0x21, "4"), // '4'=33
-        (8,  0x22, "5"), // '5'=34
-        (20, 0x26, "9"), // '9'=38 - the label actually matches this keycode
-        (21, 0x27, "0"), // '0'=39 - the 7th key
+        (16, HidKey.Digit1, "1"),
+        (32, HidKey.Digit2, "2"),
+        (28, HidKey.Digit3, "3"),
+        (40, HidKey.Digit4, "4"),
+        (8,  HidKey.Digit5, "5"),
+        (20, HidKey.Digit9, "9"), // the label actually matches this key
+        (21, HidKey.Digit0, "0"), // the 7th key
     };
 
     string desktopGif = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "pop-cat.gif");
@@ -362,22 +362,26 @@ static byte[]? BuildSevenKeyThemeFromScratch(string iconsDir)
         page.SetCanvas(640, 656);
         for (int i = 0; i < keyboardKeys.Length; i++)
         {
-            var (iconNum, keycode, label) = keyboardKeys[i];
+            var (iconNum, key, label) = keyboardKeys[i];
             int row = i < 5 ? 0 : 1;
             int col = i < 5 ? i : i - 5;
             string iconFile = Path.Combine(iconsDir, $"icon_{iconNum:D2}.png");
 
             // The 6th key (index 5, row=1/col=1) is the animated cat key - a real,
-            // pressable KeyItem whose icon is the multi-frame animation, still assigned a
-            // keyboard action like every other key.
+            // pressable KeyItem whose icon is the multi-frame animation. Assigned
+            // Ctrl+Alt+Del via the strongly-typed KeyActions.KeyboardCombo/HidKey/
+            // KeyModifiers API instead of a plain digit keystroke - confirmed encoding via a
+            // real ScreenKeyWindows capture, see KeyboardAction remarks / PROTOCOL_WAVESHARE_MK20.md.
             bool isAnimatedKey = i == 5 && hasGif;
-            page.AddKey(row, col, key =>
+            page.AddKey(row, col, keyBuilder =>
             {
                 if (isAnimatedKey)
-                    key.AnimatedIcon("pop-cat", File.ReadAllBytes(desktopGif));
+                    keyBuilder.AnimatedIcon("pop-cat", File.ReadAllBytes(desktopGif));
                 else
-                    key.Icon($"icon_{iconNum:D2}.png", File.ReadAllBytes(iconFile));
-                key.Action(KeyActions.Keyboard(keycode, label));
+                    keyBuilder.Icon($"icon_{iconNum:D2}.png", File.ReadAllBytes(iconFile));
+                keyBuilder.Action(isAnimatedKey
+                    ? KeyActions.KeyboardCombo(KeyModifiers.LeftCtrl | KeyModifiers.LeftAlt, HidKey.Delete, "L Ctrl L Alt Del")
+                    : KeyActions.Keyboard(key, label));
             });
         }
     });
