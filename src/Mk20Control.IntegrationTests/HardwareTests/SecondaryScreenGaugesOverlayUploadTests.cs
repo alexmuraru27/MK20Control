@@ -8,25 +8,24 @@ namespace Mk20Control.IntegrationTests.HardwareTests;
 /// SANDBOX - builds and uploads the cat-GIF + every-gauge-type secondary-screen theme (see
 /// <see cref="SecondaryScreenGaugesOverlayThemeTests"/>), then pumps random CPU/RAM/GPU
 /// Usage telemetry for a fixed window so the overlay's live rendering over the animated GIF
-/// can be visually confirmed. Set <c>MK20_UPLOAD_DEVICE_PATH</c> to the destination
-/// device-side path and optionally <c>MK20_PUMP_SECONDS</c> (default 15) - the test is
-/// skipped if the device path isn't set. Requires <c>MK20_COM_PORT</c> - see
-/// <see cref="HardwareConnection"/>. Formerly <c>Mk20Control.App</c> menu option 17.
+/// can be visually confirmed. Uploads to the fixed self-contained path
+/// <see cref="DevicePaths.SecondaryScreenGaugesOverlay"/> by default (override via
+/// <c>MK20_UPLOAD_DEVICE_PATH</c>); optionally set <c>MK20_PUMP_SECONDS</c> (default 15).
+/// Requires <c>MK20_COM_PORT</c> - see <see cref="HardwareConnection"/>. Formerly
+/// <c>Mk20Control.App</c> menu option 17.
 /// </summary>
 public class SecondaryScreenGaugesOverlayUploadTests
 {
     [Test]
     public async Task BuildUploadAndPump_AnimatesOverlaidGauges()
     {
-        string? devicePath = Environment.GetEnvironmentVariable("MK20_UPLOAD_DEVICE_PATH");
-        if (string.IsNullOrWhiteSpace(devicePath))
-            Assert.Ignore("Set MK20_UPLOAD_DEVICE_PATH (e.g. /data/theme/MK20/gaugesbox/gaugesbox.Theme) to run this test.");
+        string devicePath = DevicePaths.Resolve(DevicePaths.SecondaryScreenGaugesOverlay);
 
         byte[] encoded = SecondaryScreenGaugesOverlayThemeTests.BuildTheme();
 
         await using var client = await HardwareConnection.OpenAsync();
         TestContext.WriteLine($"Uploading {encoded.Length} bytes to {devicePath}...");
-        await client.UploadThemeFileAsync(devicePath!, encoded, TimeSpan.FromSeconds(30));
+        await client.UploadThemeFileAsync(devicePath, encoded, TimeSpan.FromSeconds(30));
         TestContext.WriteLine("Upload complete and theme activated.");
 
         int seconds = int.TryParse(Environment.GetEnvironmentVariable("MK20_PUMP_SECONDS"), out int s) ? s : 15;

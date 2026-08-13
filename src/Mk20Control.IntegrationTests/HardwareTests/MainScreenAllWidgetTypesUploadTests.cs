@@ -10,25 +10,24 @@ namespace Mk20Control.IntegrationTests.HardwareTests;
 /// (random/ramp/sine/cosine/counter patterns, per widget) plus a live clock (hour/minute/
 /// second - the device's digital clock is host-driven, not RTC-driven, confirmed via a real
 /// capture) for a fixed window, so every widget type's live rendering can be visually
-/// confirmed at once. Set <c>MK20_UPLOAD_DEVICE_PATH</c> to the destination device-side path
-/// and optionally <c>MK20_PUMP_SECONDS</c> (default 15) - the test is skipped if the device
-/// path isn't set. Requires <c>MK20_COM_PORT</c> - see <see cref="HardwareConnection"/>.
-/// Formerly <c>Mk20Control.App</c> menu option 18.
+/// confirmed at once. Uploads to the fixed self-contained path
+/// <see cref="DevicePaths.MainScreenAllWidgetTypes"/> by default (override via
+/// <c>MK20_UPLOAD_DEVICE_PATH</c>); optionally set <c>MK20_PUMP_SECONDS</c> (default 15).
+/// Requires <c>MK20_COM_PORT</c> - see <see cref="HardwareConnection"/>. Formerly
+/// <c>Mk20Control.App</c> menu option 18.
 /// </summary>
 public class MainScreenAllWidgetTypesUploadTests
 {
     [Test]
     public async Task BuildUploadAndPump_AnimatesEveryWidgetType()
     {
-        string? devicePath = Environment.GetEnvironmentVariable("MK20_UPLOAD_DEVICE_PATH");
-        if (string.IsNullOrWhiteSpace(devicePath))
-            Assert.Ignore("Set MK20_UPLOAD_DEVICE_PATH (e.g. /data/theme/MK20/widgettest/widgettest.Theme) to run this test.");
+        string devicePath = DevicePaths.Resolve(DevicePaths.MainScreenAllWidgetTypes);
 
         byte[] encoded = MainScreenAllWidgetTypesThemeTests.BuildTheme();
 
         await using var client = await HardwareConnection.OpenAsync();
         TestContext.WriteLine($"Uploading {encoded.Length} bytes to {devicePath}...");
-        await client.UploadThemeFileAsync(devicePath!, encoded, TimeSpan.FromSeconds(30));
+        await client.UploadThemeFileAsync(devicePath, encoded, TimeSpan.FromSeconds(30));
         TestContext.WriteLine("Upload complete and theme activated.");
 
         int seconds = int.TryParse(Environment.GetEnvironmentVariable("MK20_PUMP_SECONDS"), out int s) ? s : 15;
