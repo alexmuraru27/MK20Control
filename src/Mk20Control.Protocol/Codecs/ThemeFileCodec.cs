@@ -222,6 +222,7 @@ public static class ThemeFileCodec
                     Rotate = rotate, Scale = scale, IsLocked = locked, RawJson = itemEl.Clone(),
                     AssetPath = TryGetString(itemEl, "path") ?? "",
                     SystemDataName = TryGetBool(itemEl, "system_data_flag") == true ? TryGetString(itemEl, "system_data_name") : null,
+                    BackgroundType = TryGetString(itemEl, "backgroundType"),
                 };
             case "109":
                 return new RadialGaugeItem
@@ -605,8 +606,16 @@ public static class ThemeFileCodec
                 break;
             case DynamicImageItem gif:
                 obj["path"] = gif.AssetPath;
-                obj["system_data_flag"] = gif.SystemDataName is not null ? "1" : "0";
-                if (gif.SystemDataName is not null) obj["system_data_name"] = gif.SystemDataName;
+                // Confirmed via a genuine user-captured ScreenKeyWindows save
+                // (capture20_bg_pic.pcapng): a "main" background DynamicImageItem has NO
+                // "system_data_flag"/"system_data_name" fields at all - unlike a plain
+                // (non-background) dynamic image, which always has "system_data_flag".
+                if (gif.BackgroundType != "main")
+                {
+                    obj["system_data_flag"] = gif.SystemDataName is not null ? "1" : "0";
+                    if (gif.SystemDataName is not null) obj["system_data_name"] = gif.SystemDataName;
+                }
+                if (gif.BackgroundType is not null) obj["backgroundType"] = gif.BackgroundType;
                 break;
             case KeyItem key:
                 obj["row"] = key.Row.ToString();

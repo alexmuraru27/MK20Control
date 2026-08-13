@@ -12,6 +12,18 @@ public interface IThemeAssetRegistry
     /// <summary>Registers a new binary asset and returns its virtual path for use in an item (e.g. <c>KeyItem.IconAssetPath</c>).</summary>
     string RegisterAsset(string suggestedFileName, byte[] data);
 
+    /// <summary>
+    /// Registers a new binary asset under an EXACT, caller-specified virtual path (not
+    /// derived/namespaced automatically like <see cref="RegisterAsset"/>) - for item types
+    /// confirmed to use a different asset-path convention than key icons, e.g.
+    /// <c>BackgroundItem</c>'s confirmed real path <c>/theme/MK20-PLUS/MainScreen/&lt;file&gt;</c>
+    /// (see PROTOCOL_WAVESHARE_MK20.md §7.1). Returns <paramref name="fullPath"/> unchanged
+    /// for convenience. If the same path is registered twice with different bytes, the
+    /// later registration silently overwrites the former (caller is expected to pass unique
+    /// paths when that matters).
+    /// </summary>
+    string RegisterAssetAtPath(string fullPath, byte[] data);
+
     /// <summary>Allocates a new unique item id string.</summary>
     string AllocateItemId();
 }

@@ -84,6 +84,13 @@ public sealed class ThemeBuilder : IThemeAssetRegistry
         return path;
     }
 
+    /// <summary>See <see cref="IThemeAssetRegistry.RegisterAssetAtPath"/>.</summary>
+    public string RegisterAssetAtPath(string fullPath, byte[] data)
+    {
+        _assets[fullPath] = new ThemeAsset { Path = fullPath, Data = data };
+        return fullPath;
+    }
+
     public string AllocateItemId() => (_nextItemId++).ToString();
 
     /// <summary>Builds the immutable <see cref="ThemeFile"/>. The first added page becomes <see cref="ThemeFile.CurrentPageId"/>.</summary>

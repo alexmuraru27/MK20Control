@@ -29,8 +29,7 @@ internal static class ThemeItemSkeletons
 
     public static JsonElement EmptyObject { get; } = JsonDocument.Parse("{}").RootElement.Clone();
 
-    /// <summary>
-    /// KeyItem (type 115) skeleton. <paramref name="maxWidth"/>/<paramref name="maxHeight"/>
+    /// <summary>KeyItem (type 115) skeleton. <paramref name="maxWidth"/>/<paramref name="maxHeight"/>
     /// are the cell's bounds (typically the canvas width/height for a full-page key grid);
     /// <paramref name="scaledWidthTo"/>/<paramref name="scaledHeightTo"/> is the rendered
     /// icon size (128x128 in every sample observed).
@@ -79,15 +78,29 @@ internal static class ThemeItemSkeletons
         return ToElement(obj);
     }
 
-    /// <summary>DynamicImageItem (type 114, animated GIF) skeleton.</summary>
-    public static JsonElement DynamicImageItem(double maxWidth, double maxHeight)
+    /// <summary>DynamicImageItem (type 114, animated GIF) skeleton. <paramref name="backgroundType"/>
+    /// changes the field set to match confirmed real captures exactly: a plain (non-background)
+    /// dynamic image keeps "paths"/"system_data_flag"; a "secondary" background additionally
+    /// gets "backupX"/"backupY" (observed as "0"/"0" in defaultTheme.Theme - editor-only
+    /// bookkeeping); a "main" background (confirmed via a genuine user-captured
+    /// ScreenKeyWindows save, tools/Captures/capture20_bg_pic.pcapng) has NONE of
+    /// paths/system_data_flag/backupX/backupY - just maxWidth/maxHeight.</summary>
+    public static JsonElement DynamicImageItem(double maxWidth, double maxHeight, string? backgroundType = null)
     {
         var obj = new JsonObject
         {
             ["maxWidth"] = maxWidth.ToString(),
             ["maxHeight"] = maxHeight.ToString(),
-            ["paths"] = "",
         };
+        if (backgroundType is null)
+        {
+            obj["paths"] = "";
+        }
+        else if (backgroundType == "secondary")
+        {
+            obj["backupX"] = "0";
+            obj["backupY"] = "0";
+        }
         return ToElement(obj);
     }
 

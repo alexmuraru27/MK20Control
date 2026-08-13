@@ -39,6 +39,16 @@ if (args.Length >= 2 && args[0] == "--theme")
     return RunThemeDecode(args[1]);
 }
 
+if (args.Length >= 4 && args[0] == "--theme-raw-key")
+{
+    return RunThemeRawKeyDump(args[1], int.Parse(args[2]), int.Parse(args[3]));
+}
+
+if (args.Length >= 4 && args[0] == "--theme-dump-asset")
+{
+    return RunThemeDumpAsset(args[1], args[2], args[3]);
+}
+
 if (args.Length >= 2 && args[0] == "--theme-roundtrip")
 {
     return RunThemeRoundTripCheck(args[1]);
@@ -738,6 +748,34 @@ static int RunThemeRoundTripCheck(string themePath)
     return ok ? 0 : 1;
 }
 
+static int RunThemeDumpAsset(string themePath, string assetPathSubstring, string outputPath)
+{
+    if (!File.Exists(themePath)) { Console.WriteLine($"File not found: {themePath}"); return 1; }
+    var theme = ThemeFileCodec.Decode(File.ReadAllBytes(themePath));
+    var asset = theme.Assets.FirstOrDefault(a => a.Path.Contains(assetPathSubstring));
+    if (asset is null) { Console.WriteLine($"No asset path containing '{assetPathSubstring}' found."); return 1; }
+    File.WriteAllBytes(outputPath, asset.Data);
+    Console.WriteLine($"Wrote {asset.Data.Length} bytes ({asset.Path}) to {outputPath}");
+    return 0;
+}
+
+static int RunThemeRawKeyDump(string themePath, int row, int col)
+{
+    if (!File.Exists(themePath)) { Console.WriteLine($"File not found: {themePath}"); return 1; }
+    var theme = ThemeFileCodec.Decode(File.ReadAllBytes(themePath));
+    foreach (var page in theme.Pages)
+    {
+        var keys = page.Items.OfType<Mk20Control.Protocol.Theme.Items.KeyItem>().Where(k => k.Row == row && k.Column == col).ToList();
+        if (keys.Count > 0)
+        {
+            Console.WriteLine($"Page {page.PageName}: {keys.Count} item(s) at row={row} col={col}");
+            foreach (var key in keys)
+                Console.WriteLine(key.RawJson.GetRawText());
+        }
+    }
+    return 0;
+}
+
 static int RunThemeDecode(string themePath)
 {
     if (!File.Exists(themePath))
@@ -831,6 +869,8 @@ static int RunSelfTest()
     allPassed &= RunNamedTest("Theme file header's 8-byte gap encodes (JSON length + 1) matching real files", TestHeaderJsonLengthField);
     allPassed &= RunNamedTest("KeyItemBuilder.AnimatedIcon produces a real, pressable animated key (paths/frameDelays/path=\"\")", TestAnimatedKeyIcon);
     allPassed &= RunNamedTest("KeyActions.KeyboardCombo(modifiers, HidKey.Delete) encodes as confirmed real modifier-packed keycode 0x054C", TestCtrlAltDelEncoding);
+    allPassed &= RunNamedTest("KeyItemBuilder.Title/.Opacity/.TitleStyle round-trip matches confirmed real 'text over button' encoding", TestKeyTitleAndOpacity);
+    allPassed &= RunNamedTest("DynamicImageItemBuilder.MainScreenBackground/.SecondaryScreenBackground embed confirmed-real main+secondary screen backgrounds (both type-114, different asset namespaces)", TestSecondaryScreenBackgroundEmbedding);
     allPassed &= RunNamedTest("ThemeBuilder+ThemeEditor full round-trip (build, encode, decode, edit, re-encode, re-decode)", TestThemeBuilderEditorRoundTrip);
     allPassed &= RunNamedTest("Mk20DeviceClient refuses DeleteThemeAsync while a reload is unconfirmed", TestDeleteRefusedWhilePendingReload);
     allPassed &= RunNamedTest("Mk20DeviceClient serializes concurrent theme operations", TestThemeOperationsAreSerialized);
@@ -1249,6 +1289,80 @@ static bool TestCtrlAltDelEncoding()
     var decoded = ThemeFileCodec.Decode(encoded);
     var kbd = decoded.Pages[0].Items.OfType<KeyItem>().First().Action as Mk20Control.Protocol.Theme.Actions.KeyboardAction;
     return kbd is not null && kbd.Keycode == 0x054C && kbd.KeyLabel == "L Ctrl L Alt Del";
+}
+
+static bool TestKeyTitleAndOpacity()
+{
+    // Confirmed via a real ScreenKeyWindows capture (tools/Captures/
+    // capture19_text_over_buttons_and_txtinput.pcapng): showing text over a button's icon
+    // is the SAME key item with "title" set and "opacity" lowered (e.g. "15") - not a
+    // separate overlay item - confirmed by diffing two consecutive real theme uploads where
+    // only one key at the same row/col changed, gaining a title and opacity=15 together.
+    // TitleAlignment "top" used here (not "center") - confirmed real value, see
+    // KeyItemBuilder.TitleStyle remarks (only "top"/"bottom" observed in any real theme;
+    // "center" was tried and confirmed NOT to visibly center the title on real hardware).
+    var theme = new ThemeBuilder()
+        .AddPage(page => page
+            .SetCanvas(640, 656)
+            .AddKey(0, 0, key => key
+                .IconAssetPath("/static/icon/dark/keyboard_128x128.png")
+                .Title("text over")
+                .Opacity(15)
+                .TitleStyle(alignment: "top", colorHex: "#ff0000")
+                .Action(KeyActions.Keyboard(HidKey.A))))
+        .Build();
+    byte[] encoded = ThemeFileCodec.Encode(theme);
+    var decoded = ThemeFileCodec.Decode(encoded);
+    var key = decoded.Pages[0].Items.OfType<KeyItem>().First();
+
+    if (!key.RawJson.TryGetProperty("title", out var titleEl) || titleEl.GetString() != "text over") return false;
+    if (!key.RawJson.TryGetProperty("opacity", out var opacityEl) || opacityEl.GetString() != "15") return false;
+    if (!key.RawJson.TryGetProperty("titleParam", out var tpEl)) return false;
+    using var tpDoc = JsonDocument.Parse(tpEl.GetString() ?? "{}");
+    if (tpDoc.RootElement.GetProperty("TitleAlignment").GetString() != "top") return false;
+    if (tpDoc.RootElement.GetProperty("TitleColor").GetString() != "#ff0000") return false;
+    return true;
+}
+
+static bool TestSecondaryScreenBackgroundEmbedding()
+{
+    // Confirmed via TWO real, genuine ScreenKeyWindows-saved references:
+    // (1) defaultTheme.Theme: the secondary (2.8") screen's own background image/GIF is
+    //     embedded as a type-114 DynamicImageItem at the fixed position x=106,y=0,w=428,
+    //     h=142 with "backgroundType":"secondary", inside the SAME 640x656 main-screen page.
+    // (2) A user-captured save (tools/Captures/capture20_bg_pic.pcapng) of a picture added
+    //     as the MAIN screen's background through the vendor editor: this is ALSO a
+    //     type-114 DynamicImageItem (NOT a type-100 BackgroundItem, which an earlier attempt
+    //     incorrectly assumed and was confirmed on real hardware to not render), at
+    //     x=0,y=144,w=640,h=512,z=-2 with "backgroundType":"main" and asset path
+    //     "/image/640x656/cache/<file>" - a third, different asset namespace from either the
+    //     key-icon one or the .mp4-based BackgroundItem one. See
+    //     PROTOCOL_WAVESHARE_MK20.md §6.5/§10 Item #14 for the full investigation.
+    byte[] tinyPng = Convert.FromHexString(
+        "89504E470D0A1A0A0000000D49484452000000040000000408020000002620441A" +
+        "0000000C4944415478DA636460606000000005000106CDA31F0000000049454E44AE426082");
+
+    var theme = new ThemeBuilder()
+        .AddPage(page => page
+            .SetCanvas(640, 656)
+            .AddDynamicImage(img => img.MainScreenBackground("main_bg.png", tinyPng))
+            .AddDynamicImage(img => img.SecondaryScreenBackground("secondary_bg.png", tinyPng)))
+        .Build();
+    byte[] encoded = ThemeFileCodec.Encode(theme);
+    var decoded = ThemeFileCodec.Decode(encoded);
+
+    var mainBg = decoded.Pages[0].Items.OfType<Mk20Control.Protocol.Theme.Items.DynamicImageItem>()
+        .FirstOrDefault(d => d.BackgroundType == "main");
+    var secondaryBg = decoded.Pages[0].Items.OfType<Mk20Control.Protocol.Theme.Items.DynamicImageItem>()
+        .FirstOrDefault(d => d.BackgroundType == "secondary");
+
+    if (mainBg is null) return false;
+    if (mainBg.X != 0 || mainBg.Y != 144 || mainBg.Width != 640 || mainBg.Height != 512) return false;
+    if (!mainBg.AssetPath.StartsWith("/image/640x656/cache/")) return false;
+    if (secondaryBg is null) return false;
+    if (secondaryBg.X != 106 || secondaryBg.Y != 0 || secondaryBg.Width != 428 || secondaryBg.Height != 142) return false;
+    if (!secondaryBg.RawJson.TryGetProperty("backgroundType", out var btEl) || btEl.GetString() != "secondary") return false;
+    return true;
 }
 
 static bool TestThemeBuilderEditorRoundTrip()

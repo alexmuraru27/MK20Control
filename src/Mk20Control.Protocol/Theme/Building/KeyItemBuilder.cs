@@ -23,6 +23,11 @@ public sealed class KeyItemBuilder
     private string? _animatedFrameDelays;
     private Actions.KeyAction? _action;
     private string _title = "";
+    private int _opacity = 100;
+    private string? _titleFontFamily;
+    private double? _titleFontSize;
+    private string? _titleAlignment;
+    private string? _titleColor;
     // Real key items always have "lock":"1"; default to locked to match.
     private bool _locked = true;
 
@@ -102,6 +107,39 @@ public sealed class KeyItemBuilder
         return this;
     }
 
+    /// <summary>
+    /// Sets this key's opacity/transparency, from 0 (fully transparent) to 100 (fully
+    /// opaque, the default matching most real theme keys). Confirmed via a real
+    /// ScreenKeyWindows capture (tools/Captures/capture19_text_over_buttons_and_txtinput.pcapng
+    /// - a key edited in the vendor editor to show a title with a translucent icon):
+    /// setting the icon's transparency in the editor's UI produces <c>"opacity":"15"</c> in
+    /// the resulting <c>.Theme</c> file - i.e. the same key item, not a separate overlay
+    /// item, simply gets its own <c>opacity</c> field lowered alongside its <c>title</c>.
+    /// </summary>
+    public KeyItemBuilder Opacity(int opacityPercent)
+    {
+        _opacity = opacityPercent;
+        return this;
+    }
+
+    /// <summary>
+    /// Customizes the on-screen title's font/appearance (the <c>titleParam</c> JSON field).
+    /// Any parameter left null keeps the confirmed real default for that sub-field
+    /// (Microsoft YaHei, size 24, white, bottom-aligned, title and icon both shown).
+    /// <paramref name="alignment"/>: only <c>"top"</c> and <c>"bottom"</c> are confirmed
+    /// real values (observed across every vendor theme examined) - no other value (e.g.
+    /// "center") was found in any real theme, and passing one produced no visible centering
+    /// effect on real hardware (falls back to the default rendering, likely "bottom").
+    /// </summary>
+    public KeyItemBuilder TitleStyle(string? fontFamily = null, double? fontSize = null, string? alignment = null, string? colorHex = null)
+    {
+        _titleFontFamily = fontFamily;
+        _titleFontSize = fontSize;
+        _titleAlignment = alignment;
+        _titleColor = colorHex;
+        return this;
+    }
+
     /// <summary>Marks the key as locked/unlocked. Real key items always have "lock":"1"; defaults to locked to match.</summary>
     public KeyItemBuilder Locked(bool locked = true)
     {
@@ -136,8 +174,30 @@ public sealed class KeyItemBuilder
             Action = _action,
             RawJson = ThemeItemSkeletons.KeyItem(
                 _maxWidth, _maxHeight, _scaledWidthTo, _scaledHeightTo, _title,
+                titleParam: BuildTitleParamOverride(),
+                opacity: _opacity.ToString(),
                 paths: _animatedFolderPath ?? "",
                 frameDelays: _animatedFrameDelays),
         };
+    }
+
+    /// <summary>Builds a custom titleParam JSON string if any style override was set via <see cref="TitleStyle"/>, or null to keep the confirmed real default.</summary>
+    private string? BuildTitleParamOverride()
+    {
+        if (_titleFontFamily is null && _titleFontSize is null && _titleAlignment is null && _titleColor is null)
+            return null;
+
+        var obj = new System.Text.Json.Nodes.JsonObject
+        {
+            ["FontFamily"] = _titleFontFamily ?? "Microsoft YaHei",
+            ["FontSize"] = _titleFontSize ?? 24,
+            ["FontStyle"] = "",
+            ["FontUnderline"] = false,
+            ["ShowImage"] = true,
+            ["ShowTitle"] = true,
+            ["TitleAlignment"] = _titleAlignment ?? "bottom",
+            ["TitleColor"] = _titleColor ?? "#ffffff",
+        };
+        return obj.ToJsonString();
     }
 }

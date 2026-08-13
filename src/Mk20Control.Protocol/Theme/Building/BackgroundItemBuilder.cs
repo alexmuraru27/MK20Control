@@ -37,7 +37,14 @@ public sealed class BackgroundItemBuilder
     {
         _surface = BackgroundSurface.Main;
         _rawSurface = "main";
-        _assetPath = _owner.RegisterAsset(suggestedFileName, imageOrGifOrMp4Bytes);
+        // Confirmed via every real theme file examined with a background item (pixso.Theme,
+        // 字母.Theme, AE.Theme, AI.Theme, PS.Theme, ...): a main-screen background's asset
+        // path is ALWAYS "/theme/MK20-PLUS/MainScreen/<file>" - a DIFFERENT namespace from
+        // key icons' confirmed "/image/MK20/cache/<file>" (see ThemeBuilder.RegisterAsset).
+        // Using the key-icon namespace here (as this builder previously did, via the shared
+        // RegisterAsset helper) makes the device unable to find the asset - the background
+        // simply doesn't render, even though the theme file itself is otherwise well-formed.
+        _assetPath = _owner.RegisterAssetAtPath($"/theme/MK20-PLUS/MainScreen/{suggestedFileName}", imageOrGifOrMp4Bytes);
         return this;
     }
 
@@ -46,7 +53,10 @@ public sealed class BackgroundItemBuilder
     {
         _surface = BackgroundSurface.Secondary;
         _rawSurface = "secondary";
-        _assetPath = _owner.RegisterAsset(suggestedFileName, imageOrGifOrMp4Bytes);
+        // Confirmed real path convention for secondary-screen backgrounds observed via
+        // defaultTheme.Theme's asset listing ("/image/428x142/PhotoAlbum/<file>") - same
+        // "different namespace than key icons" principle as MainScreen above.
+        _assetPath = _owner.RegisterAssetAtPath($"/image/428x142/PhotoAlbum/{suggestedFileName}", imageOrGifOrMp4Bytes);
         return this;
     }
 

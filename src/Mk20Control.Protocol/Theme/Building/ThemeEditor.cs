@@ -80,6 +80,13 @@ public sealed class ThemeEditor : IThemeAssetRegistry
         return path;
     }
 
+    /// <summary>See <see cref="IThemeAssetRegistry.RegisterAssetAtPath"/>.</summary>
+    public string RegisterAssetAtPath(string fullPath, byte[] data)
+    {
+        _assets[fullPath] = new ThemeAsset { Path = fullPath, Data = data };
+        return fullPath;
+    }
+
     /// <summary>Allocates a new unique item id string, starting from a high number to avoid colliding with the source theme's existing item ids.</summary>
     public string AllocateItemId() => (_nextItemId++).ToString();
 
@@ -151,6 +158,24 @@ public sealed class ThemeEditor : IThemeAssetRegistry
             using var doc = System.Text.Json.JsonDocument.Parse(
                 System.Text.Json.Nodes.JsonNode.Parse(key.RawJson.GetRawText())!.AsObject()
                     .Also(o => o["title"] = title).ToJsonString());
+            ReplaceItem(key, key with { RawJson = doc.RootElement.Clone() });
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the opacity/transparency of the key at (<paramref name="row"/>, <paramref
+        /// name="column"/>), from 0 (fully transparent) to 100 (fully opaque, the default).
+        /// Confirmed via a real ScreenKeyWindows capture
+        /// (tools/Captures/capture19_text_over_buttons_and_txtinput.pcapng): making an
+        /// icon translucent so a title reads clearly over it produces
+        /// <c>"opacity":"15"</c> on that same key item - throws if no key exists there.
+        /// </summary>
+        public PageEditor SetKeyOpacity(int row, int column, int opacityPercent)
+        {
+            var key = FindKey(row, column) ?? throw new InvalidOperationException($"No key at row={row}, column={column}.");
+            using var doc = System.Text.Json.JsonDocument.Parse(
+                System.Text.Json.Nodes.JsonNode.Parse(key.RawJson.GetRawText())!.AsObject()
+                    .Also(o => o["opacity"] = opacityPercent.ToString()).ToJsonString());
             ReplaceItem(key, key with { RawJson = doc.RootElement.Clone() });
             return this;
         }

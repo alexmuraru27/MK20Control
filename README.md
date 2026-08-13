@@ -169,13 +169,13 @@ page builder directly for imperative-style chaining instead of a lambda).
 |---|---|
 | `.SetCanvas(width, height, showUnit=true)` | Canvas size - always `640, 656` for the confirmed real main screen; call before adding items that depend on it (e.g. a full-bleed background). |
 | `.AddKey(row, col, configure)` | Adds a physical key (see `KeyItemBuilder` below). |
-| `.AddBackground(configure)` | Adds a background image/video (see `BackgroundItemBuilder`). |
+| `.AddBackground(configure)` | Adds a background image/video for the main OR secondary screen (see `BackgroundItemBuilder.MainScreen`/`.SecondaryScreen`). |
 | `.AddText(configure)` | Static or data-bound text label. |
 | `.AddProgressBar(configure)` | Data-bound circular/linear progress bar. |
 | `.AddLinearGauge(configure)` | Data-bound solid-color bar gauge. |
 | `.AddRadialGauge(configure)` | Data-bound arc/radial gauge with gradient stops. |
 | `.AddDigitalClockField(configure)` | One clock field (`"hour"`/`"minute"`/`"second"`) - combine 2-3 adjacent items for a full clock. |
-| `.AddDynamicImage(configure)` | A **non-interactive, decorative** animated GIF (type 114) - NOT pressable and carries no key action. For a pressable animated **key**, use `KeyItemBuilder.AnimatedIcon` instead (see below) - these are two entirely different mechanisms; using the wrong one for "I want an animated button" is a common mistake. |
+| `.AddDynamicImage(configure)` | A **non-interactive, decorative** animated GIF (type 114) - NOT pressable and carries no key action. For a pressable animated **key**, use `KeyItemBuilder.AnimatedIcon` instead (see below) - these are two entirely different mechanisms; using the wrong one for "I want an animated button" is a common mistake. Also the mechanism for `DynamicImageItemBuilder.SecondaryScreenBackground(...)` below. |
 | `.PageId` | This page's auto-generated GUID id - reference it from `KeyActions.OpenPage(pageId)` for folder-style navigation to a *specific* page (as opposed to `PreviousPage()`/`NextPage()`, which are always relative to the current page, not absolute). |
 
 Every page **must** carry a page-level `"encoder"` array describing the device's physical
@@ -197,6 +197,8 @@ non-grid-aligned position (uncommon).
 | `.IconAssetPath(rawPath)` | Sets `"path"` to an arbitrary string directly, without registering any new asset - use this to reference an already-registered asset (e.g. shared icon across several keys) **or** one of the device's built-in static system icons, e.g. `"/static/icon/dark/PageSwitch.png"` (the confirmed real icon used by every real page-navigation key - see `KeyActions.PreviousPage`/`NextPage` example below). |
 | `.Action(keyAction)` | Assigns the key's behavior - build one via `KeyActions` (see table below). |
 | `.Title(text)` | On-screen label text (rendered per `titleParam.ShowTitle`; empty by default, matching most real keys). |
+| `.Opacity(percent)` | Sets the key's icon opacity/transparency, 0 (fully transparent) to 100 (fully opaque, default). **Confirmed via a real capture** (`tools/Captures/capture19_text_over_buttons_and_txtinput.pcapng`): the vendor editor's "transparency" control writes this same field - commonly lowered (e.g. to `15`) alongside `.Title(...)` so text reads clearly over a dimmed icon. |
+| `.TitleStyle(fontFamily, fontSize, alignment, colorHex)` | Overrides the title's font/size/alignment/color (`titleParam`); any parameter left `null` keeps the confirmed real default (Microsoft YaHei, 24pt, white, bottom-aligned). |
 | `.IconSize(width, height)` | Overrides the *rendered* icon size in pixels (defaults to 128x128, matching every real theme). |
 | `.Locked(locked=true)` | Real key items always have `"lock":"1"`; defaults to locked to match - very unlikely you'd ever need `false`. |
 
@@ -283,6 +285,39 @@ confirmed against this device so far; the remaining `HidKey`/`KeyModifiers` valu
 the same well-known USB HID Boot Keyboard standard but haven't each been separately
 verified - see `PROTOCOL_WAVESHARE_MK20.md` §7.1/§10 Item #12 for the full derivation.
 
+#### Main-screen + secondary-screen backgrounds in one theme
+
+A theme can drive the main (20-key) screen's picture/GIF background AND the secondary
+(2.8") screen's background at the same time, from a single page - **confirmed via two
+genuine ScreenKeyWindows-saved references** (the user added a picture, then separately an
+animated GIF, as the main-screen background through the vendor editor itself and captured
+both uploads):
+
+```csharp
+var theme = new ThemeBuilder()
+    .AddPage(page => page
+        .SetCanvas(640, 656)
+        .AddDynamicImage(img => img.MainScreenBackground("main_bg.jpg", File.ReadAllBytes("main_bg.jpg")))
+        .AddDynamicImage(img => img.SecondaryScreenBackground("secondary_bg.gif", File.ReadAllBytes("secondary_bg.gif")))
+        .AddKey(0, 0, key => key.Icon("icon_01.png", ...).Action(KeyActions.Keyboard(HidKey.Digit1, "1"))))
+    .Build();
+```
+
+Both the main-screen and secondary-screen backgrounds use the **same item type**
+(`DynamicImageItem`, type 114) - NOT `BackgroundItem` (type 100, which is confirmed to be
+used only by every vendor-shipped theme's `.mp4`-video background, a separate mechanism
+this library cannot construct from scratch since it has no MP4 encoder;
+`BackgroundItemBuilder.MainScreen(...)` remains available if you already have pre-encoded
+MP4 bytes). `.MainScreenBackground(...)` auto-positions at the confirmed real main-screen
+coverage area (0, 144, 640x512) and registers the asset under the confirmed real
+`/image/640x656/cache/<file>` path; `.SecondaryScreenBackground(...)` auto-positions at
+the confirmed real fixed secondary-screen position/size (106, 0, 428x142) under
+`/image/428x142/PhotoAlbum/<file>`. Both accept plain static images or animated GIFs -
+**confirmed on real hardware for both** - but note one confirmed behavioral difference: a
+static image is resized/cropped by ScreenKeyWindows to exactly fill its target area, while
+a GIF is embedded at its **original, unresized size** (the device does not appear to
+stretch a GIF background to fill the area).
+
 #### Multi-page themes with page navigation
 
 
@@ -320,7 +355,9 @@ API, applied to a decoded `ThemeFile`:
 var editor = new ThemeEditor(ThemeFileCodec.Decode(existingThemeBytes));
 editor.Page(0).SetKeyIcon(row: 0, column: 2, "new_icon.png", File.ReadAllBytes("new_icon.png"));
 editor.Page(0).SetKeyAction(row: 0, column: 2, KeyActions.TypeText("hello"));
-editor.Page(0).AddKey(row: 1, column: 0, key => key.Icon("icon_05.png", ...).Action(KeyActions.Keyboard(0x22, "5")));
+editor.Page(0).SetKeyTitle(row: 0, column: 2, "text over");
+editor.Page(0).SetKeyOpacity(row: 0, column: 2, 15); // dim the icon so the title reads clearly
+editor.Page(0).AddKey(row: 1, column: 0, key => key.Icon("icon_05.png", ...).Action(KeyActions.Keyboard(HidKey.Digit5, "5")));
 byte[] updatedBytes = ThemeFileCodec.Encode(editor.Save());
 ```
 

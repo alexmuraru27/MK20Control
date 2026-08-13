@@ -13,6 +13,10 @@ using Mk20Control.Protocol.Theme;
 using Mk20Control.Protocol.Theme.Actions;
 using Mk20Control.Protocol.Theme.Building;
 using Mk20Control.Protocol.Theme.Items;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.Formats.Gif;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Processing;
 
 // Interactive sandbox for Mk20Control.Protocol's confirmed MK20 device API. Every operation
 // exposed here maps directly to a method on Mk20DeviceClient - see that type's XML
@@ -62,6 +66,33 @@ if (args.Length >= 1 && args[0] == "--build-7key-scratch")
     string outPath = Path.Combine(Path.GetTempPath(), "mk20-7key-scratch-theme.Theme");
     File.WriteAllBytes(outPath, built);
     Console.WriteLine($"Saved to {outPath}");
+    return;
+}
+
+if (args.Length >= 1 && args[0] == "--build-title-opacity-demo")
+{
+    byte[]? built = BuildTitleOpacityDemoThemeFromScratch(iconsDir);
+    if (built is null) return;
+    string outPath = Path.Combine(Path.GetTempPath(), "mk20-title-opacity-demo-theme.Theme");
+    File.WriteAllBytes(outPath, built);
+    Console.WriteLine($"Saved to {outPath}");
+    string previewPath = Path.Combine(Path.GetTempPath(), "mk20-title-opacity-demo-theme.png");
+    GeneratePreviewPng(iconsDir, previewPath);
+    Console.WriteLine($"Saved preview to {previewPath}");
+    return;
+}
+
+if (args.Length >= 1 && args[0] == "--build-title-opacity-backgrounds-demo")
+{
+    byte[]? built = BuildTitleOpacityDemoWithBackgroundsFromScratch(iconsDir);
+    if (built is null) return;
+    string outPath = Path.Combine(Path.GetTempPath(), "mk20-title-opacity-backgrounds-demo-theme.Theme");
+    File.WriteAllBytes(outPath, built);
+    Console.WriteLine($"Saved to {outPath}");
+    string previewPath = Path.Combine(Path.GetTempPath(), "mk20-title-opacity-backgrounds-demo-theme.png");
+    string mainBgImagePathForPreview = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Racing_Setup_Cheatsheet.jpg");
+    GenerateRealBackgroundPreviewPng(iconsDir, mainBgImagePathForPreview, previewPath);
+    Console.WriteLine($"Saved preview to {previewPath}");
     return;
 }
 
@@ -398,6 +429,279 @@ static byte[]? BuildSevenKeyThemeFromScratch(string iconsDir)
 
     Console.WriteLine($"Built 7-key-from-scratch theme: {encoded.Length} bytes, {reKeys.Count} pressable keyboard key(s)" +
         $"{(hasGif ? " (1 of which shows an animated GIF)" : "")}, {reDecoded.Assets.Count} asset(s), round-trip: {(roundTripOk ? "PASSED" : "FAILED")}");
+    if (!roundTripOk)
+    {
+        Console.WriteLine("Aborting - local round-trip verification failed.");
+        return null;
+    }
+
+    return encoded;
+}
+
+/// <summary>Generates a simple 640x656 preview PNG showing the theme's key icons in a row -
+/// ScreenKeyWindows requires a matching .png file alongside a .Theme file to show it in its
+/// theme library thumbnail list; exact pixel content is not load-bearing for the device
+/// itself, only for the vendor UI's thumbnail.</summary>
+static void GeneratePreviewPng(string iconsDir, string outputPath)
+{
+    using var canvas = new SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgb24>(640, 656, SixLabors.ImageSharp.Color.Black);
+    int[] iconNums = { 2, 3, 4, 5, 8 };
+    for (int i = 0; i < iconNums.Length; i++)
+    {
+        string iconFile = Path.Combine(iconsDir, $"icon_{iconNums[i]:D2}.png");
+        if (!File.Exists(iconFile)) continue;
+        using var icon = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.Rgb24>(iconFile);
+        icon.Mutate(x => x.Resize(128, 128));
+        canvas.Mutate(x => x.DrawImage(icon, new SixLabors.ImageSharp.Point(i * 128, 144), 1f));
+    }
+    using var ms = new MemoryStream();
+    canvas.Save(ms, new PngEncoder());
+    File.WriteAllBytes(outputPath, ms.ToArray());
+}
+
+/// <summary>Like <see cref="GeneratePreviewPng"/>, but composites the icons on top of this
+/// theme's actual main-screen background image, for a more representative thumbnail.</summary>
+static void GenerateRealBackgroundPreviewPng(string iconsDir, string mainBackgroundImagePath, string outputPath)
+{
+    using var bgFrame = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.Rgb24>(mainBackgroundImagePath);
+    bgFrame.Mutate(x => x.Resize(new SixLabors.ImageSharp.Processing.ResizeOptions
+    {
+        Size = new SixLabors.ImageSharp.Size(640, 512),
+        Mode = SixLabors.ImageSharp.Processing.ResizeMode.Crop,
+    }));
+    using var canvas = new SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgb24>(640, 656, SixLabors.ImageSharp.Color.Black);
+    canvas.Mutate(x => x.DrawImage(bgFrame, new SixLabors.ImageSharp.Point(0, 144), 1f));
+
+    int[] iconNums = { 1, 2, 3, 4, 5 };
+    for (int i = 0; i < iconNums.Length; i++)
+    {
+        string iconFile = Path.Combine(iconsDir, $"icon_{iconNums[i]:D2}.png");
+        if (!File.Exists(iconFile)) continue;
+        using var icon = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.Rgb24>(iconFile);
+        icon.Mutate(x => x.Resize(128, 128));
+        canvas.Mutate(x => x.DrawImage(icon, new SixLabors.ImageSharp.Point(i * 128, 144), 1f));
+    }
+    using var ms2 = new MemoryStream();
+    canvas.Save(ms2, new PngEncoder());
+    File.WriteAllBytes(outputPath, ms2.ToArray());
+}
+
+/// <summary>
+/// Loads a real image/GIF file from disk and resizes every frame to fill the exact target
+/// size (cropping to preserve aspect ratio, matching how every real background asset
+/// examined was pre-scaled to precisely the item's declared w/h - e.g. every real
+/// secondary-screen GIF is exactly 428x142, not scaled by the device at render time).
+/// Preserves the original frame count/delays/loop count for animated sources. Intended for
+/// the secondary screen only - see remarks on <see cref="ResizeImageToStaticFill"/> for why
+/// the main screen does not use this.
+/// </summary>
+static byte[] ResizeImageOrGifToFill(string filePath, int targetWidth, int targetHeight)
+{
+    using var source = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.Rgba32>(filePath);
+    source.Mutate(ctx => ctx.Resize(new SixLabors.ImageSharp.Processing.ResizeOptions
+    {
+        Size = new SixLabors.ImageSharp.Size(targetWidth, targetHeight),
+        Mode = SixLabors.ImageSharp.Processing.ResizeMode.Crop,
+    }));
+    using var ms = new MemoryStream();
+    if (source.Frames.Count > 1)
+        source.Save(ms, new SixLabors.ImageSharp.Formats.Gif.GifEncoder());
+    else
+        source.Save(ms, new PngEncoder());
+    return ms.ToArray();
+}
+
+/// <summary>
+/// Loads a real image (or the first frame of a GIF) from disk and resizes/crops it to fill
+/// the exact target size, re-encoding in the same format ScreenKeyWindows itself uses.
+/// CONFIRMED via a genuine ScreenKeyWindows-saved reference (the user added this same
+/// picture as the main-screen background through the vendor editor and saved; capturing
+/// and decoding the resulting upload showed the embedded asset is exactly 640x512, saved as
+/// JPEG - matching the source `.jpg`'s format, not re-encoded to PNG). Uses JPEG when the
+/// source is JPEG-like (matches file extension), PNG otherwise.
+/// </summary>
+static byte[] ResizeImageToStaticFill(string filePath, int targetWidth, int targetHeight)
+{
+    using var source = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.Rgb24>(filePath);
+    source.Mutate(ctx => ctx.Resize(new SixLabors.ImageSharp.Processing.ResizeOptions
+    {
+        Size = new SixLabors.ImageSharp.Size(targetWidth, targetHeight),
+        Mode = SixLabors.ImageSharp.Processing.ResizeMode.Crop,
+    }));
+    using var ms = new MemoryStream();
+    string ext = Path.GetExtension(filePath).ToLowerInvariant();
+    if (ext is ".jpg" or ".jpeg")
+        source.Save(ms, new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder());
+    else
+        source.Save(ms, new PngEncoder());
+    return ms.ToArray();
+}
+
+static byte[]? BuildTitleOpacityDemoThemeFromScratch(string iconsDir)
+{
+    // Demonstrates the confirmed real "text over a button" mechanism (PROTOCOL_WAVESHARE_MK20.md
+    // §7.1/§10 Item #13): KeyItemBuilder.Title/.Opacity/.TitleStyle, cross-checked against a
+    // real ScreenKeyWindows capture (tools/Captures/capture19_text_over_buttons_and_txtinput.pcapng)
+    // where the vendor editor's "title" + "transparency" controls were shown to set exactly
+    // these same two JSON fields ("title", "opacity") on a key item - not a separate overlay.
+    // 5 keys across the top row: a plain keyboard key (control), 3 keys each showing a
+    // labeled title over a progressively more transparent icon, and a custom-styled title.
+    (int iconNum, HidKey key, string label, string title, int opacity, string? alignment, string? colorHex)[] keys =
+    {
+        (1,  HidKey.Digit1, "1", "",           100, null,   null),      // plain control key, no title/opacity change
+        (2,  HidKey.Digit2, "2", "Opaque",     100, null,   null),      // title shown, icon fully opaque
+        (3,  HidKey.Digit3, "3", "Semi",        50, null,   null),      // title shown, icon at 50% opacity
+        (4,  HidKey.Digit4, "4", "Faint",       15, null,   null),      // title shown, icon at 15% opacity (matches the real capture's value)
+        (5,  HidKey.Digit5, "5", "Styled",      15, "top",  "#ff0000"), // 15% opacity + custom red, top-aligned title ("top"/"bottom" are the only confirmed real alignment values)
+    };
+
+    foreach (var (iconNum, _, _, _, _, _, _) in keys)
+    {
+        string iconFile = Path.Combine(iconsDir, $"icon_{iconNum:D2}.png");
+        if (!File.Exists(iconFile))
+        {
+            Console.WriteLine($"Missing icon file: {iconFile}.");
+            return null;
+        }
+    }
+
+    var builder = new ThemeBuilder();
+    builder.AddPage(page =>
+    {
+        page.SetCanvas(640, 656);
+        for (int i = 0; i < keys.Length; i++)
+        {
+            var (iconNum, key, label, title, opacity, alignment, colorHex) = keys[i];
+            string iconFile = Path.Combine(iconsDir, $"icon_{iconNum:D2}.png");
+            page.AddKey(0, i, keyBuilder =>
+            {
+                keyBuilder.Icon($"icon_{iconNum:D2}.png", File.ReadAllBytes(iconFile));
+                keyBuilder.Title(title);
+                keyBuilder.Opacity(opacity);
+                if (alignment is not null || colorHex is not null)
+                    keyBuilder.TitleStyle(alignment: alignment, colorHex: colorHex);
+                keyBuilder.Action(KeyActions.Keyboard(key, label));
+            });
+        }
+    });
+
+    var theme = builder.Build();
+    byte[] encoded = ThemeFileCodec.Encode(theme);
+
+    var reDecoded = ThemeFileCodec.Decode(encoded);
+    var reKeys = reDecoded.Pages[0].Items.OfType<KeyItem>().ToList();
+    bool roundTripOk = reDecoded.Pages.Count == 1
+        && reKeys.Count == keys.Length
+        && reKeys.All(k => k.Action is KeyboardAction)
+        && reDecoded.Pages[0].Encoder is not null
+        && reKeys.Any(k => k.RawJson.TryGetProperty("title", out var t) && t.GetString() == "Faint")
+        && reKeys.Any(k => k.RawJson.TryGetProperty("opacity", out var o) && o.GetString() == "15");
+
+    Console.WriteLine($"Built title/opacity demo theme: {encoded.Length} bytes, {reKeys.Count} key(s), " +
+        $"{reDecoded.Assets.Count} asset(s), round-trip: {(roundTripOk ? "PASSED" : "FAILED")}");
+    if (!roundTripOk)
+    {
+        Console.WriteLine("Aborting - local round-trip verification failed.");
+        return null;
+    }
+
+    return encoded;
+}
+
+static byte[]? BuildTitleOpacityDemoWithBackgroundsFromScratch(string iconsDir)
+{
+    // Same 5 title/opacity keys as BuildTitleOpacityDemoThemeFromScratch, plus:
+    //   - a real STATIC image from the user's Desktop, resized to fill the confirmed real
+    //     640x512 main-screen background area - embedded as a type-114 DynamicImageItem via
+    //     DynamicImageItemBuilder.MainScreenBackground, NOT a type-100 BackgroundItem.
+    //     CONFIRMED via a genuine ScreenKeyWindows-saved reference file (the user added
+    //     this exact picture as the main-screen background through the vendor editor,
+    //     saved, and the resulting upload was captured/decoded): real main-screen picture
+    //     backgrounds are DynamicImageItems at x=0,y=144,w=640,h=512,z=-2 with
+    //     "backgroundType":"main" and asset path "/image/640x656/cache/<file>" - a
+    //     completely different item type AND namespace from what an earlier attempt (using
+    //     BackgroundItemBuilder.MainScreen, type 100, "/theme/MK20-PLUS/MainScreen/<file>")
+    //     assumed, which is why that attempt didn't render on real hardware. See
+    //     PROTOCOL_WAVESHARE_MK20.md §6.5/§10 Item #14.
+    //   - a real GIF from the user's Desktop, resized to fill the confirmed real 428x142
+    //     secondary (2.8") screen area, embedded in this same page via the confirmed real
+    //     mechanism (DynamicImageItemBuilder.SecondaryScreenBackground - a type-114 item at
+    //     the fixed x=106,y=0,w=428,h=142 position with "backgroundType":"secondary",
+    //     confirmed via defaultTheme.Theme; see PROTOCOL_WAVESHARE_MK20.md §7.1). GIF
+    //     backgrounds ARE confirmed to work correctly here (user confirmed seeing the cat
+    //     GIF rendering on the secondary screen).
+    string desktopDir = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+    string mainBgImagePath = Path.Combine(desktopDir, "Racing_Setup_Cheatsheet.jpg");
+    string secondaryBgGifPath = Path.Combine(desktopDir, "pop-cat.gif");
+    if (!File.Exists(mainBgImagePath)) { Console.WriteLine($"Missing image: {mainBgImagePath}"); return null; }
+    if (!File.Exists(secondaryBgGifPath)) { Console.WriteLine($"Missing GIF: {secondaryBgGifPath}"); return null; }
+
+    (int iconNum, HidKey key, string label, string title, int opacity, string? alignment, string? colorHex)[] keys =
+    {
+        (1,  HidKey.Digit1, "1", "",           100, null,   null),
+        (2,  HidKey.Digit2, "2", "Opaque",     100, null,   null),
+        (3,  HidKey.Digit3, "3", "Semi",        50, null,   null),
+        (4,  HidKey.Digit4, "4", "Faint",       15, null,   null),
+        (5,  HidKey.Digit5, "5", "Styled",      15, "top",  "#ff0000"), // "top"/"bottom" are the only confirmed real alignment values
+    };
+
+    foreach (var (iconNum, _, _, _, _, _, _) in keys)
+    {
+        string iconFile = Path.Combine(iconsDir, $"icon_{iconNum:D2}.png");
+        if (!File.Exists(iconFile))
+        {
+            Console.WriteLine($"Missing icon file: {iconFile}.");
+            return null;
+        }
+    }
+
+    byte[] mainBackgroundPng = ResizeImageToStaticFill(mainBgImagePath, 640, 512);
+    byte[] secondaryBackgroundGif = ResizeImageOrGifToFill(secondaryBgGifPath, 428, 142);
+
+    var builder = new ThemeBuilder();
+    builder.AddPage(page =>
+    {
+        page.SetCanvas(640, 656);
+        page.AddDynamicImage(img => img.MainScreenBackground("Racing_Setup_Cheatsheet.jpg", mainBackgroundPng));
+        page.AddDynamicImage(img => img.SecondaryScreenBackground("popcat_secondary.gif", secondaryBackgroundGif));
+
+        for (int i = 0; i < keys.Length; i++)
+        {
+            var (iconNum, key, label, title, opacity, alignment, colorHex) = keys[i];
+            string iconFile = Path.Combine(iconsDir, $"icon_{iconNum:D2}.png");
+            page.AddKey(0, i, keyBuilder =>
+            {
+                keyBuilder.Icon($"icon_{iconNum:D2}.png", File.ReadAllBytes(iconFile));
+                keyBuilder.Title(title);
+                keyBuilder.Opacity(opacity);
+                if (alignment is not null || colorHex is not null)
+                    keyBuilder.TitleStyle(alignment: alignment, colorHex: colorHex);
+                keyBuilder.Action(KeyActions.Keyboard(key, label));
+            });
+        }
+    });
+
+    var theme = builder.Build();
+    byte[] encoded = ThemeFileCodec.Encode(theme);
+
+    var reDecoded = ThemeFileCodec.Decode(encoded);
+    var reKeys = reDecoded.Pages[0].Items.OfType<KeyItem>().ToList();
+    var mainBgItem = reDecoded.Pages[0].Items.OfType<Mk20Control.Protocol.Theme.Items.DynamicImageItem>()
+        .FirstOrDefault(d => d.BackgroundType == "main");
+    var secondaryItem = reDecoded.Pages[0].Items.OfType<Mk20Control.Protocol.Theme.Items.DynamicImageItem>()
+        .FirstOrDefault(d => d.BackgroundType == "secondary");
+    bool roundTripOk = reDecoded.Pages.Count == 1
+        && reKeys.Count == keys.Length
+        && reKeys.All(k => k.Action is KeyboardAction)
+        && reDecoded.Pages[0].Encoder is not null
+        && mainBgItem is not null && mainBgItem.X == 0 && mainBgItem.Y == 144 && mainBgItem.Width == 640 && mainBgItem.Height == 512
+        && secondaryItem is not null && secondaryItem.X == 106 && secondaryItem.Y == 0
+        && secondaryItem.Width == 428 && secondaryItem.Height == 142;
+
+    Console.WriteLine($"Built title/opacity + backgrounds demo theme: {encoded.Length} bytes, {reKeys.Count} key(s), " +
+        $"main background: {(mainBgItem is not null ? "present" : "MISSING")}, " +
+        $"secondary background: {(secondaryItem is not null ? "present" : "MISSING")}, " +
+        $"{reDecoded.Assets.Count} asset(s), round-trip: {(roundTripOk ? "PASSED" : "FAILED")}");
     if (!roundTripOk)
     {
         Console.WriteLine("Aborting - local round-trip verification failed.");
