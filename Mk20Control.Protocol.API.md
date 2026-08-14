@@ -58,6 +58,14 @@ The MK20 enumerates as a USB CDC-ACM virtual serial port
 (VID:PID `1D6B:0104` or `1234:5678`). Enumerate available ports with
 `System.IO.Ports.SerialPort.GetPortNames()` if you need to auto-detect it.
 
+> **The screens sleep, and sleep is the backlight going to 0.** Left idle the device blanks
+> its displays; `TryPingAsync()` then reports `DeviceBacklight == 0`, which is how you detect
+> it. Measured on hardware, none of these woke a sleeping screen: an open connection, polling
+> `TryPingAsync` every 10 s, or `SetBacklightAsync` to the value it already holds. Only a
+> physical key press did — `DeviceBacklight` jumped straight back to its stored value. There
+> is no sleep-timeout setting in the protocol; see `PROTOCOL_WAVESHARE_MK20.md` §6.1b for the
+> full measurement.
+
 ### Constructor overloads
 
 | Member | Use when |

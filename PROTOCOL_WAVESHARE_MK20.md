@@ -335,8 +335,37 @@ sequenceDiagram
     MK20-->>Host: FIND_DEVICE reply (Simple String Map: version, screenModel,<br/>screenWidth/Height, volume, backlight, name)
 ```
 
-### 6.2 Telemetry push contract (`deviceRequestSystemData`)
+### 6.1b Screen sleep **(C)**
 
+Left alone, the device blanks its screens. Sleep is **the backlight being forced to 0**, and
+it is directly observable: `FIND_DEVICE` reports `deviceBl=0` while asleep, then the
+previously-set value once it wakes. That makes "is it asleep?" a one-call check —
+`(await client.TryPingAsync())?.DeviceBacklight == 0`.
+
+Measured on hardware over a 120-second sleeping window, with a client connected and polling
+`FIND_DEVICE` every 10 s throughout:
+
+| Candidate | Wakes it? | Prevents sleep? |
+|---|---|---|
+| An open serial port (DTR/RTS asserted) | **No** — stayed at `deviceBl=0` the whole time | No |
+| `FIND_DEVICE` polling every 10 s | **No** | No |
+| `SET_DEVICE_BL` to the value it already holds | **No** — the value is stored, but the screen stays dark | Not established |
+| A physical key press | **Yes** — `deviceBl` went 0 → 60 (the stored value) immediately | Yes |
+
+So there is no known command that lights a sleeping screen: the wake path observed is
+physical. Note the ordering that proves `SET_DEVICE_BL` alone is not a wake — a
+`SET_DEVICE_BL 60` sent while asleep left `deviceBl` reading 0 for a further two minutes, and
+only the later key press produced the 60.
+
+No sleep/idle-timeout setting was found anywhere: not in the identity map (§5.1), not in the
+vendor app's `conf/set.json`, and not as a theme field. The timeout appears to be firmware
+policy the protocol does not expose.
+
+> An earlier draft of this section claimed an open connection keeps the screen awake. That
+> was wrong — it came from observing a lit screen while connected shortly after an upload,
+> i.e. before the idle timer had elapsed. The controlled run above disproves it.
+
+### 6.2 Telemetry push contract (`deviceRequestSystemData`)
 Immediately after every successful `SET_DEVICE_RELOAD`, the device sends an unsolicited
 `SEND_JSON` (commandId 15) reply declaring which data-source keys the **newly loaded
 theme** requires:
