@@ -27,10 +27,10 @@ public enum CommandId : uint
     /// <summary>Ordering-inferred only - not yet individually confirmed on the wire.</summary>
     SetDeviceScanState = 5,
 
-    /// <summary>CONFIRMED: carries a file path and total size (Simple String Map, {path: totalSize}) when starting a theme file upload. The device replies with an empty payload; the raw file bytes are then written directly to the transport in fixed 4096-byte chunks with no additional framing (see <see cref="Client.Mk20DeviceClient.UploadThemeFileAsync"/>).</summary>
+    /// <summary>CONFIRMED: carries a file path and total size (Simple String Map, {path: totalSize}) when starting a theme file upload. The device replies with an empty payload, and that reply MUST be awaited before any bulk byte is written - it is not counting payload until it has opened the file. The raw file bytes then go directly to the transport in fixed 4096-byte chunks with no additional framing (see <see cref="Client.Mk20DeviceClient.UploadThemeFileAsync"/>).</summary>
     FileStart = 6,
 
-    /// <summary>CONFIRMED: carries a file path and CRC-32 as decimal text (Simple String Map, {path: crc32AsText}, host-&gt;device) or {"res":"1","fileName":path} (device-&gt;host) when finishing a theme file upload.</summary>
+    /// <summary>CONFIRMED: carries a file path and CRC-32 as decimal text (Simple String Map, {path: crc32AsText}, host-&gt;device) or {"res":"1","fileName":path} (device-&gt;host) when finishing a theme file upload. The host must send an abort-transfer control message immediately after the request, without waiting for the reply: that message closes the bulk stream and is what causes the device to answer.</summary>
     FileEnd = 7,
 
     /// <summary>Ordering-inferred only - not yet individually confirmed on the wire.</summary>

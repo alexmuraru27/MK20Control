@@ -10,9 +10,10 @@ No vendor software required.
 [![.NET](https://img.shields.io/badge/.NET-9.0-512BD4)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue)](./LICENSE)
 [![Tests](https://img.shields.io/badge/tests-88%20passing-brightgreen)](#testing)
+[![Examples](https://img.shields.io/badge/examples-5-8A2BE2)](./examples)
 [![Status](https://img.shields.io/badge/status-experimental-orange)](#project-status)
 
-[Quick start](#quick-start) · [Features](#features) · [Documentation](#documentation) · [Testing](#testing)
+[Quick start](#quick-start) · [Features](#features) · [Examples](./examples) · [Documentation](#documentation) · [Testing](#testing)
 
 </div>
 
@@ -81,6 +82,9 @@ buttons.OnCommand("build.start", () => StartBuild());
 
 That's the whole loop: describe a layout, upload it, bind handlers.
 
+See **[examples/](./examples)** for five complete programs, from a ten-line connection check
+to a full sim racing button box with pages, folders and encoders.
+
 ## Features
 
 | | |
@@ -112,6 +116,7 @@ animated background through the artwork. **No vendor theme can do this.**
 ## Repository layout
 
 ```
+examples/                        five runnable programs, each with its own solution
 src/
   Mk20Control.Protocol/          the library
     Client/                      Mk20DeviceClient - connect, upload, control, receive events

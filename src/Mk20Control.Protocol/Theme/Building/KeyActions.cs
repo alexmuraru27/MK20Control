@@ -197,17 +197,25 @@ public static class KeyActions
     /// in the loaded theme. A key with no action produces no wire traffic whatsoever, and
     /// there is no generic "any key pressed" event (PROTOCOL_WAVESHARE_MK20.md §6.3).
     ///
-    /// Implemented as a <c>text</c> action carrying the ID, because text is the one action
-    /// type the device does NOT execute itself - confirmed by USB capture, a text key emits
-    /// zero HID keystrokes and merely reports the press. Nothing types the ID: this library
-    /// performs no OS input, and <c>isInputEnter</c>/<c>isCopyPaste</c> are both false. The
-    /// press is delivered to your handler and nowhere else.
+    /// Implemented as a <c>text</c> action carrying the ID, because the device does not
+    /// execute text keys itself: it reports the press with the string attached and emits
+    /// no HID keystrokes of its own (confirmed by USB capture of the device's HID
+    /// endpoint). Your handler receives the ID through <c>KeyBindings</c>.
+    ///
+    /// IMPORTANT - do not run the vendor app at the same time. ScreenKeyWindows also
+    /// listens for these events, and it DOES act on a text key by typing the string.
+    /// Confirmed on real hardware: with the vendor app running, pressing these keys types
+    /// the raw command ids ("demo.hello", "demo.time", ...) into the focused window. The
+    /// device is only reporting; whichever host application is listening decides what to
+    /// do. Since the vendor app also holds the serial port exclusively, it must be closed
+    /// for this library to connect anyway.
     /// </summary>
-    /// <param name="commandId">Any string meaningful to your application, e.g. "pit.request".</param>
-    public static TextInputAction Command(string commandId)
+    /// <param name="commandId">The routing id - any string meaningful to your application, e.g. "pit.request". This is what <c>KeyBindings.OnCommand(id, ...)</c> matches on, so it must be unique per button; it is never displayed on the device.</param>
+    /// <param name="description">An optional label echoed back on every press, so a handler or log can report the button's name rather than its grid position. Purely informational - NOT used for routing, and it does NOT change what the device draws (that is the key's own Title). Conventionally set to the same text as the title. Defaults to "Text", matching a vendor-written text key.</param>
+    public static TextInputAction Command(string commandId, string? description = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(commandId);
-        return TypeText(commandId, pressEnterAfter: false, useCopyPaste: false);
+        return TypeText(commandId, pressEnterAfter: false, useCopyPaste: false, description: description);
     }
 
     /// <summary>

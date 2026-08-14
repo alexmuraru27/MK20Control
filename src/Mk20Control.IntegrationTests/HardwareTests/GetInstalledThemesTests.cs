@@ -17,7 +17,7 @@ public class GetInstalledThemesTests
 
         var listing = await client.GetInstalledThemesAsync();
 
-        TestContext.WriteLine($"Free space: {listing.BytesAvailable}/{listing.BytesTotal} bytes");
+        TestContext.WriteLine($"Free space: {listing.MegabytesAvailable:N0}/{listing.MegabytesTotal:N0} MB");
         foreach (var theme in listing.Themes)
             TestContext.WriteLine($"  {theme.Path}  (crc32=0x{theme.Crc32:x8})");
 

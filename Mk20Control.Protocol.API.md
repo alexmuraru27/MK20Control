@@ -27,7 +27,7 @@ how to use it.
 | `Mk20Control.Protocol.Theme.Items` | Core page item types (`KeyItem`, `BackgroundItem`, `DynamicImageItem`) |
 | `Mk20Control.Protocol.Theme.Items.Widgets` | Data-bound widget item types (`TextItem`, `MultilineTextItem`, `ShadowTextItem`, `ProgressBarItem`, `LinearGaugeItem`, `RadialGaugeItem`, `CircularGaugeItem`, `SegmentedCircularGaugeItem`, `LightShadowGaugeItem`, `DigitalClockItem`) |
 | `Mk20Control.Protocol.Theme.Actions` | Key action types (`KeyboardAction`, `PageSwitchAction`, etc.) |
-| `Mk20Control.Protocol.Theme.Building` | `ThemeBuilder`, `ThemeEditor`, `ThemePageBuilder`, `KeyItemBuilder`, `KeyActions`, `ThemeColor`, `HidKey`, `KeyModifiers`, `EncoderSide`, `EncoderPositions`, `EncoderFunctionType`, `SystemIconPaths` — fluent theme construction/editing |
+| `Mk20Control.Protocol.Theme.Building` | `ThemeBuilder`, `ThemeEditor`, `ThemePageBuilder`, `KeyItemBuilder`, `KeyActions`, `ThemeColor`, `ScreenLayout`, `LayoutRect`, `HidKey`, `KeyModifiers`, `EncoderSide`, `EncoderPositions`, `EncoderFunctionType`, `SystemIconPaths` — fluent theme construction/editing |
 | `Mk20Control.Protocol.Theme.Building.Widgets` | Fluent builders for the widget item types above (`TextItemBuilder`, `ProgressBarItemBuilder`, `RadialGaugeItemBuilder`, etc.) |
 | `Mk20Control.Protocol.Framing` | Wire-frame primitives (`DeviceFrame`, `DeviceFrameParser`) — needed only to build a custom transport or analyse raw captures |
 | `Mk20Control.Protocol.Checksums` | `Crc32` (zlib variant) as used by the frame header |
@@ -157,6 +157,54 @@ buttons.Unbound += (_, ctx) => Log($"unhandled {ctx.CommandId ?? "(none)"} at {c
 
 `KeyEventContext` carries `CommandId`, `Position`, `IsPressed` and `Action` (the decoded
 theme action).
+
+**Naming a key in a log.** The device reports only a row and column, never the page, so a
+press on its own tells you little. Every `KeyActions` factory takes an optional
+`description:` that round-trips through the theme and is echoed back on each press. The two
+arguments have distinct jobs and are stored as separate fields:
+
+```csharp
+page.AddKey(2, 0, key => key
+    .Title("MARK")                                              // drawn on the device
+    .Action(KeyActions.Command(
+        "racing.mark-lap",                                       // routing id -> OnCommand
+        description: "MARK")));                                  // label echoed back
+```
+
+| Argument | Wire field | Role |
+|----------|-----------|------|
+| `commandId` (1st) | `inputText` | What `OnCommand(id, …)` matches on. Must be unique per button — two buttons sharing an ID share a handler. Never displayed. |
+| `description:` | `description` | A label echoed back on every press, for logs and diagnostics. Not used for routing; duplicates are fine. Defaults to `"Text"`. |
+
+`description` does **not** change what the device draws — that is `.Title(...)`, a property of
+the key itself, not of its action. They are independent, so passing the title as the
+description is a convention, not a requirement: it simply makes a press report a name you
+recognise instead of `r2c0`. Keeping them in step is easiest via a helper:
+
+```csharp
+void AddButton(int row, int col, string title, string commandId) =>
+    page.AddKey(row, col, key => key
+        .Title(title)
+        .Action(KeyActions.Command(commandId, description: title)));
+```
+
+Then log from a single place:
+
+```csharp
+bindings.Unbound += (_, ctx) =>
+{
+    if (!ctx.IsPressed) return;
+    Console.WriteLine($"{ctx.Action?.Description ?? "(unlabelled)"} ({ctx.CommandId})");
+};
+// MARK (racing.mark-lap)
+```
+
+`Unbound` covers every key without its own handler; a bound key logs from inside its handler,
+where the `Action<KeyEventContext>` overload gives the same context.
+
+> **`Keyboard()` keys never reach the host.** The device executes them itself and sends no
+> event at all (§6.3), so they cannot be logged or handled — that is the trade for working
+> with no software running. Give a key a `Command()` action instead if the host must see it.
 
 **Command IDs are page-agnostic.** The press event reports only `{row, col, pressed}` and
 never identifies the page, so the same grid cell on two pages — or inside a folder — is
@@ -350,6 +398,50 @@ var theme = new ThemeBuilder()
 byte[] fileBytes = ThemeFileCodec.Encode(theme);
 File.WriteAllBytes("MyTheme.Theme", fileBytes);
 ```
+
+### Screen geometry — `ScreenLayout`
+
+The canvas covers two physically separate displays, and every item is positioned in canvas
+pixels measured from the **top-left**. `ScreenLayout` is the single source of truth for that
+geometry, so coordinates never have to be hard-coded or eyeballed:
+
+```
+  y=0    +---------------------------------------+
+         |        secondary screen strip         |  428x142 at x=106
+  y=144  +=======================================+
+         | r0c0 | r0c1 | r0c2 | r0c3 | r0c4      |
+         | r1c0 | r1c1 | r1c2 | r1c3 | r1c4      |  main screen:
+         | r2c0 | r2c1 | r2c2 | r2c3 | r2c4      |  5 columns x 4 rows
+         | r3c0 | r3c1 | r3c2 | r3c3 | r3c4      |  of 128x128 cells
+  y=656  +---------------------------------------+
+```
+
+| Member | Value / result |
+|--------|----------------|
+| `ScreenLayout.CanvasWidth` / `CanvasHeight` | `640` / `656` |
+| `ScreenLayout.KeyRows` / `KeyColumns` / `KeyCellSize` | `4` / `5` / `128` |
+| `ScreenLayout.MainScreenTop` | `144` — where the key grid begins |
+| `ScreenLayout.SecondaryScreen` | `LayoutRect(106, 0, 428, 142)` |
+| `ScreenLayout.MainScreen` | `LayoutRect(0, 144, 640, 512)` |
+| `ScreenLayout.KeyTopLeft(row, col)` | `(x, y)` of that key — the same position `AddKey` uses |
+| `ScreenLayout.KeyCell(row, col)` | The full `LayoutRect` of that cell |
+| `ScreenLayout.KeyAt(x, y)` | `(row, col)` containing a point, or `null` if it isn't on the grid |
+| `ScreenLayout.AllKeyCells()` | All 20 cells, row-major |
+
+`LayoutRect` exposes `Right`, `Bottom`, `CenterX`, `CenterY`, `Contains(x, y)` and
+`CenterFor(width, height)` — the last returns the top-left at which an item of that size sits
+**centred** on the rectangle. Since the physical keys are visibly separated squares, anything
+drawn across a cell boundary reads as misaligned, so place widgets relative to a cell:
+
+```csharp
+LayoutRect cell = ScreenLayout.KeyCell(row: 1, column: 2);
+(double x, double y) = cell.CenterFor(width: 100, height: 100);
+
+page.AddRadialGauge(g => g.At(x, y, scale: 0.4).BoundTo("cpu_usage", 0, 100));
+```
+
+Row/column arguments are validated against the 4x5 grid and throw
+`ArgumentOutOfRangeException` if outside it.
 
 ### `ThemeBuilder`
 
@@ -834,9 +926,9 @@ using Mk20Control.Protocol.Codecs;
 var theme = new ThemeBuilder()
     .AddPage(page => page
         .SetCanvas(640, 656)
-        .AddProgressBar(pb => pb.At(20, 20, 200, 30).BoundTo("CPU Usage", 0, 100)
+        .AddProgressBar(pb => pb.At(20, 20, 200, 30).BoundTo("cpu_usage", 0, 100)
             .Colors(new ThemeColor(0, 170, 255, 220), ThemeColor.White.WithAlpha(140), ThemeColor.Black.WithAlpha(180)))
-        .AddText(t => t.At(20, 55).BoundTo("CPU Usage").Font("Microsoft YaHei,14,-1,5,50,0,0,0,0,0"))
+        .AddText(t => t.At(20, 55).BoundTo("cpu_usage").Font("Microsoft YaHei,14,-1,5,50,0,0,0,0,0"))
         .AddRadialGauge(rg => rg.At(300, 20, scale: 0.4).BoundTo("GPU Usage", 0, 100)
             .Gradient(new ThemeColor(0, 170, 255), new ThemeColor(255, 200, 0), new ThemeColor(255, 0, 0)))
         .AddDigitalClockField(c => c.At(500, 20, 40, 40).Field("hour"))
@@ -852,7 +944,7 @@ while (await timer.WaitForNextTickAsync())
     var now = DateTime.Now;
     await client.PushSystemDataAsync(new Dictionary<string, string>
     {
-        ["CPU Usage"] = $"{GetCpuUsagePercent()}%",
+        ["cpu_usage"] = $"{GetCpuUsagePercent()}%",
         ["GPU Usage"] = $"{GetGpuUsagePercent()}%",
         ["hour"] = now.Hour.ToString(),
         ["minute"] = now.Minute.ToString(),
@@ -927,10 +1019,13 @@ await client.UploadThemeFileAsync("/data/theme/MK20/MyTheme/MyTheme.Theme", them
 ```
 
 `UploadThemeFileAsync` performs the complete confirmed sequence internally
-(`GET_DEVICE_THEME` → abort-transfer → `FILE_START` → 4096-byte bulk chunks → `FILE_END` →
-abort-transfer → `SET_DEVICE_RELOAD`), retries once on a `FILE_END`/reload timeout after
-confirming the device is still alive (fails fast with a clear message if not — a physical
-power-cycle is then required), and automatically normalizes the theme's `currentPage` to
+(`GET_DEVICE_THEME` → abort-transfer → `FILE_START` → *wait for its ack* → 4096-byte bulk
+chunks → `FILE_END` → abort-transfer → `SET_DEVICE_RELOAD`). Both the `FILE_START` ack wait
+and the abort-transfer immediately after `FILE_END` are mandatory — omitting either makes
+uploads fail, in the second case wedging the device until it is physically replugged (see
+`PROTOCOL_WAVESHARE_MK20.md` §4.1). It makes up to three attempts on a `FILE_END`/reload
+timeout, confirming the device is still alive between them and failing fast with a clear
+message if it isn't, and automatically normalizes the theme's `currentPage` to
 its first page before sending, so activation always lands on page 1 regardless of what was
 embedded in the source bytes.
 
@@ -961,7 +1056,7 @@ var theme = new ThemeBuilder()
             .IconAssetPath(EncoderPositions.SystemVolumeIcon).Opacity(0)
             .Action(KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume)))
         // A gauge - the bound name is your own choice.
-        .AddProgressBar(pb => pb.At(20, 20, 200, 30).BoundTo("CPU Usage", 0, 100)
+        .AddProgressBar(pb => pb.At(20, 20, 200, 30).BoundTo("cpu_usage", 0, 100)
             .Colors(new ThemeColor(0, 170, 255, 220), ThemeColor.White.WithAlpha(140), ThemeColor.Black.WithAlpha(180))))
     .Build();
 
@@ -975,7 +1070,7 @@ buttons.OnCommand("build.start", StartBuild);
 var timer = new System.Timers.Timer(500);
 timer.Elapsed += async (_, _) => await client.PushSystemDataAsync(new Dictionary<string, string>
 {
-    ["CPU Usage"] = $"{GetCpuUsagePercent()}%",
+    ["cpu_usage"] = $"{GetCpuUsagePercent()}%",
 });
 timer.Start();
 

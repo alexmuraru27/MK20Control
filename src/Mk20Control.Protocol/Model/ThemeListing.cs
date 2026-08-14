@@ -18,7 +18,17 @@ public sealed record InstalledTheme(string Path, uint Crc32);
 /// </summary>
 public sealed record ThemeListing
 {
-    public required long BytesTotal { get; init; }
-    public required long BytesAvailable { get; init; }
+    /// <summary>
+    /// Total theme storage, in MEGABYTES.
+    ///
+    /// The wire field is named "bytesTotal" but the unit is megabytes: a device with a 32 GB
+    /// card reports 28003, i.e. ~27.3 GB. Verified against a live device whose installed
+    /// themes (109 MB, including a 33 MB defaultTheme.Theme) match the 153 MB it reported as
+    /// used. Reading this as bytes gives a nonsensical ~28 KB budget.
+    /// </summary>
+    public required long MegabytesTotal { get; init; }
+
+    /// <summary>Free theme storage, in MEGABYTES - see <see cref="MegabytesTotal"/> for the unit.</summary>
+    public required long MegabytesAvailable { get; init; }
     public required IReadOnlyList<InstalledTheme> Themes { get; init; }
 }

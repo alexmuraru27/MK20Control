@@ -82,15 +82,18 @@ Not a command frame — do not attempt to parse a header out of it.
 
 **CONFIRMED exact placement** (message-by-message across every real capture examined, zero
 exceptions): exactly one abort-transfer message is sent immediately before every
-`FILE_START`, and exactly one more immediately after `FILE_END` and before
-`SET_DEVICE_RELOAD` — the host does **not** wait for `FILE_END`'s reply before sending the
-abort-transfer + `SET_DEVICE_RELOAD` that follows it; all three requests are pipelined
-back-to-back (typically 1-7ms apart) and replies are collected afterward in FIFO order
-(`FILE_END`'s reply arrives first, then `SET_DEVICE_RELOAD`'s). A **standalone** reload of
-an already-installed theme (no re-upload) is *not* preceded by an abort-transfer message.
-Omitting this message and/or waiting for `FILE_END`'s reply before sending the reload
-request (this client's original behavior) was confirmed via real-hardware testing to cause
-the device to never acknowledge `FILE_END`/`SET_DEVICE_RELOAD` — see §10 Open Item #6.
+`FILE_START`, and exactly one more immediately after `FILE_END`. The second one must be sent
+**without waiting for `FILE_END`'s reply** — it is what closes the bulk stream, and the reply
+is what it triggers, so waiting first is a deadlock. `SET_DEVICE_RELOAD`, by contrast, *is*
+sent only after that reply arrives, and is **not** preceded by an abort of its own. In
+`capture20_bg_gif` the host writes `FILE_END` and the abort in the same millisecond (12.318s),
+the device's `FILE_END` reply follows at 12.349s, and `SET_DEVICE_RELOAD` only at 12.450s.
+
+A **standalone** reload of an already-installed theme (no re-upload) is *not* preceded by an
+abort-transfer message either. Omitting the post-`FILE_END` abort, or withholding it until
+the reply arrives (this client's original behavior), was confirmed via real-hardware testing
+to cause the device to never acknowledge `FILE_END` and then ignore every subsequent command
+until physically replugged — see §4.1 and §10 resolved item 16.
 
 ### 3.2 Parser resynchronization
 
@@ -140,24 +143,50 @@ and reconstructing the transferred bytes from the capture, verifying them byte-f
 identical to the source `.Theme` file and confirming the reported CRC-32 matched:
 
 ```
+0. → GET_DEVICE_THEME                                   (host polls storage first)
+   → "AA551234 Abort file transfer 123455AA"            (§3.1 control message)
 1. → FILE_START   {"<device path>": "<totalSize>"}     (Simple String Map, §5.1)
-   ← FILE_START   (empty payload ack)
+   ← FILE_START   (empty payload ack — MUST be awaited before step 2)
 2. Raw file bytes are written directly to the same bulk OUT endpoint (0x01) in fixed
    4096-byte chunks, back-to-back, with NO additional per-chunk header/framing of any
    kind and NO per-chunk acknowledgment - it is exactly the file's bytes, split at
    4096-byte boundaries. The final chunk is a shorter remainder
    (totalSize mod 4096 bytes, or a full 4096-byte chunk if it divides evenly).
 3. → FILE_END     {"<device path>": "<crc32AsDecimalText>"}
+   → "AA551234 Abort file transfer 123455AA"            (MANDATORY - see below)
    ← FILE_END     {"res": "1", "fileName": "<device path>"}
+4. → SET_DEVICE_RELOAD  "<device path>"                 (activates the theme, §8.6)
+   ← SEND_JSON, then SET_DEVICE_RELOAD echoed back
 ```
+
+Two ordering rules are load-bearing, and getting either wrong produces the same symptom — an
+unacknowledged `FILE_END`:
+
+**(a) The `FILE_START` reply must be awaited before any bulk byte is written.** The device is
+not counting payload until it has opened the destination file, so bytes written earlier are
+discarded; its counter then never reaches `totalSize`, it stays in file-receive mode, and it
+swallows the following `FILE_END` as if it were more payload. In `capture20_bg_gif` the host
+sends `FILE_START` at 12.311 s, the device acks at 12.312 s, and only then does the first
+chunk go out. Skipping this wait fails *intermittently*, purely depending on how quickly the
+device happens to reply — which is what made this look like flaky hardware.
+
+**(b) The abort control message in step 3 is mandatory and must be sent without waiting for
+the `FILE_END` reply.** That message is what closes the bulk stream; the reply is exactly what
+it triggers, so waiting for the reply first is a deadlock. The symptom is severe: `FILE_END`
+is never acknowledged, the device then ignores every subsequent command (including
+`GET_DEVICE_THEME` and `FIND_DEVICE`) while staying enumerated on USB, and neither waiting nor
+disabling/re-enabling the USB device recovers it — only a physical replug does.
+
+Both are confirmed identical in 5/5 vendor captures — `capture15`, `capture16`, `capture17`,
+`capture20_bg_gif` and `capture22_text_input`. In every one the host writes the abort in the
+same millisecond as `FILE_END`, and the device's `FILE_END` reply follows ~30 ms later. No
+delays, retries or timeouts are involved anywhere in a healthy upload: a complete 49,869-byte
+install in `capture20_bg_gif` takes 0.55 s end to end.
 
 Confirmed example: a 743,649-byte theme file was sent as 181 chunks of exactly 4096 bytes
 followed by one 2273-byte remainder chunk (181×4096 + 2273 = 743,649); the reconstructed
 bytes from the capture were byte-for-byte identical to the source file, and both matched
 CRC-32 `3131160337`, the exact value the device echoed back in the `FILE_END` reply.
-
-After a successful `FILE_END` reply, `SET_DEVICE_RELOAD` is sent for the same path to
-activate the newly uploaded theme (see §8.6).
 
 ### 4.2 Reply correlation
 
@@ -207,6 +236,12 @@ Confirmed `GET_DEVICE_THEME` reply shape:
   "/data/theme/MK20/<name>/<name>.Theme": "<crc32 as decimal text>"
 }
 ```
+
+**The two size fields are in MEGABYTES despite their names.** A device with a 32 GB card
+reports `bytesTotal: 28003` — 27.3 GB, not 28 KB. Confirmed against a live device: it
+reported 153 MB used, and its installed themes total ~109 MB including a 33 MB
+`defaultTheme.Theme`, which would be impossible under a byte reading. Themes of several
+hundred kilobytes upload without difficulty.
 (one path→CRC entry per installed theme, in addition to the two fixed free-space fields)
 
 ### 5.2 Tagged-Value Map — `DEVICE_ProactiveEscalationCMD`, `.Theme` file internals
@@ -347,6 +382,20 @@ leading numeric portion for gauge fill level and ignores the rest.
 an action bound to it in the currently loaded theme. A key with no bound action produces **no
 wire traffic at all** on press — there is no generic "any key pressed" event. A host that
 wants to observe a key must therefore give it *some* action, even an inert one.
+
+**Not every action type reports.** A `keyboard` key is executed entirely by the device and is
+**silent on the serial link**: pressing one emits the HID keystroke but produces no
+`DEVICE_ProactiveEscalationCMD` at all. Confirmed on real hardware — with a host listening,
+pressing keystroke keys typed into the focused window (visible as stray characters) while the
+event log stayed empty, and every other key on the same theme reported normally. No `keyboard`
+event appears in any capture examined either (capture6, 11, 12, 19, 21, 22).
+
+Action types confirmed to **report** a press: `text`, `openPage`, `oneLevelUp`, `pageSwitch`,
+`openWeb`, `qmk_mouse`, and the `encoder_*` functions. Only `keyboard` is known to be silent.
+
+The practical consequence: a key cannot both send a native keystroke *and* notify the host.
+Use `keyboard` for keys the device should handle alone (they then work with no software
+running), and a `text` action carrying an identifier for keys the host must see.
 
 Each event is an array of two maps: `keyState` (position + pressed) and the key's full action
 descriptor, echoed back verbatim from the theme's `controlData`. Because `keyState` carries no
@@ -989,8 +1038,9 @@ sequenceDiagram
         Note over Host,MK20: 743,649 bytes total, no framing/header/per-chunk ack
     end
     Host->>MK20: FILE_END { "/data/.../可爱按键.Theme": "3131160337" }
-    MK20-->>Host: FILE_END { "res": "1", "fileName": "..." }
     Host->>MK20: "Abort file transfer" control message
+    Note over Host,MK20: sent immediately, WITHOUT waiting for the reply below - it is what closes the bulk stream and triggers that reply
+    MK20-->>Host: FILE_END { "res": "1", "fileName": "..." }
     Host->>MK20: SET_DEVICE_RELOAD "/data/.../可爱按键.Theme"
     MK20-->>Host: SET_DEVICE_RELOAD ack
 ```
@@ -1009,7 +1059,8 @@ before starting the transfer.
 ```
 Decodes to `{"/data/theme/MK20/可爱按键/可爱按键.Theme":"743649"}` (total size in bytes).
 
-Device replies with an empty `FILE_START` ack, then the host writes the raw file bytes
+Device replies with an empty `FILE_START` ack — which the host **must** await before writing
+any bulk bytes (§4.1) — then the host writes the raw file bytes
 directly to the bulk OUT endpoint in 182 back-to-back chunks (181 × 4096 bytes + one
 2273-byte remainder), **with no header, length prefix, or framing of any kind** - this is
 confirmed by reconstructing all 743,649 transferred bytes directly from the capture and
@@ -1171,7 +1222,7 @@ Previously-open issues, now closed - kept as terse historical notes only.
 
 | # | Item | Resolution summary |
 |---|------|--------|
-| 6 | Real hangs during `FILE_END`/`SET_DEVICE_RELOAD` | Root cause was 3 client-side bugs: missing abort-transfer control message before `FILE_START`/`SET_DEVICE_RELOAD`, awaiting `FILE_END`'s ack before sending reload (real host doesn't), and missing serial write backpressure. Fixed in `Mk20DeviceClient`/`SerialPortTransport`. |
+| 6 | Real hangs during `FILE_END`/`SET_DEVICE_RELOAD` | Root cause was client-side: a missing abort-transfer control message around the transfer, and missing serial write backpressure. Fixed in `Mk20DeviceClient`/`SerialPortTransport`. (An earlier note here claimed the vendor host does not await `FILE_END`'s ack before `SET_DEVICE_RELOAD`; that was a misreading — it does, see §4.1 and item 16.) |
 | 8 | Deleting a theme mid-reload could stick the render engine | `DeleteThemeAsync` now refuses to delete a path with an unconfirmed pending reload; all theme-mutating ops are serialized. |
 | 9 | Synthetic themes reloaded slowly or hung | Fixed missing `lock:"1"`, missing pre-upload `GET_DEVICE_THEME` call, and write backpressure; added retry-with-health-check for a residual low-probability firmware hang. All 13 vendor themes upload cleanly. |
 | 10 | Builder-produced `.Theme` files locked up ScreenKeyWindows itself | Root cause was a missing `itemName`, incomplete `KeyboardAction.controlData`, wrong icon PNG format, wrong asset namespace, missing page `"encoder"` array, and 3 serialization bugs (header length field, JSON formatting, string escaping). Confirmed byte-identical to a real reference file; confirmed loading in ScreenKeyWindows itself. |
@@ -1179,12 +1230,12 @@ Previously-open issues, now closed - kept as terse historical notes only.
 | 12 | How to encode a keyboard combo (e.g. Ctrl+Alt+Del) | Modifiers are packed into the upper byte of the 16-bit `keycode` field. Implemented as `HidKey` + `KeyModifiers` enums and `KeyActions.KeyboardCombo(...)`. |
 | 13 | How "title over button" + "transparency" are encoded | Same key item, not an overlay: `title` + `opacity` fields. Added `KeyItemBuilder.Opacity`/`.TitleStyle` and `ThemeEditor.SetKeyOpacity`. |
 | 14 | How to set a main-screen + secondary-screen background | Both are `DynamicImageItem` (type 114), not `BackgroundItem` (which is `.mp4`-video-only). Main: `x=0,y=144,w=640,h=512`, path `/image/640x656/cache/<file>`. Secondary: `x=106,y=0,w=428,h=142`, path `/image/428x142/PhotoAlbum/<file>`. Confirmed visually on real hardware for both a static image and a GIF. Added `DynamicImageItemBuilder.MainScreenBackground`/`.SecondaryScreenBackground`. |
+| 16 | `FILE_END` unacknowledged; device then ignored every command until physically replugged | Two host bugs, no device defect: bulk bytes were written without awaiting the `FILE_START` ack (early bytes dropped, so the device's counter never reached `totalSize`), and the mandatory post-`FILE_END` abort was withheld until that ack arrived (a deadlock — the abort is what triggers the reply). Both corrected to match 5/5 vendor captures (§4.1) and pinned by `UploadWireSequenceTests`. |
 | 18 | Why folder navigation entered but never returned | The page-level `parentPageName` field (§7) was being dropped. `oneLevelUp`'s `"parentPage"` sentinel resolves against the page, not the key, so without it the return key does nothing. Confirmed fixed on hardware. |
 | 19 | How a host distinguishes keys across pages/folders | The `keyState` map carries no page identity (§5.2). The echoed action descriptor does, so an identifier placed in a `text` action's `inputText` is returned on every press. Confirmed on hardware across two pages and a folder sharing the same grid cell. |
 | 20 | Whether `text` keys type anything | No. Capturing the HID endpoint during 35 text-key presses produced zero keystrokes (§6.3); the device delegates entirely to the host. |
 | 21 | Whether key icons can be transparent | Yes — a 128x128 RGBA icon is composited against the screen background by the firmware (§7.1), though no vendor theme uses it. |
 | 22 | Encoder assignment and event model | Encoders are ordinary key items at fixed coordinates reporting pseudo-rows; full field sets and the modifier packing for `encoder_keyboard` documented in §7.2a, verified by having ScreenKeyWindows re-save a library-built theme and diffing. |
-| 16 | Command processor locked up on upload, requiring a physical replug | Occurred twice, both times uploading a theme whose `encoder_*` actions omitted four of the six fields a real one carries (§7.2a): `FILE_END` went unacknowledged and the device then ignored `FIND_DEVICE` while staying enumerated. After emitting the full vendor field set, the same upload was repeated twice against real hardware — `FILE_END` and `SET_DEVICE_RELOAD` both acknowledged in ~15s, device responsive to `FIND_DEVICE` afterwards, encoder functions driving the hardware. Hosts should still treat an unacknowledged `FILE_END` as potentially fatal: verify liveness with `FIND_DEVICE` before retrying rather than retrying indefinitely. |
 
 ---
 

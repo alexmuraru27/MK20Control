@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Mk20Control.Examples.SimRacingButtonBox</RootNamespace>
+    <AssemblyName>SimRacingButtonBox</AssemblyName>
+  </PropertyGroup>
+
+  <!-- Copied this folder out of the repository? Replace this ProjectReference with a
+       reference to Mk20Control.Protocol.dll (or a PackageReference) and it builds
+       standalone - nothing else in the example points outside its own directory. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Mk20Control.Protocol\Mk20Control.Protocol.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="icons\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

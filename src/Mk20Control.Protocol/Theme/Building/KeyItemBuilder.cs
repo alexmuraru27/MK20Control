@@ -38,9 +38,11 @@ public sealed class KeyItemBuilder
         _column = column;
         _maxWidth = canvasWidth;
         _maxHeight = canvasHeight;
-        // Confirmed key-grid layout: 128x128 cells, main-screen grid origin at (0, 144).
-        _x = column * 128;
-        _y = 144 + row * 128;
+        // Confirmed key-grid layout - see ScreenLayout for the full geometry. Computed
+        // directly (rather than via ScreenLayout.KeyCell) because encoders are added as keys
+        // at out-of-grid pseudo positions and then repositioned with At(...).
+        _x = column * ScreenLayout.KeyCellSize;
+        _y = ScreenLayout.MainScreenTop + (row * ScreenLayout.KeyCellSize);
     }
 
     /// <summary>Overrides the auto-derived cell position/z-order (defaults are derived from row/column assuming 128x128 cells at the confirmed grid origin).</summary>

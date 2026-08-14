@@ -242,21 +242,21 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
         // even the CRC-32 values are decimal text, not binary integers.
         var fields = SimpleStringMapCodec.Decode(frame.Payload);
 
-        long bytesTotal = 0, bytesAvailable = 0;
+        long megabytesTotal = 0, megabytesAvailable = 0;
         var themes = new List<InstalledTheme>();
         foreach (var (key, value) in fields)
         {
             switch (key)
             {
-                case "bytesTotal": long.TryParse(value, out bytesTotal); break;
-                case "bytesAvailable": long.TryParse(value, out bytesAvailable); break;
+                case "bytesTotal": long.TryParse(value, out megabytesTotal); break;
+                case "bytesAvailable": long.TryParse(value, out megabytesAvailable); break;
                 default:
                     if (uint.TryParse(value, out uint crc)) themes.Add(new InstalledTheme(key, crc));
                     break;
             }
         }
 
-        return new ThemeListing { BytesTotal = bytesTotal, BytesAvailable = bytesAvailable, Themes = themes };
+        return new ThemeListing { MegabytesTotal = megabytesTotal, MegabytesAvailable = megabytesAvailable, Themes = themes };
     }
 
     /// <summary>
@@ -380,20 +380,24 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
     /// FILE_END reply:
     ///
     ///   1. FILE_START request: a Simple String Map with one entry {path: totalSize}, preceded
-    ///      by an "Abort file transfer" control message.
+    ///      by an "Abort file transfer" control message. The device's FILE_START reply must be
+    ///      awaited before any bulk bytes are written.
     ///   2. The raw file bytes are written directly to the transport in fixed-size 4096-byte
     ///      chunks (a final shorter chunk carries the remainder) - CONFIRMED to carry NO
     ///      additional per-chunk framing/header of any kind; it is exactly the file's bytes,
     ///      split at 4096-byte boundaries. There is no chunk acknowledgment observed between
     ///      chunks (they are written back-to-back).
-    ///   3. FILE_END request: a Simple String Map with one entry {path: crc32AsDecimalText}.
+    ///   3. FILE_END request: a Simple String Map with one entry {path: crc32AsDecimalText},
+    ///      immediately followed by an "Abort file transfer" control message. That message is
+    ///      what closes the bulk stream and makes the device act on FILE_END - it must be sent
+    ///      WITHOUT waiting for FILE_END's reply, or the upload deadlocks.
     ///   4. Once FILE_END's reply confirms the write succeeded: another "Abort file transfer"
     ///      control message, then a SET_DEVICE_RELOAD request for the same path.
     ///
     /// The device replies to FILE_START (empty payload) and FILE_END ({"res":"1","fileName":path})
-    /// as confirmed in <see cref="CommandId.FileStart"/>/<see cref="CommandId.FileEnd"/>, but
-    /// this method does not require the FILE_START reply before starting the bulk write
-    /// (matching the timing observed in the confirming capture).
+    /// as confirmed in <see cref="CommandId.FileStart"/>/<see cref="CommandId.FileEnd"/>. Both
+    /// replies are load-bearing: the FILE_START reply gates the bulk write, and the FILE_END
+    /// reply gates SET_DEVICE_RELOAD.
     /// </summary>
     /// <param name="deviceThemePath">The device-side path to store/activate the theme at, e.g. "/data/theme/MK20/&lt;name&gt;/&lt;name&gt;.Theme".</param>
     /// <param name="themeFileBytes">The complete .Theme file bytes (see <c>Mk20Control.Protocol.Codecs.ThemeFileCodec</c> to build one).</param>
@@ -429,23 +433,30 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
             }
             catch (Mk20TimeoutException ex) when (attempt < maxAttempts)
             {
-                // Confirmed on real hardware (PROTOCOL_WAVESHARE_MK20.md §10 Open Item #9):
-                // FILE_END/SET_DEVICE_RELOAD occasionally never gets acknowledged even for a
-                // byte-identical transfer that succeeds moments later - a low-probability,
-                // non-deterministic device-firmware condition, not tied to file size or
-                // content. A same-session retry (without power-cycling) has been directly
-                // confirmed NOT to help once the device's whole command processor has locked
-                // up (FIND_DEVICE itself stops replying), so before retrying we first confirm
-                // the device is still alive; if it isn't, we fail fast with a clear message
-                // instead of silently retrying against a dead link.
+                // A timed-out upload leaves the device mid-transfer, so before retrying we
+                // both close any half-open transfer and confirm the device is still alive;
+                // if it isn't, fail fast with a clear message rather than retrying against a
+                // dead link. (The long-standing "every upload times out" fault was NOT a
+                // device defect: the host used to withhold the post-FILE_END abort until the
+                // FILE_END reply arrived, which deadlocked the transfer - see
+                // UploadThemeFileAttemptAsync.)
                 _logger.LogWarning(ex, "Upload attempt {Attempt}/{Max} for {Path} timed out; checking device health before retrying.", attempt, maxAttempts, deviceThemePath);
+                try
+                {
+                    await SendAbortFileTransferAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception abortEx)
+                {
+                    _logger.LogDebug(abortEx, "Could not send the recovery abort-transfer message.");
+                }
+
                 DeviceIdentity? identity = await TryPingAsync(TimeSpan.FromSeconds(5), cancellationToken).ConfigureAwait(false);
                 if (identity is null)
                 {
                     throw new Mk20TimeoutException(
-                        $"Upload for '{deviceThemePath}' timed out and the device is no longer responding to FIND_DEVICE " +
-                        "(the whole command processor appears locked up, not just the reload path) - a physical power-cycle " +
-                        "is required before any further attempt will succeed.");
+                        $"Upload for '{deviceThemePath}' timed out and the device is no longer answering. " +
+                        "If it stays silent, unplug and replug it: once the firmware's command processor has " +
+                        "locked up, neither waiting nor re-enumerating the USB device recovers it.");
                 }
                 _pendingReloadPaths.TryRemove(deviceThemePath, out _);
             }
@@ -501,7 +512,17 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
             // FILE_START, resetting the device's file-transfer state machine before a new
             // upload. See SendAbortFileTransferAsync remarks.
             await SendAbortFileTransferAsync(cancellationToken).ConfigureAwait(false);
+            // The device must acknowledge FILE_START before any bulk bytes are written: until
+            // it has opened the destination file it is not yet counting payload, and bytes
+            // sent early are lost - leaving its byte counter short of totalSize, so it stays
+            // in file-receive mode and swallows the following FILE_END instead of answering
+            // it. Confirmed in every vendor capture (e.g. capture20_bg_gif: FILE_START at
+            // 12.311s, ack at 12.312s, first chunk only after that). Skipping this wait makes
+            // uploads fail intermittently, depending on how quickly the device happens to
+            // respond.
+            var fileStartWaitTask = WaitForReplyAsync(CommandId.FileStart, effectiveTimeout, cancellationToken);
             await SendRequestAsync(CommandId.FileStart, fileStartPayload, cancellationToken).ConfigureAwait(false);
+            await fileStartWaitTask.ConfigureAwait(false);
 
             if (!_transport.IsOpen)
                 throw new InvalidOperationException("Cannot upload a theme file: the client is not connected.");
@@ -517,6 +538,14 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
 
             var fileEndWaitTask = WaitForReplyAsync(CommandId.FileEnd, effectiveTimeout, cancellationToken);
             await SendRequestAsync(CommandId.FileEnd, fileEndPayload, cancellationToken).ConfigureAwait(false);
+            // The device stays in file-receive mode until the host closes the bulk stream with
+            // an "Abort file transfer" control message, and only then processes FILE_END. The
+            // vendor host sends it in the same millisecond as FILE_END - confirmed 5/5 in
+            // capture15, capture16, capture17, capture20_bg_gif and capture22_text_input, where
+            // the FILE_END reply then arrives ~30ms later. Waiting for that reply before
+            // sending this deadlocks the upload: the device never answers, and from then on it
+            // ignores every command while staying enumerated, until it is physically replugged.
+            await SendAbortFileTransferAsync(cancellationToken).ConfigureAwait(false);
             DeviceFrame frame = await fileEndWaitTask.ConfigureAwait(false);
 
             var fields = SimpleStringMapCodec.Decode(frame.Payload);
@@ -530,11 +559,13 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
             _logger.LogInformation("Theme upload acknowledged for {Path}; activating.", deviceThemePath);
 
             // The device replies to FILE_END before the file is actually reloadable, so only
-            // send SET_DEVICE_RELOAD once FILE_END's reply confirms the write succeeded -
-            // preceded by the same abort-transfer control message sent before FILE_START.
+            // send SET_DEVICE_RELOAD once FILE_END's reply confirms the write succeeded.
+            // Confirmed 5/5 in the captures listed above: the vendor host sends nothing
+            // between the FILE_END reply and SET_DEVICE_RELOAD. (Earlier revisions sent an
+            // abort-transfer here; that abort actually belongs immediately after FILE_END -
+            // see above - and sending it only at this point deadlocked every upload.)
             _pendingReloadPaths[deviceThemePath] = 0;
             var reloadWaitTask = WaitForReplyAsync(CommandId.SetDeviceReload, effectiveTimeout, cancellationToken);
-            await SendAbortFileTransferAsync(cancellationToken).ConfigureAwait(false);
             await SendRequestAsync(CommandId.SetDeviceReload, Encoding.UTF8.GetBytes(deviceThemePath), cancellationToken).ConfigureAwait(false);
             await reloadWaitTask.ConfigureAwait(false); // confirms the device echoed the reload command back
             _pendingReloadPaths.TryRemove(deviceThemePath, out _);
