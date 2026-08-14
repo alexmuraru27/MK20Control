@@ -52,7 +52,7 @@ public class TitleOpacityBackgroundsDemoTests
                     keyBuilder.Title(title);
                     keyBuilder.Opacity(opacity);
                     if (alignment is not null || colorHex is not null)
-                        keyBuilder.TitleStyle(alignment: alignment, colorHex: colorHex);
+                        keyBuilder.TitleStyle(alignment: alignment, color: colorHex is null ? (ThemeColor?)null : ThemeColor.Parse(colorHex));
                     keyBuilder.Action(KeyActions.Keyboard(key, label));
                 });
             }

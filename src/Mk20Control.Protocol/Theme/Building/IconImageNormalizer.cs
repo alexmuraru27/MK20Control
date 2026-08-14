@@ -58,6 +58,42 @@ internal static class IconImageNormalizer
     }
 
     /// <summary>
+    /// Re-encodes to 128x128 but KEEPS the alpha channel (32-bit RGBA PNG), padding with
+    /// transparency instead of black.
+    ///
+    /// CONFIRMED ON REAL HARDWARE: the device composites a key icon's alpha against whatever
+    /// is behind the key, so transparent and semi-transparent areas genuinely show the screen
+    /// background (including an animated GIF background) through the button artwork. This is
+    /// NOT vendor-shaped - every key icon in a shipped vendor theme is 128x128 RGB with no
+    /// alpha channel, so the vendor editor can never produce this - but the firmware handles
+    /// it correctly.
+    ///
+    /// Note the caveat behind <see cref="NormalizeToKeyIcon"/> still stands for the VENDOR
+    /// APP: a format mismatch is confirmed able to lock up ScreenKeyWindows' own image
+    /// loading, so a theme built this way is best treated as device-only.
+    /// </summary>
+    public static byte[] NormalizeToKeyIconPreservingAlpha(byte[] pngOrOtherImageBytes)
+    {
+        ArgumentNullException.ThrowIfNull(pngOrOtherImageBytes);
+        using var image = Image.Load<Rgba32>(pngOrOtherImageBytes);
+
+        image.Mutate(ctx => ctx.Resize(new ResizeOptions
+        {
+            Size = new Size(RequiredSize, RequiredSize),
+            Mode = ResizeMode.Pad,
+            PadColor = Color.Transparent,
+        }));
+
+        using var ms = new MemoryStream();
+        image.Save(ms, new PngEncoder
+        {
+            ColorType = PngColorType.RgbWithAlpha,
+            BitDepth = PngBitDepth.Bit8,
+        });
+        return ms.ToArray();
+    }
+
+    /// <summary>
     /// Decodes an animated image (typically a GIF), splits it into individual frames, and
     /// registers each frame as a separate 128x128 RGB PNG asset under a folder path -
     /// matching the confirmed real mechanism used by an animated KEY item (as opposed to a

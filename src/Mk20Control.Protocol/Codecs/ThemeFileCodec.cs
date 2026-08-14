@@ -370,6 +370,22 @@ public static class ThemeFileCodec
         }
         catch (InvalidDataException) { return null; }
 
+        return DecodeKeyAction(fields);
+    }
+
+    /// <summary>
+    /// Builds a strongly-typed <see cref="KeyAction"/> from an already-decoded tagged-value
+    /// field map. Used both for a theme key's <c>controlData</c> and for the action descriptor
+    /// the device pushes in a <c>DEVICE_ProactiveEscalationCMD</c> key-press event - confirmed
+    /// via real captures to carry the same <c>type</c> plus operational fields (e.g. a text
+    /// key reports <c>type=text</c> with <c>inputText</c>/<c>isInputEnter</c>/<c>isCopyPaste</c>,
+    /// exactly as stored in the theme file).
+    /// </summary>
+    public static KeyAction? DecodeKeyAction(IReadOnlyDictionary<string, TaggedValue> decodedFields)
+    {
+        ArgumentNullException.ThrowIfNull(decodedFields);
+        var fields = decodedFields as Dictionary<string, TaggedValue> ?? new Dictionary<string, TaggedValue>(decodedFields);
+
         string rawType = fields.TryGetValue("type", out var t) && t.AsString is { } ts ? ts : "";
         string? description = GetString(fields, "description");
         string? parentDescription = GetString(fields, "parentDescription");
@@ -383,35 +399,11 @@ public static class ThemeFileCodec
                 Keycode = GetInt(fields, "keycode") ?? 0,
                 KeyLabel = GetString(fields, "keyString"),
             },
-            "openWeb" => new OpenWebAction
-            {
-                RawType = rawType, Description = description, ParentDescription = parentDescription, IconPath = iconPath, RawFields = fields,
-                Url = GetString(fields, "Url") ?? "",
-            },
-            "qmk_mouse" => new MouseAction
-            {
-                RawType = rawType, Description = description, ParentDescription = parentDescription, IconPath = iconPath, RawFields = fields,
-                MouseKey = GetInt(fields, "qmk_mouse_key") ?? 0,
-                MouseEvent = GetInt(fields, "qmk_mouse_event") ?? 0,
-                MouseX = GetInt(fields, "mouse_x") ?? 0,
-                MouseY = GetInt(fields, "mouse_y") ?? 0,
-                MouseVerticalScroll = GetInt(fields, "mouse_v") ?? 0,
-                MouseHorizontalScroll = GetInt(fields, "mouse_h") ?? 0,
-            },
             "pageSwitch" => new PageSwitchAction
             {
                 RawType = rawType, Description = description, ParentDescription = parentDescription, IconPath = iconPath, RawFields = fields,
                 PageSwitchMode = GetInt(fields, "pageSwitchMode") ?? 0,
                 JumpToPage = GetInt(fields, "jumpToPage") ?? 0,
-            },
-            "Microphone" or "Loudspeaker" => new AudioVolumeAction
-            {
-                RawType = rawType, Description = description, ParentDescription = parentDescription, IconPath = iconPath, RawFields = fields,
-                DeviceClass = rawType == "Microphone" ? AudioDeviceClass.Microphone : AudioDeviceClass.Loudspeaker,
-                TargetDeviceName = GetString(fields, "volumeAdjustDevice"),
-                VolumeAdjustMode = GetInt(fields, "volumeAdjustMode") ?? 0,
-                VolumeAdjustValue = GetInt(fields, "volumeadjustValue") ?? 0,
-                IsSwitchDefaultDevice = GetBool(fields, "isSwitchDefaultDevice") ?? false,
             },
             "text" => new TextInputAction
             {
@@ -419,10 +411,6 @@ public static class ThemeFileCodec
                 InputText = GetString(fields, "inputText") ?? "",
                 IsInputEnter = GetBool(fields, "isInputEnter") ?? false,
                 IsCopyPaste = GetBool(fields, "isCopyPaste") ?? false,
-            },
-            "keyboard_switch" => new KeyboardSwitchAction
-            {
-                RawType = rawType, Description = description, ParentDescription = parentDescription, IconPath = iconPath, RawFields = fields,
             },
             "openPage" => new OpenPageAction
             {
@@ -433,11 +421,6 @@ public static class ThemeFileCodec
             {
                 RawType = rawType, Description = description, ParentDescription = parentDescription, IconPath = iconPath, RawFields = fields,
                 PageName = GetString(fields, "pageName"),
-            },
-            "ControlFlow" => new ControlFlowAction
-            {
-                RawType = rawType, Description = description, ParentDescription = parentDescription, IconPath = iconPath, RawFields = fields,
-                ControlDataList = fields.TryGetValue("controlDataList", out var cdl) ? cdl.AsByteArray : null,
             },
             "encoder_keyboard" => new EncoderKeyboardAction
             {
@@ -457,6 +440,11 @@ public static class ThemeFileCodec
                 Category = GetString(fields, "category"),
                 RelatedThemePath = GetString(fields, "relatedTheme"),
             },
+            // Every other vendor action type ("openWeb", "qmk_mouse", "Microphone",
+            // "Loudspeaker", "keyboard_switch", "ControlFlow", ...) lands here. This library
+            // models only the actions it needs - the rest are not dropped: every field stays
+            // in RawFields and is written back verbatim by EncodeKeyAction, so a vendor theme
+            // containing them still round-trips byte-identically.
             _ => new UnknownKeyAction
             {
                 RawType = rawType, Description = description, ParentDescription = parentDescription, IconPath = iconPath, RawFields = fields,
@@ -515,6 +503,14 @@ public static class ThemeFileCodec
             VariantMapCodec.WriteString(stream, asset.Path);
             VariantMapCodec.WriteByteArray(stream, asset.Data);
         }
+
+        // CONFIRMED: every real theme file ends with a 4-byte zero trailer after the last
+        // asset - present in all 38 vendor themes examined, and absent only from files this
+        // encoder produced. Its meaning is unconfirmed (most likely an empty trailing
+        // collection's count, e.g. the key-macro definition list implied by the header's
+        // keyMacroValue), but omitting it is confirmed to leave `text` keys completely inert
+        // on real hardware while keyboard keys keep working.
+        stream.Write(stackalloc byte[4]);
 
         return stream.ToArray();
     }
@@ -592,14 +588,22 @@ public static class ThemeFileCodec
         };
         // Confirmed present on every real top-level/main-screen theme file examined (absent
         // only from secondary/sub-page theme files) - preserved from the source page if this
-        // page was decoded from a real file, or defaulted to the confirmed real fixed value
-        // (two encoder rotation entries, row 103/104, both with keycode/keyString unset) for
-        // a brand-new page built via ThemeBuilder, where no source page exists to copy it
-        // from. See PROTOCOL_WAVESHARE_MK20.md §10 Item #10 - its complete absence was
-        // confirmed to make ScreenKeyWindows itself lock up when loading the theme file.
+        // page was decoded from a real file, or defaulted to the confirmed real value for a
+        // brand-new page built via ThemeBuilder, where no source page exists to copy it from.
+        //
+        // The default is the 4-entry form the CURRENT vendor software writes (rows 100/103/
+        // 104/105), observed on 51 real pages - including every theme ScreenKeyWindows saved
+        // during this investigation. An older 2-entry form (rows 103/104 only) also exists on
+        // 35 real pages. See PROTOCOL_WAVESHARE_MK20.md §10 Item #10 - the array's complete
+        // absence was confirmed to make ScreenKeyWindows itself lock up when loading a theme.
         obj["encoder"] = page.Encoder is { } enc
             ? JsonNode.Parse(enc.GetRawText())
-            : JsonNode.Parse("""[{"col":0,"keyString":"","keycode":0,"row":103},{"col":0,"keyString":"","keycode":0,"row":104}]""");
+            : JsonNode.Parse("""
+                [{"col":0,"keyString":"","keycode":0,"row":103},
+                 {"col":0,"keyString":"","keycode":0,"row":104},
+                 {"col":0,"keyString":"E","keycode":8,"row":100},
+                 {"col":0,"keyString":"","keycode":38992,"row":105}]
+                """);
         obj["items"] = new JsonArray(page.Items.Select(i => (JsonNode)BuildItemJson(i)).ToArray());
         if (page.PageName is not null) obj["pageName"] = page.PageName;
         // Present ONLY on folder sub-pages - this is what makes the device treat the page as
@@ -797,26 +801,9 @@ public static class ThemeFileCodec
 
         switch (action)
         {
-            case OpenWebAction w:
-                fields["Url"] = TaggedValue.Of(w.Url);
-                break;
-            case MouseAction m:
-                fields["qmk_mouse_key"] = TaggedValue.Of(m.MouseKey);
-                fields["qmk_mouse_event"] = TaggedValue.Of(m.MouseEvent);
-                fields["mouse_x"] = TaggedValue.Of(m.MouseX);
-                fields["mouse_y"] = TaggedValue.Of(m.MouseY);
-                fields["mouse_v"] = TaggedValue.Of(m.MouseVerticalScroll);
-                fields["mouse_h"] = TaggedValue.Of(m.MouseHorizontalScroll);
-                break;
             case PageSwitchAction p:
                 fields["pageSwitchMode"] = TaggedValue.Of(p.PageSwitchMode);
                 fields["jumpToPage"] = TaggedValue.Of(p.JumpToPage);
-                break;
-            case AudioVolumeAction a:
-                SetIfNotNull(fields, "volumeAdjustDevice", a.TargetDeviceName);
-                fields["volumeAdjustMode"] = TaggedValue.Of(a.VolumeAdjustMode);
-                fields["volumeadjustValue"] = TaggedValue.Of(a.VolumeAdjustValue);
-                fields["isSwitchDefaultDevice"] = TaggedValue.Of(a.IsSwitchDefaultDevice);
                 break;
             case TextInputAction t:
                 fields["inputText"] = TaggedValue.Of(t.InputText);
@@ -828,9 +815,6 @@ public static class ThemeFileCodec
                 break;
             case OneLevelUpAction ol:
                 SetIfNotNull(fields, "pageName", ol.PageName);
-                break;
-            case ControlFlowAction cf:
-                if (cf.ControlDataList is not null) fields["controlDataList"] = TaggedValue.Of(cf.ControlDataList);
                 break;
             case EncoderKeyboardAction ek:
                 SetIfNotNull(fields, "category", ek.Category);
@@ -846,7 +830,8 @@ public static class ThemeFileCodec
                 SetIfNotNull(fields, "category", ef.Category);
                 SetIfNotNull(fields, "relatedTheme", ef.RelatedThemePath);
                 break;
-            // KeyboardSwitchAction: no extra fields beyond the common base - nothing more to set.
+            // UnknownKeyAction (every unmodeled vendor action) needs no case: its fields were
+            // already copied verbatim from RawFields above, which is what preserves them.
         }
 
         return VariantMapCodec.EncodeMap(fields);

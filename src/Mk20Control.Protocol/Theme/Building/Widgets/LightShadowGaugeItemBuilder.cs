@@ -11,13 +11,13 @@ public sealed class LightShadowGaugeItemBuilder
     private double _x, _y, _z = 1;
     private string? _systemDataName;
     private double _min, _max = 100;
-    private string _backColor = "r=0,g=255,b=0,a=255";
-    private string _arcColor = "r=0,g=0,b=255,a=255";
+    private ThemeColor _backColor = ThemeColor.Parse("r=0,g=255,b=0,a=255");
+    private ThemeColor _arcColor = ThemeColor.Parse("r=0,g=0,b=255,a=255");
     private double _arcWidth = 6;
     private double _radius = 50;
     private bool _clockwise = true;
     private double _displayDirection = 1;
-    private string _lightShadowColor = "r=255,g=0,b=0,a=255";
+    private ThemeColor _lightShadowColor = ThemeColor.Parse("r=255,g=0,b=0,a=255");
     private double _lightShadowLighter = 100;
     private double _lightShadowPosition = 80;
 
@@ -27,11 +27,11 @@ public sealed class LightShadowGaugeItemBuilder
 
     public LightShadowGaugeItemBuilder BoundTo(string systemDataName, double min = 0, double max = 100) { _systemDataName = systemDataName; _min = min; _max = max; return this; }
 
-    public LightShadowGaugeItemBuilder Colors(string backRgba, string arcRgba, double arcWidth = 6) { _backColor = backRgba; _arcColor = arcRgba; _arcWidth = arcWidth; return this; }
+    public LightShadowGaugeItemBuilder Colors(ThemeColor backRgba, ThemeColor arcRgba, double arcWidth = 6) { _backColor = backRgba; _arcColor = arcRgba; _arcWidth = arcWidth; return this; }
 
     public LightShadowGaugeItemBuilder Geometry(double radius, bool clockwise = true, double displayDirection = 1) { _radius = radius; _clockwise = clockwise; _displayDirection = displayDirection; return this; }
 
-    public LightShadowGaugeItemBuilder LightShadow(string colorRgba, double lighter = 100, double position = 80) { _lightShadowColor = colorRgba; _lightShadowLighter = lighter; _lightShadowPosition = position; return this; }
+    public LightShadowGaugeItemBuilder LightShadow(ThemeColor colorRgba, double lighter = 100, double position = 80) { _lightShadowColor = colorRgba; _lightShadowLighter = lighter; _lightShadowPosition = position; return this; }
 
     internal ThemeItem Build() => new LightShadowGaugeItem
     {
@@ -41,15 +41,15 @@ public sealed class LightShadowGaugeItemBuilder
         SystemDataName = _systemDataName,
         MinValue = _min,
         MaxValue = _max,
-        BackColor = _backColor,
-        ArcColor = _arcColor,
+        BackColor = _backColor.ToWireString(),
+        ArcColor = _arcColor.ToWireString(),
         ArcWidth = _arcWidth,
         Radius = _radius,
         Clockwise = _clockwise,
         DisplayDirection = _displayDirection,
-        LightShadowColor = _lightShadowColor,
+        LightShadowColor = _lightShadowColor.ToWireString(),
         LightShadowLighter = _lightShadowLighter,
         LightShadowPosition = _lightShadowPosition,
-        RawJson = ThemeItemSkeletons.LightShadowGaugeItem(_backColor, _arcColor, _arcWidth, _radius, _clockwise, _displayDirection, _lightShadowColor, _lightShadowLighter, _lightShadowPosition),
+        RawJson = ThemeItemSkeletons.LightShadowGaugeItem(_backColor.ToWireString(), _arcColor.ToWireString(), _arcWidth, _radius, _clockwise, _displayDirection, _lightShadowColor.ToWireString(), _lightShadowLighter, _lightShadowPosition),
     };
 }

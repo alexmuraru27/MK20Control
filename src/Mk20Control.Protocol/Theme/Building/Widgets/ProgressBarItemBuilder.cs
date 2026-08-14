@@ -11,9 +11,9 @@ public sealed class ProgressBarItemBuilder
     private double _x, _y, _z = 1, _w = 80, _h = 12;
     private string? _systemDataName;
     private double _min, _max = 100;
-    private string _frontColor = "r=0,g=255,b=255,a=255";
-    private string _backColor = "r=255,g=255,b=255,a=100";
-    private string _borderColor = "r=0,g=0,b=255,a=0";
+    private ThemeColor _frontColor = ThemeColor.Parse("r=0,g=255,b=255,a=255");
+    private ThemeColor _backColor = ThemeColor.Parse("r=255,g=255,b=255,a=100");
+    private ThemeColor _borderColor = ThemeColor.Parse("r=0,g=0,b=255,a=0");
     private double _borderWidth = 2;
     private double _cornerRadius = 5;
 
@@ -24,7 +24,7 @@ public sealed class ProgressBarItemBuilder
     /// <summary>Binds this bar's fill level to a live data source (e.g. "Volume", "device_bl", "CPU Usage") within [<paramref name="min"/>, <paramref name="max"/>].</summary>
     public ProgressBarItemBuilder BoundTo(string systemDataName, double min = 0, double max = 100) { _systemDataName = systemDataName; _min = min; _max = max; return this; }
 
-    public ProgressBarItemBuilder Colors(string frontRgba, string backRgba, string borderRgba, double borderWidth = 2, double cornerRadius = 5)
+    public ProgressBarItemBuilder Colors(ThemeColor frontRgba, ThemeColor backRgba, ThemeColor borderRgba, double borderWidth = 2, double cornerRadius = 5)
     {
         _frontColor = frontRgba; _backColor = backRgba; _borderColor = borderRgba; _borderWidth = borderWidth; _cornerRadius = cornerRadius;
         return this;
@@ -38,6 +38,6 @@ public sealed class ProgressBarItemBuilder
         SystemDataName = _systemDataName,
         MinValue = _min,
         MaxValue = _max,
-        RawJson = ThemeItemSkeletons.ProgressBarItem(_frontColor, _backColor, _borderColor, _borderWidth, _cornerRadius),
+        RawJson = ThemeItemSkeletons.ProgressBarItem(_frontColor.ToWireString(), _backColor.ToWireString(), _borderColor.ToWireString(), _borderWidth, _cornerRadius),
     };
 }

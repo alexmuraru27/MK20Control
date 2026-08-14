@@ -17,6 +17,14 @@ public enum EncoderFunctionType
 
     /// <summary>Encoder controls system media playback (play/pause/skip via click+rotate). Confirmed real string: "encoder_system_media".</summary>
     SystemMedia,
+
+    /// <summary>
+    /// Encoder adjusts the DEVICE's own speaker volume (as opposed to the PC's system
+    /// volume). Confirmed real string "encoder_device_volume", found in the ScreenKeyWindows
+    /// binaries alongside its icon pair (<c>deviceVolume.png</c>/<c>deviceVolume_.png</c>) and
+    /// its <c>Encoder/relatedTheme/device_volume.Theme</c> mini-display theme.
+    /// </summary>
+    DeviceVolume,
 }
 
 /// <summary>Maps <see cref="EncoderFunctionType"/> values to their confirmed real wire-format <c>type</c> strings, and back.</summary>
@@ -28,6 +36,7 @@ public static class EncoderFunctionTypeExtensions
         EncoderFunctionType.SystemVolume => "encoder_system_volume",
         EncoderFunctionType.DeviceBrightness => "encoder_device_brightness",
         EncoderFunctionType.SystemMedia => "encoder_system_media",
+        EncoderFunctionType.DeviceVolume => "encoder_device_volume",
         _ => throw new System.ArgumentOutOfRangeException(nameof(type), type, "Unknown EncoderFunctionType."),
     };
 }

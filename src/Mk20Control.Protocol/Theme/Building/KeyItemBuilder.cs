@@ -65,6 +65,26 @@ public sealed class KeyItemBuilder
     }
 
     /// <summary>
+    /// Same as <see cref="Icon"/> but KEEPS the image's alpha channel instead of flattening
+    /// it onto black, so transparent areas of the artwork let the screen background show
+    /// through the button - including an animated GIF background.
+    ///
+    /// CONFIRMED ON REAL HARDWARE: the device really does composite key icon alpha against
+    /// what is behind the key (fully transparent holes, partial alpha and alpha gradients all
+    /// render correctly). This is a firmware capability the vendor editor cannot reach - every
+    /// shipped vendor key icon is 128x128 RGB with no alpha - so a theme using it is best
+    /// treated as device-only: loading it back into ScreenKeyWindows is untested and the
+    /// vendor app is known to be fussy about icon format.
+    ///
+    /// Use <see cref="Icon"/> when you want byte-for-byte vendor-shaped output instead.
+    /// </summary>
+    public KeyItemBuilder IconPreservingAlpha(string suggestedFileName, byte[] pngBytes)
+    {
+        _iconAssetPath = _owner.RegisterAsset(suggestedFileName, IconImageNormalizer.NormalizeToKeyIconPreservingAlpha(pngBytes));
+        return this;
+    }
+
+    /// <summary>
     /// Sets this key to show a multi-frame animation (e.g. from an animated GIF) instead of
     /// a static icon - this makes the KEY ITSELF animated (still fully pressable/assignable
     /// an action via <see cref="Action"/>), unlike <see cref="ThemePageBuilder.AddDynamicImage"/>
@@ -131,12 +151,12 @@ public sealed class KeyItemBuilder
     /// "center") was found in any real theme, and passing one produced no visible centering
     /// effect on real hardware (falls back to the default rendering, likely "bottom").
     /// </summary>
-    public KeyItemBuilder TitleStyle(string? fontFamily = null, double? fontSize = null, string? alignment = null, string? colorHex = null)
+    public KeyItemBuilder TitleStyle(string? fontFamily = null, double? fontSize = null, string? alignment = null, ThemeColor? color = null)
     {
         _titleFontFamily = fontFamily;
         _titleFontSize = fontSize;
         _titleAlignment = alignment;
-        _titleColor = colorHex;
+        _titleColor = color?.ToHexString();
         return this;
     }
 

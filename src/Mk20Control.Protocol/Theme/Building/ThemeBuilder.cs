@@ -32,6 +32,21 @@ namespace Mk20Control.Protocol.Theme.Building;
 /// </summary>
 public sealed class ThemeBuilder : IThemeAssetRegistry
 {
+    /// <summary>
+    /// The theme header's <c>keyMacroValue</c> - a fixed 92-byte ASCII blob (base64 text for
+    /// an empty 16-slot key-macro table) that is byte-for-byte IDENTICAL across all 38 real
+    /// vendor themes examined, and present in every single one of them.
+    ///
+    /// CONFIRMED LOAD-BEARING: a builder-made theme that left this empty had working keyboard
+    /// keys but completely dead <c>text</c> keys on real hardware - pressing them did nothing
+    /// at all - while a vendor-saved theme with byte-identical key <c>controlData</c> worked.
+    /// Restoring this value is what makes text/macro keys function, which fits its name: text
+    /// injection is a "key macro", and the device appears to require the macro table to exist
+    /// before it will execute one.
+    /// </summary>
+    private static readonly byte[] DefaultKeyMacroValue = System.Text.Encoding.ASCII.GetBytes(
+        "AAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=");
+
     private readonly List<ThemePageBuilder> _pages = new();
     private readonly Dictionary<string, ThemeAsset> _assets = new();
     private int _nextItemId = 1;
@@ -103,7 +118,7 @@ public sealed class ThemeBuilder : IThemeAssetRegistry
         return new ThemeFile
         {
             Language = Language,
-            KeyMacroValue = Array.Empty<byte>(),
+            KeyMacroValue = DefaultKeyMacroValue,
             KeyMacro = null,
             CurrentPageId = pages[0].PageName ?? "",
             LayoutVersion = LayoutVersion,

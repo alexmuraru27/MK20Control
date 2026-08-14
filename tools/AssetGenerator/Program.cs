@@ -31,6 +31,7 @@ Directory.CreateDirectory(backgroundsDir);
 var font = SystemFonts.CreateFont(PickFontFamily(), 22, FontStyle.Bold);
 
 GenerateIcons(iconsDir, font);
+GenerateAlphaTestIcons(iconsDir, font);
 GenerateBackgrounds(backgroundsDir);
 
 Console.WriteLine($"Icons written to:       {iconsDir}");
@@ -52,7 +53,6 @@ static void GenerateIcons(string iconsDir, Font font)
 {
     const int size = 64;
     const int count = 40;
-
     for (int i = 1; i <= count; i++)
     {
         double hue = (i - 1) / (double)count * 360.0;
@@ -100,6 +100,59 @@ static void GenerateIcons(string iconsDir, Font font)
 
         img.SaveAsPng(System.IO.Path.Combine(iconsDir, $"icon_{i:D2}.png"));
     }
+}
+
+// Icons that deliberately expose the screen background THROUGH the button artwork, so a
+// theme can be used to verify that PNG alpha really composites against whatever is behind
+// the key (e.g. an animated GIF background) rather than being flattened onto black.
+//
+// The numbered icon_NN.png badges are fully opaque (every pixel alpha=255) and so prove
+// nothing about transparency - hence this separate set:
+//   alpha_ring     - an opaque ring with a FULLY TRANSPARENT centre (hard alpha=0 hole)
+//   alpha_half     - a uniform 50% alpha fill (tests partial blending, not just a hole)
+//   alpha_gradient - alpha sweeping 0 -> 255 left to right (tests the whole alpha range)
+//   alpha_checker  - alternating opaque/transparent squares (unmistakable if it works)
+static void GenerateAlphaTestIcons(string iconsDir, Font font)
+{
+    const int size = 64;
+    var accent = Color.ParseHex("#22D3EE");
+
+    using (var ring = new Image<Rgba32>(size, size, Color.Transparent))
+    {
+        ring.Mutate(ctx =>
+        {
+            ctx.Fill(accent, new EllipsePolygon(size / 2f, size / 2f, size / 2f - 2));
+            // Punch a real hole: source-copy a transparent disc so alpha becomes 0, rather
+            // than painting black over it.
+            ctx.SetGraphicsOptions(o => o.AlphaCompositionMode = PixelAlphaCompositionMode.DestOut);
+            ctx.Fill(Color.Black, new EllipsePolygon(size / 2f, size / 2f, size / 4f));
+        });
+        ring.SaveAsPng(System.IO.Path.Combine(iconsDir, "alpha_ring.png"));
+    }
+
+    using (var half = new Image<Rgba32>(size, size, new Rgba32(34, 211, 238, 128)))
+        half.SaveAsPng(System.IO.Path.Combine(iconsDir, "alpha_half.png"));
+
+    using (var grad = new Image<Rgba32>(size, size))
+    {
+        for (int x = 0; x < size; x++)
+        {
+            byte a = (byte)(x * 255 / (size - 1));
+            for (int y = 0; y < size; y++) grad[x, y] = new Rgba32(34, 211, 238, a);
+        }
+        grad.SaveAsPng(System.IO.Path.Combine(iconsDir, "alpha_gradient.png"));
+    }
+
+    using (var checker = new Image<Rgba32>(size, size, Color.Transparent))
+    {
+        const int cell = 8;
+        for (int x = 0; x < size; x++)
+            for (int y = 0; y < size; y++)
+                if ((x / cell + y / cell) % 2 == 0) checker[x, y] = new Rgba32(34, 211, 238, 255);
+        checker.SaveAsPng(System.IO.Path.Combine(iconsDir, "alpha_checker.png"));
+    }
+
+    Console.WriteLine("Alpha test icons: alpha_ring, alpha_half, alpha_gradient, alpha_checker");
 }
 
 static IPath BuildHexagon(float cx, float cy, float r)

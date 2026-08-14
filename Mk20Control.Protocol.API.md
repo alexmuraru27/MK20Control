@@ -4,8 +4,7 @@
 **Assembly:** `Mk20Control.Protocol` (project reference or build+reference the DLL)
 **Purpose:** reusable client library for the Waveshare MK20 programmable keypad — connect
 to the device, read/build/edit `.Theme` files, and drive its display and telemetry
-programmatically from any .NET application (e.g. a SimHub plugin, a custom button-box
-controller, or any app that wants to reflect its own state on the device's buttons).
+programmatically from any .NET application.
 
 For the underlying wire protocol and file format specification, see
 [`PROTOCOL_WAVESHARE_MK20.md`](./PROTOCOL_WAVESHARE_MK20.md). For build/run instructions,
@@ -24,16 +23,19 @@ how to use it.
 | `Mk20Control.Protocol.Model` | Value types returned by the client (`DeviceIdentity`, `ThemeListing`, `KeyPosition`, `CommandId`) |
 | `Mk20Control.Protocol.Codecs` | `ThemeFileCodec` — decode/encode raw `.Theme` file bytes |
 | `Mk20Control.Protocol.Theme` | `ThemeFile`, `ThemePage`, `ThemeCanvas`, `ThemeAsset` — the decoded theme data model |
+| `Mk20Control.Protocol.Host` | `KeyBindings` — run your own C# when a physical button is pressed |
 | `Mk20Control.Protocol.Theme.Items` | Core page item types (`KeyItem`, `BackgroundItem`, `DynamicImageItem`) |
 | `Mk20Control.Protocol.Theme.Items.Widgets` | Data-bound widget item types (`TextItem`, `MultilineTextItem`, `ShadowTextItem`, `ProgressBarItem`, `LinearGaugeItem`, `RadialGaugeItem`, `CircularGaugeItem`, `SegmentedCircularGaugeItem`, `LightShadowGaugeItem`, `DigitalClockItem`) |
 | `Mk20Control.Protocol.Theme.Actions` | Key action types (`KeyboardAction`, `PageSwitchAction`, etc.) |
-| `Mk20Control.Protocol.Theme.Building` | `ThemeBuilder`, `ThemeEditor`, `ThemePageBuilder`, `KeyActions`, `HidKey`, `KeyModifiers`, `EncoderFunctionType` — fluent theme construction/editing |
+| `Mk20Control.Protocol.Theme.Building` | `ThemeBuilder`, `ThemeEditor`, `ThemePageBuilder`, `KeyItemBuilder`, `KeyActions`, `ThemeColor`, `HidKey`, `KeyModifiers`, `EncoderSide`, `EncoderPositions`, `EncoderFunctionType`, `SystemIconPaths` — fluent theme construction/editing |
 | `Mk20Control.Protocol.Theme.Building.Widgets` | Fluent builders for the widget item types above (`TextItemBuilder`, `ProgressBarItemBuilder`, `RadialGaugeItemBuilder`, etc.) |
+| `Mk20Control.Protocol.Framing` | Wire-frame primitives (`DeviceFrame`, `DeviceFrameParser`) — needed only to build a custom transport or analyse raw captures |
+| `Mk20Control.Protocol.Checksums` | `Crc32` (zlib variant) as used by the frame header |
 | `Mk20Control.Protocol.Exceptions` | `Mk20ProtocolException` and subtypes |
 
-Required NuGet dependencies (already declared by the project; pull in transitively when
-referencing the built DLL): `System.Text.Json`, `System.IO.Ports`,
-`Microsoft.Extensions.Logging.Abstractions`, `SixLabors.ImageSharp`.
+Package dependencies (declared by the project, transitive when referencing the built DLL):
+`System.Text.Json` 10.0.11, `System.IO.Ports` 10.0.11,
+`Microsoft.Extensions.Logging.Abstractions` 10.0.0, `SixLabors.ImageSharp` 3.1.11.
 
 ---
 
@@ -71,7 +73,7 @@ their own explicit timeout).
 
 Pass an `ILoggerFactory` (or `ILogger<Mk20DeviceClient>`) to get structured `Debug`/`Info`/
 `Warning` logs for every command sent/received, retries, and timeouts — useful when
-integrating into a host application (e.g. SimHub) that has its own logging pipeline.
+integrating into a host application that has its own logging pipeline.
 
 ```csharp
 var client = Mk20DeviceClient.CreateForSerialPort("COM7", loggerFactory: myLoggerFactory);
@@ -82,7 +84,19 @@ var client = Mk20DeviceClient.CreateForSerialPort("COM7", loggerFactory: myLogge
 ```csharp
 client.NotificationReceived += (_, e) =>
 {
-    // e.Position.Row / e.Position.Column, e.IsPressed, e.ActionDescriptor (raw fields)
+    // e.Position.Row / e.Position.Column, e.IsPressed
+    // e.Action           - strongly typed KeyAction (pattern-match on it)
+    // e.ActionDescriptor - the same thing as raw tagged-value fields
+    if (e.IsPressed && e.Action is TextInputAction text)
+        Console.WriteLine($"key wants to type: {text.InputText}");
+};
+client.PageSwitched += (_, _) =>
+{
+    // The device changed page (relative paging, jumpToPage, folder in/out).
+};
+client.JsonReceived += (_, json) =>
+{
+    // Raw SEND_JSON status pushed by the device.
 };
 client.TransportError += (_, ex) =>
 {
@@ -93,11 +107,86 @@ client.TransportError += (_, ex) =>
 `NotificationReceived` fires for every physical key press/release **that has a bound
 action in the currently loaded theme** — a key with no assigned action produces no event
 at all (see the protocol spec §6.3). This is how you observe button presses to trigger
-your own application logic (e.g. toggle a SimHub setting when a button is pressed).
+your own application logic.
+
+`PageSwitched` is the device's own confirmation that navigation actually happened, which
+makes it the reliable way to verify page/folder keys on real hardware.
 
 ---
 
-## 3. Core device operations
+## 3. Handling input
+
+### 3.1 Which actions the device executes
+
+| Action | Executed by | Notes |
+|---|---|---|
+| `keyboard`, `KeyboardCombo` | Device | Native USB HID; works with no software running on the PC |
+| `pageSwitch`, `openPage`, `oneLevelUp` | Device | Changes page itself and reports `themePageSwitch` |
+| `EncoderFunction(...)` | Device | Volume, brightness and media are handled on-device |
+| `EncoderKeyboard(...)` | Device | Emits a keystroke per motion; reports nothing on the serial channel |
+| `Command(id)` | **Your application** | The device emits no HID input at all — it reports the press with the ID and takes no other action |
+
+### 3.2 Running your own code on a button press
+
+Give the key a **command ID** when you build the theme, then bind a handler to that ID at
+runtime. The ID is any string meaningful to your application.
+
+```csharp
+using Mk20Control.Protocol.Host;
+
+// Build: stamp an ID onto the key.
+page.AddKey(0, 0, key => key.Title("Build").Action(KeyActions.Command("build.start")));
+page.AddKey(0, 1, key => key.Title("Mute").Action(KeyActions.Command("audio.mute")));
+
+// Run: bind your code to that ID.
+using var buttons = new KeyBindings(client);
+
+buttons.OnCommand("build.start", () => StartBuild());
+buttons.OnCommand("audio.mute", () => SetMuted(true));
+buttons.OnCommandRelease("audio.mute", () => SetMuted(false));
+
+buttons.Unbound += (_, ctx) => Log($"unhandled {ctx.CommandId ?? "(none)"} at {ctx.Position}");
+```
+
+| Member | Purpose |
+|---|---|
+| `OnCommand(id, handler)` / `OnCommandRelease(id, handler)` | Bind a handler; `Action` and `Action<KeyEventContext>` overloads |
+| `Unbind(id)` / `Clear()` | Remove one or all bindings |
+| `BoundCommands` | Currently bound `(Id, Pressed)` pairs |
+| `Unbound` event | Fires for reported keys with no matching binding |
+
+`KeyEventContext` carries `CommandId`, `Position`, `IsPressed` and `Action` (the decoded
+theme action).
+
+**Command IDs are page-agnostic.** The press event reports only `{row, col, pressed}` and
+never identifies the page, so the same grid cell on two pages — or inside a folder — is
+indistinguishable by position. The ID travels in the key's action descriptor, which is echoed
+back on every press, so a binding keeps working when a button moves to another cell, page or
+folder.
+
+Two constraints follow from the protocol:
+
+- **A key must have an action to be reported at all.** The device sends nothing for an
+  unassigned key. `Command()` satisfies this while doing nothing on the device.
+- **Device-native actions carry no command ID**, so they never match a binding.
+
+Handlers run on the transport read thread: keep them short and queue slow work elsewhere. A
+handler that throws is caught and logged, so it cannot stop the read loop or other bindings.
+
+### 3.3 Encoder input
+
+Encoder motion is reported through the same channel, with `Position.Row` and `Position.Column`
+both set to a pseudo-row identifying the knob — `100` for the left, `103` for the right — and
+`IsPressed` always `true` (encoders send no release). Use
+`EncoderPositions.SideOfPseudoRow(row)` to map a reported row back to an `EncoderSide`.
+
+A `Command()`-bound encoder reports the same value for clockwise, counter-clockwise and click,
+so it identifies *which* knob moved, not which way. Bind `EncoderKeyboard(...)` when direction
+matters — see [Physical rotary encoders](#physical-rotary-encoders).
+
+---
+
+## 4. Device operations
 
 All async methods accept an optional `TimeSpan? timeout` and `CancellationToken`.
 
@@ -148,8 +237,8 @@ Key names are theme-defined (bound via `system_data_name` in the theme's JSON, s
 each widget builder's `.BoundTo(...)` — see §5.5) — push whatever keys the currently
 loaded theme declares via its `deviceRequestSystemData` contract (sent automatically after
 every `SET_DEVICE_RELOAD`). There is no fixed/reserved key set: any string you bind a
-widget to in the theme is a valid key to push, including custom ones like `"Speed"` or
-`"LapTime"`. Most integrations simply push their own known key set on a timer.
+widget to in the theme is a valid key to push, including application-specific names. Most
+integrations push their own known key set on a timer.
 
 Confirmed real-hardware convention: values are pushed as **pre-formatted display
 strings**, not bare numbers — even for a widget bound with a numeric `min`/`max` range
@@ -169,7 +258,7 @@ safe (e.g. after a manual power-cycle).
 
 ---
 
-## 4. Reading a `.Theme` file
+## 5. Reading a `.Theme` file
 
 ```csharp
 using Mk20Control.Protocol.Codecs;
@@ -222,25 +311,27 @@ check `RawControlDataBase64` in that case). Concrete types in
 | Type | `type` string | Notable fields |
 |---|---|---|
 | `KeyboardAction` | `keyboard` | `Keycode` (USB HID usage; upper byte = modifier bitmask for combos), `KeyLabel` |
-| `OpenWebAction` | `openWeb` | `Url` |
-| `MouseAction` | `qmk_mouse` | `MouseKey`, `MouseEvent`, `MouseX`/`Y`/`VerticalScroll`/`HorizontalScroll` |
 | `PageSwitchAction` | `pageSwitch` | `PageSwitchMode` (1=previous, 2=next, 0=absolute jump), `JumpToPage` (zero-based page index, used when mode is 0) |
 | `OpenPageAction` | `openPage` | `PageName` (target page GUID) |
 | `OneLevelUpAction` | `oneLevelUp` | `PageName` (always the sentinel `"parentPage"`, which resolves via the page's own `ParentPageName`) |
-| `TextInputAction` | `text` | `InputText`, `IsInputEnter`, `IsCopyPaste` |
-| `AudioVolumeAction` | `Microphone`/`Loudspeaker` | `DeviceClass`, `TargetDeviceName`, `VolumeAdjustMode`/`Value` |
-| `KeyboardSwitchAction` | `keyboard_switch` | — |
-| `EncoderKeyboardAction` | `encoder_keyboard` | `LeftKeycode`/`MiddleKeycode`/`RightKeycode` (+ labels) |
-| `EncoderFunctionAction` | `encoder_system_volume`/`encoder_device_brightness`/`encoder_system_media` | `RelatedThemePath`. Build via `KeyActions.EncoderFunction(EncoderFunctionType.___)`. |
-| `ControlFlowAction` | `ControlFlow` | `ControlDataList` (raw bytes; populated-step schema unconfirmed) |
-| `UnknownKeyAction` | any other | `RawFields` only |
+| `TextInputAction` | `text` | `InputText` (a command id when built with `KeyActions.Command`), `IsInputEnter`, `IsCopyPaste` |
+| `EncoderKeyboardAction` | `encoder_keyboard` | `LeftKeycode`/`MiddleKeycode`/`RightKeycode` (+ labels), `Category` |
+| `EncoderFunctionAction` | `encoder_system_volume`, `encoder_device_volume`, `encoder_device_brightness`, `encoder_system_media` | `Category`, `RelatedThemePath` |
+| `UnknownKeyAction` | anything else | `RawFields` only |
 
-Every `KeyAction` exposes `RawFields: IReadOnlyDictionary<string, TaggedValue>` for any
-field not yet promoted to a typed property.
+Every `KeyAction` exposes `RawType`, `Description`, `ParentDescription`, `IconPath` and
+`RawFields: IReadOnlyDictionary<string, TaggedValue>` for any field not promoted to a typed
+property.
+
+The vendor also ships `openWeb`, `qmk_mouse`, `Microphone`/`Loudspeaker` (volume),
+`keyboard_switch` and `ControlFlow` keys. These are not modelled: they decode to
+`UnknownKeyAction` with every field intact in `RawFields` and are re-encoded verbatim, so
+loading and editing a vendor theme preserves them exactly. Use `KeyActions.Command(id)` to
+implement equivalent host-side behaviour yourself.
 
 ---
 
-## 5. Building a new theme from scratch
+## 6. Building a new theme
 
 ```csharp
 using Mk20Control.Protocol.Theme.Building;
@@ -274,6 +365,7 @@ an immutable `ThemeFile`. The first added page becomes the active page on load
 | `.SetCanvas(width, height, showUnit=true)` | Canvas size — always `640, 656` for the real main screen. Call first. |
 | `.AsFolderOf(parentPage)` | Marks this page as a **folder** of `parentPage` (emits `parentPageName`). Required for `KeyActions.OneLevelUp()` to work — see [Page navigation](#page-navigation-paging-jumps-and-folders). |
 | `.AddKey(row, col, configure)` | A physical key (`KeyItemBuilder`, see below). |
+| `.AddEncoder(side, configure)` | A rotary encoder binding, positioned automatically (`EncoderSide.Left`/`Right`) — see [Physical rotary encoders](#physical-rotary-encoders). |
 | `.AddBackground(configure)` | `.mp4` video background, main or secondary screen (`BackgroundItemBuilder`). |
 | `.AddDynamicImage(configure)` | Decorative animated GIF, or (via `.MainScreenBackground`/`.SecondaryScreenBackground`/their `AutoFit` size-guarding variants) a picture/GIF screen background (`DynamicImageItemBuilder`). |
 | `.AddText(configure)` | Static or data-bound text label (type 113). |
@@ -288,13 +380,14 @@ an immutable `ThemeFile`. The first added page becomes the active page on load
 
 | Method | Effect |
 |---|---|
-| `.Icon(fileName, bytes)` | Sets a static icon; auto-normalized to the required 128x128 RGB PNG format. |
+| `.Icon(fileName, bytes)` | Sets a static icon, normalised to the vendor format (128x128, RGB, no alpha). |
+| `.IconPreservingAlpha(fileName, pngBytes)` | Same, but keeps the alpha channel so the background shows through — see [Transparent key icons](#transparent-key-icons). |
 | `.AnimatedIcon(folderName, gifBytes)` | Sets a multi-frame animated icon (pressable key, unlike a decorative dynamic image). |
 | `.IconAssetPath(path)` | Points at an already-registered/static system asset path (e.g. `/static/icon/dark/PageSwitch.png`) instead of registering a new one. |
 | `.Action(keyAction)` | Assigns behavior — build one via `KeyActions` (below). |
 | `.Title(text)` | On-screen label text over the icon. |
 | `.Opacity(0-100)` | Icon transparency (100 = opaque, the default). |
-| `.TitleStyle(fontFamily?, fontSize?, alignment?, colorHex?)` | Overrides title font/color; only `"top"`/`"bottom"` are confirmed real `alignment` values. |
+| `.TitleStyle(fontFamily?, fontSize?, alignment?, color?)` | Overrides title font/colour; only `"top"`/`"bottom"` are confirmed real `alignment` values. |
 | `.IconSize(width, height)` | Overrides rendered icon size (defaults to 128x128). |
 | `.At(x, y, z=1)` | Overrides auto-derived position (defaults to row/column × 128px cells from origin (0,144)). |
 | `.Locked(locked=true)` | Real key items are always locked; defaults to `true`. |
@@ -310,20 +403,23 @@ KeyActions.PreviousPage() / KeyActions.NextPage()                     // relativ
 KeyActions.JumpToPage(2)                                              // absolute jump to page index 2
 KeyActions.OpenPage(otherPage.PageId)                                 // enter a "folder" page (by GUID)
 KeyActions.OneLevelUp()                                               // return out of a folder
-KeyActions.OpenWeb("https://example.com")
-KeyActions.Mouse(mouseKey, mouseEvent, x, y, vScroll, hScroll)
-KeyActions.TypeText("hello", pressEnterAfter: true)
-KeyActions.AudioVolume(AudioDeviceClass.Loudspeaker, "Speakers", adjustMode, adjustValue)
-KeyActions.KeyboardSwitch()
+KeyActions.Command("build.start")                                     // report an ID to YOUR C# handler
+KeyActions.TypeText("hello", pressEnterAfter: true)                   // raw text action; nothing types it
+
+// Encoders - see §6.4
 KeyActions.EncoderKeyboard(leftKeycode, leftLabel, middleKeycode, middleLabel, rightKeycode, rightLabel)
-KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume, relatedThemePath: null)  // strongly typed
-KeyActions.EncoderFunction("encoder_system_volume", relatedThemePath: null)          // raw-string fallback
+KeyActions.EncoderKeyboard(rotateLeft: (KeyModifiers.LeftCtrl, HidKey.Z),
+                           click: null,
+                           rotateRight: (KeyModifiers.LeftCtrl, HidKey.Y))
+KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume, relatedThemePath: null)
+KeyActions.EncoderFunction("encoder_system_volume", relatedThemePath: null)   // raw-string overload
 ```
 
 `HidKey` is an enum of the standard USB HID keyboard usage table (`A`-`Z`, `Digit0`-`Digit9`,
 `Enter`, `Escape`, `Tab`, `Delete`, `F1`-`F12`, arrow keys, etc.) — use it instead of raw
 integers. `KeyModifiers` is a `[Flags]` enum (`LeftCtrl`, `LeftShift`, `LeftAlt`, `LeftWin`,
-`RightCtrl`, `RightShift`, `RightAlt`, `RightWin`) for `KeyboardCombo`.
+`RightCtrl`, `RightShift`, `RightAlt`, `RightWin`); modifiers are packed into the upper byte
+of the keycode, so `Ctrl+Shift+C` encodes as `0x0306`.
 
 ### Page navigation: paging, jumps and folders
 
@@ -388,13 +484,13 @@ at all. A home page jumps out to each section, and each section jumps back to in
 ```csharp
 var builder = new ThemeBuilder();
 var hub = builder.AddPage().SetCanvas(640, 656);      // page index 0
-var fuel = builder.AddPage().SetCanvas(640, 656);     // page index 1
-var tyres = builder.AddPage().SetCanvas(640, 656);    // page index 2
+var media = builder.AddPage().SetCanvas(640, 656);    // page index 1
+var window = builder.AddPage().SetCanvas(640, 656);   // page index 2
 
-hub.AddKey(0, 0, key => key.Title("FUEL").Action(KeyActions.JumpToPage(1)));
-hub.AddKey(0, 1, key => key.Title("TYRES").Action(KeyActions.JumpToPage(2)));
+hub.AddKey(0, 0, key => key.Title("MEDIA").Action(KeyActions.JumpToPage(1)));
+hub.AddKey(0, 1, key => key.Title("WINDOW").Action(KeyActions.JumpToPage(2)));
 
-foreach (var section in new[] { fuel, tyres })
+foreach (var section in new[] { media, window })
 {
     section.AddKey(3, 4, key => key
         .IconAssetPath(SystemIconPaths.PageSwitch)
@@ -449,7 +545,7 @@ var folder = builder.AddPage().SetCanvas(640, 656)
 
 home.AddKey(0, 0, key => key
     .IconAssetPath(SystemIconPaths.CreateFolder)
-    .Title("PIT")
+    .Title("TOOLS")
     .Action(KeyActions.OpenPage(folder.PageId)));     // in
 
 folder.AddKey(3, 4, key => key
@@ -465,13 +561,13 @@ same actions. The only convention worth keeping is reserving the bottom-right ce
 return key, which leaves 19 usable cells:
 
 ```csharp
-var pit = builder.AddPage().SetCanvas(640, 656).AsFolderOf(home);
+var tools = builder.AddPage().SetCanvas(640, 656).AsFolderOf(home);
 
 // Fill the grid in reading order, skipping the reserved return cell.
 var functions = new (string Label, HidKey Key)[]
 {
-    ("PIT REQ", HidKey.A), ("FUEL +", HidKey.B), ("FUEL -", HidKey.C),
-    ("TYRES",   HidKey.D), ("REPAIR", HidKey.E),
+    ("CUT",  HidKey.X), ("COPY",  HidKey.C), ("PASTE", HidKey.V),
+    ("UNDO", HidKey.Z), ("REDO",  HidKey.Y),
 };
 
 int i = 0;
@@ -479,13 +575,13 @@ foreach (var (label, hidKey) in functions)
 {
     int row = i / 5, col = i % 5;
     i++;
-    pit.AddKey(row, col, key => key
-        .Icon($"{label}.png", File.ReadAllBytes(iconPath))
+    tools.AddKey(row, col, key => key
+        .Icon($"{label}.png", File.ReadAllBytes($"icons/{label}.png"))
         .Title(label)
-        .Action(KeyActions.Keyboard(hidKey, hidKey.ToString())));
+        .Action(KeyActions.KeyboardCombo(KeyModifiers.LeftCtrl, hidKey)));
 }
 
-pit.AddKey(3, 4, key => key                            // reserved: return key
+tools.AddKey(3, 4, key => key                          // reserved: return key
     .IconAssetPath(SystemIconPaths.OneLevelUp)
     .Title("BACK")
     .Action(KeyActions.OneLevelUp()));
@@ -545,6 +641,23 @@ straight to page index 0 regardless of depth.
 > device's own `themePageSwitch` confirmation, which is the reliable way to verify navigation
 > actually happened.
 
+### Command IDs on keys
+
+`KeyActions.Command(id)` stamps a caller-defined ID onto a key. The device executes nothing —
+it reports the press with the ID, which your application routes to a handler via
+`KeyBindings` ([§3.2](#32-running-your-own-code-on-a-button-press)).
+
+```csharp
+page.AddKey(0, 0, key => key
+    .Icon("deploy.png", iconBytes)
+    .Title("DEPLOY")
+    .Action(KeyActions.Command("deploy.staging")));
+```
+
+`KeyActions.TypeText(text, pressEnterAfter, useCopyPaste)` is the underlying `text` action,
+exposed so vendor themes round-trip with their `isInputEnter`/`isCopyPaste` flags intact.
+Nothing types it. For real keystrokes use `Keyboard(...)` / `KeyboardCombo(...)`.
+
 ### Screen backgrounds
 
 ```csharp
@@ -573,54 +686,91 @@ x/y/w/h rectangle. Animated GIF sources keep their frame count/delays/loop count
 
 ### Physical rotary encoders
 
-The MK20 has two physical rotary encoders on the secondary screen. Confirmed real-hardware
-layout (cross-checked against `defaultTheme.Theme` and `海边吹风.Theme`): an encoder
-function is a normal `KeyItem` positioned at a fixed coordinate — not part of the row/column
-key grid — with its action set via `KeyActions.EncoderFunction(...)`:
+The MK20 has two rotary encoders. Each is an ordinary key placed at a fixed
+secondary-screen coordinate, which is how the device recognises it — `AddEncoder` applies the
+correct position for you.
 
-| Encoder | Fixed position |
+| Member | Value |
 |---|---|
-| Left | `x=106, y=0` |
-| Right | `x=320, y=0` |
+| `EncoderPositions.LeftX` / `LeftY` | `106` / `0` |
+| `EncoderPositions.RightX` / `RightY` | `320` / `0` |
+| `EncoderPositions.LeftPseudoRow` / `RightPseudoRow` | `100` / `103` — the row/col reported on input |
+| `EncoderPositions.SystemVolumeIcon`, `DeviceVolumeIcon`, `DeviceBrightnessIcon`, `SystemMediaIcon`, `KeyboardIcon` | Built-in icon asset paths |
+| `EncoderPositions.PositionOf(side)`, `PseudoRowOf(side)`, `SideOfPseudoRow(row)` | Lookups |
+| `EncoderPositions.RelatedThemePath(root, type)` | Builds the mini-display theme path (below) |
+
+An encoder key is normally invisible — point it at a built-in icon and set `.Opacity(0)`. The
+binding works regardless of what is drawn.
+
+**Built-in device functions.** Executed entirely on-device, so they work with no software
+running on the PC.
 
 ```csharp
-using Mk20Control.Protocol.Theme.Building;
-
-// Left encoder -> system volume
-page.AddKey(0, 0, key => key
-    .At(106, 0)
-    .IconAssetPath("/static/icon/white/systemVolume_.png")
+page.AddEncoder(EncoderSide.Left, key => key
+    .IconAssetPath(EncoderPositions.SystemVolumeIcon)
+    .Opacity(0)
     .Action(KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume)));
-
-// Right encoder -> device (screen) brightness
-page.AddKey(0, 0, key => key
-    .At(320, 0)
-    .IconAssetPath("/static/icon/white/deviceBrightness_.png")
-    .Action(KeyActions.EncoderFunction(EncoderFunctionType.DeviceBrightness)));
 ```
 
-`EncoderFunctionType` (`SystemVolume`, `DeviceBrightness`, `SystemMedia`) is a strongly-typed
-enum for the confirmed real function-type strings; a raw `string rawType` overload of
-`EncoderFunction` remains available for any future/unconfirmed function type.
-
-A live progress-bar/text readout of the current value can optionally be placed near the
-encoder (bound to `"Volume"`/`"device_bl"` — see §5.5), matching the real vendor theme
-layout. The encoder function works regardless of whether anything is visibly rendered — set
-the key's icon to `.Opacity(0)` and any accompanying progress-bar/text colors to a fully
-transparent `"r=0,g=0,b=0,a=0"` if you don't want anything shown on the secondary screen:
+`EncoderFunctionType`: `SystemVolume` (the PC's volume), `DeviceVolume` (the device's own
+speaker), `DeviceBrightness`, `SystemMedia`. A raw-string overload accepts any other
+`encoder_*` type. The optional `relatedThemePath` names a mini-theme rendered on the
+encoder's own small display:
 
 ```csharp
-page.AddKey(0, 0, key => key.At(106, 0).IconAssetPath("/static/icon/white/systemVolume_.png")
-    .Opacity(0) // fully invisible, encoder still works
-    .Action(KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume)));
+KeyActions.EncoderFunction(
+    EncoderFunctionType.SystemVolume,
+    EncoderPositions.RelatedThemePath(@"C:\...\ScreenKeyWindows_v1_1", EncoderFunctionType.SystemVolume));
+```
+
+**Keystrokes and combos per motion.** The only way to distinguish rotation direction; the
+device sends a different keystroke for rotate-left, click and rotate-right. Pass `null` to
+leave a motion unbound.
+
+```csharp
+page.AddEncoder(EncoderSide.Right, key => key
+    .IconAssetPath(EncoderPositions.KeyboardIcon)
+    .Opacity(0)
+    .Action(KeyActions.EncoderKeyboard(
+        rotateLeft:  (KeyModifiers.LeftCtrl, HidKey.Z),
+        click:       (KeyModifiers.LeftCtrl | KeyModifiers.LeftShift, HidKey.C),
+        rotateRight: (KeyModifiers.LeftCtrl, HidKey.Y))));
+```
+
+An `int`-based overload takes raw HID usages and labels directly:
+`EncoderKeyboard(170, "Vol -", 168, "Mute", 169, "Vol +")`.
+
+**Your own C#.** Routes the knob to a handler, but reports only *which* knob moved — clockwise,
+counter-clockwise and click are indistinguishable (see [§3.3](#33-encoder-input)).
+
+```csharp
+page.AddEncoder(EncoderSide.Right, key => key.Action(KeyActions.Command("enc.right")));
+```
+
+A live readout of the current value can be placed near the encoder by binding a progress bar
+or text item to `"Volume"` / `"device_bl"`. Use fully transparent colours
+(`ThemeColor.Transparent`) to keep the function without showing anything:
+
+```csharp
 page.AddProgressBar(pb => pb.At(204, 96, 100, 12).BoundTo("Volume", 0, 100)
-    .Colors("r=0,g=0,b=0,a=0", "r=0,g=0,b=0,a=0", "r=0,g=0,b=0,a=0"));
+    .Colors(ThemeColor.Transparent, ThemeColor.Transparent, ThemeColor.Transparent));
 ```
 
-Confirmed working on real hardware in both variants (visible and invisible) — see
-`src/Mk20Control.IntegrationTests/OfflineThemeTests/EncoderVolumeAndBrightnessThemeTests.cs`
-for a complete, runnable example, and `HardwareTests/EncoderVolumeAndBrightnessUploadTests.cs`
-for the upload+live-telemetry-pump variant.
+### Transparent key icons
+
+`Icon(...)` normalises to the vendor format — 128x128, RGB, no alpha — so transparent source
+pixels are flattened onto black. `IconPreservingAlpha(...)` keeps the alpha channel, and the
+device composites it against the screen background, so transparent areas reveal whatever is
+behind the key including an animated background.
+
+```csharp
+page.AddKey(0, 0, key => key
+    .IconPreservingAlpha("ring.png", File.ReadAllBytes("ring.png"))
+    .Title("RING")
+    .Action(KeyActions.Command("ring")));
+```
+
+Vendor themes never use alpha icons, so a theme built this way is device-only.
 
 ### Widgets — gauges, text, and clocks
 
@@ -638,14 +788,36 @@ updated at runtime with `PushSystemDataAsync` (§3). Builders live in
 | Circular gauge | `.AddCircularGauge(configure)` | 101 | `.At(x, y, z=1)`, `.BoundTo(name, min, max)`, `.Colors(front, back)`, `.Geometry(margin=20, radius=100)` |
 | Segmented circular gauge | `.AddSegmentedCircularGauge(configure)` | 104 | Same as circular gauge (identical JSON shape; renders as a segmented/notched ring) |
 | Light-shadow gauge | `.AddLightShadowGauge(configure)` | 110 | `.At(x, y, z=1)`, `.BoundTo(name, min, max)`, `.Colors(back, arc, arcWidth=6)`, `.Geometry(radius=50, clockwise=true, displayDirection=1)`, `.LightShadow(color, lighter=100, position=80)` |
-| Text | `.AddText(configure)` | 113 | `.At(x, y, z=1)`, `.Text(string)` or `.BoundTo(name)`, `.Font(descriptor, scale=1)`, `.Color(rgba)` |
-| Multiline text | `.AddMultilineText(configure)` | 116 | `.At(x, y, w=200, h=100, z=1)`, `.Text(...)`/`.BoundTo(name)`, `.Font(descriptor)`, `.Color(rgba)` |
-| Shadow text | `.AddShadowText(configure)` | 117 | `.At(x, y, z=1)`, `.Text(...)`/`.BoundTo(name)`, `.Font(descriptor)`, `.Color(rgba)`, `.Border(rgba, width=5)`, `.Shadow(rgba, size=10)` |
+| Text | `.AddText(configure)` | 113 | `.At(x, y, z=1)`, `.Text(string)` or `.BoundTo(name)`, `.Font(descriptor, scale=1)`, `.Color(colour)` |
+| Multiline text | `.AddMultilineText(configure)` | 116 | `.At(x, y, w=200, h=100, z=1)`, `.Text(...)`/`.BoundTo(name)`, `.Font(descriptor)`, `.Color(colour)` |
+| Shadow text | `.AddShadowText(configure)` | 117 | `.At(x, y, z=1)`, `.Text(...)`/`.BoundTo(name)`, `.Font(descriptor)`, `.Color(colour)`, `.Border(colour, width=5)`, `.Shadow(colour, size=10)` |
 | Digital clock field | `.AddDigitalClockField(configure)` | 111 | `.At(x, y, w=128, h=128, z=1)`, `.Field("hour"\|"minute"\|"second", displayDigits=2)`, `.Font(descriptor)`, `.Colors(front, back, border)` |
 
-Colors are `"r=<0-255>,g=<0-255>,b=<0-255>,a=<0-255>"` strings throughout. Font descriptors
-follow the confirmed real format `"family,size,-1,5,weight,0,0,0,0,0[,style]"` (e.g.
-`"Microsoft YaHei,20,-1,5,50,0,0,0,0,0"`).
+#### Colours
+
+Every colour parameter takes a `ThemeColor`:
+
+```csharp
+new ThemeColor(0, 170, 255)             // opaque RGB
+new ThemeColor(0, 170, 255, 220)        // with alpha
+ThemeColor.White.WithAlpha(140)         // preset + alpha
+ThemeColor.Transparent                  // hide a widget while keeping it functional
+ThemeColor.Parse("#22D3EE")             // hex, with or without '#', optionally 8-digit
+```
+
+Components are range-checked at construction, so an out-of-range or malformed value fails
+immediately rather than being written into a theme file. `ThemeColor.Black` and
+`ThemeColor.White` are also provided, and `TryParse` gives a non-throwing parse.
+
+A `string` converts implicitly, so a raw value copied out of an existing theme still works
+wherever a colour is expected:
+
+```csharp
+ThemeColor colour = "r=0,g=170,b=255,a=220";
+```
+
+Font descriptors follow the confirmed real format
+`"family,size,-1,5,weight,0,0,0,0,0[,style]"` (e.g. `"Microsoft YaHei,20,-1,5,50,0,0,0,0,0"`).
 
 **The digital clock is host-driven, not device-RTC-driven.** Confirmed via a real capture
 (`tools/Captures/capture17_multiple_theme_set.pcapng`): ScreenKeyWindows pushes `hour`,
@@ -663,10 +835,10 @@ var theme = new ThemeBuilder()
     .AddPage(page => page
         .SetCanvas(640, 656)
         .AddProgressBar(pb => pb.At(20, 20, 200, 30).BoundTo("CPU Usage", 0, 100)
-            .Colors("r=0,g=170,b=255,a=220", "r=255,g=255,b=255,a=140", "r=0,g=0,b=0,a=180"))
+            .Colors(new ThemeColor(0, 170, 255, 220), ThemeColor.White.WithAlpha(140), ThemeColor.Black.WithAlpha(180)))
         .AddText(t => t.At(20, 55).BoundTo("CPU Usage").Font("Microsoft YaHei,14,-1,5,50,0,0,0,0,0"))
         .AddRadialGauge(rg => rg.At(300, 20, scale: 0.4).BoundTo("GPU Usage", 0, 100)
-            .Gradient("r=0,g=170,b=255,a=255", "r=255,g=200,b=0,a=255", "r=255,g=0,b=0,a=255"))
+            .Gradient(new ThemeColor(0, 170, 255), new ThemeColor(255, 200, 0), new ThemeColor(255, 0, 0)))
         .AddDigitalClockField(c => c.At(500, 20, 40, 40).Field("hour"))
         .AddDigitalClockField(c => c.At(545, 20, 40, 40).Field("minute")))
     .Build();
@@ -698,7 +870,7 @@ visually verified — run it with `dotnet test --environment MK20_COM_PORT=COM7
 
 ---
 
-## 6. Editing an existing theme
+## 7. Editing an existing theme
 
 Use `ThemeEditor` when you want to modify one or two things in an already-built or
 downloaded theme without reconstructing it from scratch.
@@ -747,7 +919,7 @@ any field this library doesn't model yet survives round-trip untouched.
 
 ---
 
-## 7. Uploading a theme to the device
+## 8. Uploading a theme to the device
 
 ```csharp
 byte[] themeBytes = ThemeFileCodec.Encode(theme); // from ThemeBuilder or ThemeEditor
@@ -767,53 +939,60 @@ the vendor app), though any valid path the device accepts works.
 
 ---
 
-## 8. Typical integration pattern (e.g. a SimHub plugin)
+## 9. Typical integration pattern
 
 ```csharp
-// 1. Connect once at plugin startup.
-var client = Mk20DeviceClient.CreateForSerialPort("COM7", loggerFactory: pluginLogger);
+// 1. Connect once at application startup.
+var client = Mk20DeviceClient.CreateForSerialPort("COM7", loggerFactory: appLoggerFactory);
 await client.ConnectAsync();
 
 // 2. Build (or load+edit) a theme representing your app's button layout, upload once.
 var theme = new ThemeBuilder()
     .AddPage(page => page
         .SetCanvas(640, 656)
-        .AddKey(0, 0, key => key.Icon("pit_limiter.png", pitLimiterIconBytes)
-            .Title("Pit Limiter").Action(KeyActions.Keyboard(HidKey.P)))
-        // A speed gauge on the secondary screen - system_data_name is your own choice.
-        .AddProgressBar(pb => pb.At(20, 20, 200, 30).BoundTo("Speed", 0, 300)
-            .Colors("r=0,g=170,b=255,a=220", "r=255,g=255,b=255,a=140", "r=0,g=0,b=0,a=180")))
+        // A command id makes this key reachable from C# regardless of which page it sits on.
+        .AddKey(0, 0, key => key.Icon("build.png", buildIconBytes)
+            .Title("Build").Action(KeyActions.Command("build.start")))
+        // A keystroke the device sends natively, so it also works when this app is closed.
+        .AddKey(0, 1, key => key.Icon("save.png", saveIconBytes)
+            .Title("Save").Action(KeyActions.KeyboardCombo(KeyModifiers.LeftCtrl, HidKey.S)))
+        // The left knob adjusts the PC volume entirely on-device.
+        .AddEncoder(EncoderSide.Left, key => key
+            .IconAssetPath(EncoderPositions.SystemVolumeIcon).Opacity(0)
+            .Action(KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume)))
+        // A gauge - the bound name is your own choice.
+        .AddProgressBar(pb => pb.At(20, 20, 200, 30).BoundTo("CPU Usage", 0, 100)
+            .Colors(new ThemeColor(0, 170, 255, 220), ThemeColor.White.WithAlpha(140), ThemeColor.Black.WithAlpha(180))))
     .Build();
-await client.UploadThemeFileAsync("/data/theme/MK20/SimHub/SimHub.Theme", ThemeFileCodec.Encode(theme));
 
-// 3. React to button presses via the event.
-client.NotificationReceived += (_, e) =>
-{
-    if (e.Position.Row == 0 && e.Position.Column == 0 && e.IsPressed)
-        TogglePitLimiter();
-};
+await client.UploadThemeFileAsync("/data/theme/MK20/MyApp/MyApp.Theme", ThemeFileCodec.Encode(theme));
 
-// 4. Periodically push live telemetry your theme's gauges/text are bound to.
+// 3. Bind your code to command ids.
+var buttons = new KeyBindings(client);
+buttons.OnCommand("build.start", StartBuild);
+
+// 4. Periodically push live values your theme's gauges/text are bound to.
 var timer = new System.Timers.Timer(500);
 timer.Elapsed += async (_, _) => await client.PushSystemDataAsync(new Dictionary<string, string>
 {
-    ["Speed"] = currentSpeedKph.ToString(),
+    ["CPU Usage"] = $"{GetCpuUsagePercent()}%",
 });
 timer.Start();
 
-// 5. Clean up on plugin shutdown.
+// 5. Clean up on shutdown.
+timer.Dispose();
+buttons.Dispose();
 await client.DisconnectAsync();
 await client.DisposeAsync();
 ```
 
-To change a button's icon/function at runtime (e.g. reflecting a changed car/session
-state), decode the currently-installed theme, edit it with `ThemeEditor`, and re-upload —
-there is no live per-key command; every change requires re-sending the whole file (see
-protocol spec §6.4).
+To change a button's icon or function at runtime, decode the installed theme, edit it with
+`ThemeEditor`, and re-upload — there is no live per-key command; every change requires
+re-sending the whole file.
 
 ---
 
-## 9. Error handling
+## 10. Error handling
 
 All client operations throw `Mk20Control.Protocol.Exceptions.Mk20ProtocolException` (or a
 subtype) on failure:
@@ -831,7 +1010,7 @@ any live device.
 
 ---
 
-## 10. Diagnostics
+## 11. Diagnostics
 
 `Mk20Control.Protocol.Transport.WireLoggingTransport` wraps any `ISerialTransport` and logs
 every byte written/read to a file — a live-capture substitute useful for comparing this

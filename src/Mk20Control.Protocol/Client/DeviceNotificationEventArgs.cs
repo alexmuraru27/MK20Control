@@ -29,6 +29,18 @@ public sealed class DeviceNotificationEventArgs : EventArgs
     /// </summary>
     public IReadOnlyDictionary<string, TaggedValue>? ActionDescriptor { get; init; }
 
+    /// <summary>
+    /// The bound action, strongly typed - the same <c>KeyAction</c> hierarchy used to BUILD a
+    /// theme, so a press can be handled by pattern-matching (<c>is TextInputAction t</c>)
+    /// instead of digging through raw fields. Null when the key reported no action descriptor
+    /// or its <c>type</c> is not modeled.
+    ///
+    /// Confirmed via real captures that the device echoes the same field set it was given in
+    /// the theme file: a text key reports <c>inputText</c>/<c>isInputEnter</c>/<c>isCopyPaste</c>,
+    /// a page-switch reports <c>pageSwitchMode</c>, and so on.
+    /// </summary>
+    public Theme.Actions.KeyAction? Action { get; init; }
+
     /// <summary>The complete, unprocessed decoded map array, for anything not exposed above.</summary>
     public required IReadOnlyList<IReadOnlyDictionary<string, TaggedValue>> RawMaps { get; init; }
 }

@@ -751,6 +751,7 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
             Position = new KeyPosition(row, col),
             IsPressed = pressed,
             ActionDescriptor = maps.Count > 1 ? maps[1] : null,
+            Action = maps.Count > 1 ? Codecs.ThemeFileCodec.DecodeKeyAction(maps[1]) : null,
             RawMaps = maps,
         };
         NotificationReceived?.Invoke(this, args);

@@ -17,8 +17,8 @@ public sealed class CircularGaugeItemBuilder
     private double _x, _y, _z = 1;
     private string? _systemDataName;
     private double _min, _max = 100;
-    private string _frontColor = "r=0,g=170,b=255,a=255";
-    private string _backColor = "r=255,g=255,b=255,a=160";
+    private ThemeColor _frontColor = ThemeColor.Parse("r=0,g=170,b=255,a=255");
+    private ThemeColor _backColor = ThemeColor.Parse("r=255,g=255,b=255,a=160");
     private double _margin = 20;
     private double _radius = 100;
 
@@ -28,27 +28,27 @@ public sealed class CircularGaugeItemBuilder
 
     public CircularGaugeItemBuilder BoundTo(string systemDataName, double min = 0, double max = 100) { _systemDataName = systemDataName; _min = min; _max = max; return this; }
 
-    public CircularGaugeItemBuilder Colors(string frontRgba, string backRgba) { _frontColor = frontRgba; _backColor = backRgba; return this; }
+    public CircularGaugeItemBuilder Colors(ThemeColor frontRgba, ThemeColor backRgba) { _frontColor = frontRgba; _backColor = backRgba; return this; }
 
     public CircularGaugeItemBuilder Geometry(double margin, double radius) { _margin = margin; _radius = radius; return this; }
 
     internal ThemeItem Build()
     {
-        var rawJson = ThemeItemSkeletons.CircularGaugeItem(_frontColor, _backColor, _margin, _radius);
+        var rawJson = ThemeItemSkeletons.CircularGaugeItem(_frontColor.ToWireString(), _backColor.ToWireString(), _margin, _radius);
         string id = _owner.AllocateItemId();
         return _segmented
             ? new SegmentedCircularGaugeItem
             {
                 RawTypeCode = "104", Id = id, X = _x, Y = _y, Z = _z, Rotate = 0, Scale = 1, IsLocked = true,
                 SystemDataName = _systemDataName, MinValue = _min, MaxValue = _max,
-                FrontColor = _frontColor, BackColor = _backColor, Margin = _margin, Radius = _radius,
+                FrontColor = _frontColor.ToWireString(), BackColor = _backColor.ToWireString(), Margin = _margin, Radius = _radius,
                 RawJson = rawJson,
             }
             : new CircularGaugeItem
             {
                 RawTypeCode = "101", Id = id, X = _x, Y = _y, Z = _z, Rotate = 0, Scale = 1, IsLocked = true,
                 SystemDataName = _systemDataName, MinValue = _min, MaxValue = _max,
-                FrontColor = _frontColor, BackColor = _backColor, Margin = _margin, Radius = _radius,
+                FrontColor = _frontColor.ToWireString(), BackColor = _backColor.ToWireString(), Margin = _margin, Radius = _radius,
                 RawJson = rawJson,
             };
     }

@@ -38,18 +38,15 @@ public class DecodeLocalThemeTests
     private static string DescribeAction(KeyItem item) => item.Action switch
     {
         Mk20Control.Protocol.Theme.Actions.KeyboardAction k => $"keyboard '{k.KeyLabel}' (keycode {k.Keycode})",
-        Mk20Control.Protocol.Theme.Actions.OpenWebAction w => $"open web {w.Url}",
-        Mk20Control.Protocol.Theme.Actions.MouseAction => "mouse action",
         Mk20Control.Protocol.Theme.Actions.PageSwitchAction p => $"page switch (mode {p.PageSwitchMode})",
-        Mk20Control.Protocol.Theme.Actions.AudioVolumeAction a => $"{a.DeviceClass} volume ({a.TargetDeviceName})",
-        Mk20Control.Protocol.Theme.Actions.TextInputAction t => $"type text '{t.InputText}'",
-        Mk20Control.Protocol.Theme.Actions.KeyboardSwitchAction => "switch keyboard layout",
+        Mk20Control.Protocol.Theme.Actions.TextInputAction t => $"command/text '{t.InputText}'",
         Mk20Control.Protocol.Theme.Actions.OpenPageAction op => $"open page {op.PageName}",
         Mk20Control.Protocol.Theme.Actions.OneLevelUpAction => "navigate to parent page",
-        Mk20Control.Protocol.Theme.Actions.ControlFlowAction => "control flow (macro)",
         Mk20Control.Protocol.Theme.Actions.EncoderKeyboardAction ek => $"encoder keyboard (left={ek.LeftKeyLabel} middle={ek.MiddleKeyLabel} right={ek.RightKeyLabel})",
         Mk20Control.Protocol.Theme.Actions.EncoderFunctionAction ef => $"encoder function ({ef.RawType})",
-        Mk20Control.Protocol.Theme.Actions.UnknownKeyAction u => $"unrecognized action type '{u.RawType}'",
+        // Vendor action types this library does not model (openWeb, qmk_mouse, Microphone,
+        // Loudspeaker, keyboard_switch, ControlFlow, ...) - fields still round-trip intact.
+        Mk20Control.Protocol.Theme.Actions.UnknownKeyAction u => $"unmodeled action type '{u.RawType}'",
         null => "(no action)",
         _ => "(action)",
     };

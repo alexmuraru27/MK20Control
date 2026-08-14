@@ -28,8 +28,14 @@ public sealed class RadialGaugeItemBuilder
 
     public RadialGaugeItemBuilder Arc(double arcRadius, double arcCircularInterval, double radius = 100) { _arcRadius = arcRadius; _arcInterval = arcCircularInterval; _radius = radius; return this; }
 
-    /// <summary>Sets up to 3 gradient stop colors, each as "r=..,g=..,b=..,a=..".</summary>
-    public RadialGaugeItemBuilder Gradient(string color1, string? color2 = null, string? color3 = null) { _color1 = color1; _color2 = color2; _color3 = color3; return this; }
+    /// <summary>Sets up to 3 gradient stop colours.</summary>
+    public RadialGaugeItemBuilder Gradient(ThemeColor color1, ThemeColor? color2 = null, ThemeColor? color3 = null)
+    {
+        _color1 = color1.ToWireString();
+        _color2 = color2?.ToWireString();
+        _color3 = color3?.ToWireString();
+        return this;
+    }
 
     /// <summary>Sets the arc's fill direction (defaults to clockwise=true, the confirmed real-theme default). Confirmed field via widgetThemeDemo.Theme.</summary>
     public RadialGaugeItemBuilder Direction(bool clockwise) { _clockwise = clockwise; return this; }

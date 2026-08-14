@@ -64,29 +64,6 @@ public static class KeyActions
         return string.Join("+", parts);
     }
 
-    /// <summary>Opens a URL in the host's default browser.</summary>
-    public static OpenWebAction OpenWeb(string url, string? description = null) => new()
-    {
-        RawType = "openWeb",
-        Description = description,
-        RawFields = Empty,
-        Url = url,
-    };
-
-    /// <summary>Performs a mouse click, move, or scroll. See <see cref="MouseAction"/> remarks - raw integers are not individually enumerated/confirmed for every option.</summary>
-    public static MouseAction Mouse(int mouseKey, int mouseEvent, int x = 0, int y = 0, int verticalScroll = 0, int horizontalScroll = 0, string? description = null) => new()
-    {
-        RawType = "qmk_mouse",
-        Description = description,
-        RawFields = Empty,
-        MouseKey = mouseKey,
-        MouseEvent = mouseEvent,
-        MouseX = x,
-        MouseY = y,
-        MouseVerticalScroll = verticalScroll,
-        MouseHorizontalScroll = horizontalScroll,
-    };
-
     /// <summary>Navigates to the previous page on the current level (confirmed <c>pageSwitchMode=1</c>).</summary>
     public static PageSwitchAction PreviousPage(string? description = null) => new()
     {
@@ -198,39 +175,99 @@ public static class KeyActions
         ["AISoundControlKeyword"] = TaggedValue.Of(""),
     };
 
-    /// <summary>Types literal text into the host, optionally pressing Enter afterward or using clipboard paste instead of keystrokes.</summary>
+    /// <summary>
+    /// Assigns a caller-defined ID to a button, which the device echoes back on every press -
+    /// the building block for "50 buttons across pages and folders, each running its own C#".
+    /// The ID is private between your theme and your application; it is not a keystroke and
+    /// has no meaning to the OS or to any game.
+    ///
+    /// <code>
+    /// page.AddKey(0, 0, key => key.Icon(...).Title("PIT").Action(KeyActions.Command("pit.request")));
+    /// // then: buttons.OnCommand("pit.request", () => sim.RequestPitStop());
+    /// </code>
+    ///
+    /// WHY AN ID RATHER THAN row/column: the device's key event reports only
+    /// <c>{row, col, pressed}</c> - it does NOT say which page the press came from (confirmed
+    /// by decoding real captures). So r0c0 on page 1 and r0c0 inside a folder are
+    /// indistinguishable by position. The ACTION DESCRIPTOR is echoed back per key, so an ID
+    /// carried there is the only reliable way to tell 50 buttons apart - and it keeps working
+    /// if you later move a button to a different cell or page.
+    ///
+    /// WHY AN ACTION AT ALL: the device fires a key event ONLY for keys with an action bound
+    /// in the loaded theme. A key with no action produces no wire traffic whatsoever, and
+    /// there is no generic "any key pressed" event (PROTOCOL_WAVESHARE_MK20.md §6.3).
+    ///
+    /// Implemented as a <c>text</c> action carrying the ID, because text is the one action
+    /// type the device does NOT execute itself - confirmed by USB capture, a text key emits
+    /// zero HID keystrokes and merely reports the press. Nothing types the ID: this library
+    /// performs no OS input, and <c>isInputEnter</c>/<c>isCopyPaste</c> are both false. The
+    /// press is delivered to your handler and nowhere else.
+    /// </summary>
+    /// <param name="commandId">Any string meaningful to your application, e.g. "pit.request".</param>
+    public static TextInputAction Command(string commandId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(commandId);
+        return TypeText(commandId, pressEnterAfter: false, useCopyPaste: false);
+    }
+
+    /// <summary>
+    /// A raw <c>text</c> action carrying an arbitrary string - the low-level form behind
+    /// <see cref="Command"/>, exposed for round-tripping vendor themes and for the
+    /// <c>isInputEnter</c>/<c>isCopyPaste</c> flags the vendor editor sets.
+    ///
+    /// NOTHING TYPES THIS. The device emits zero HID keystrokes for a text key (confirmed by
+    /// USB capture) and this library performs no OS input, so the string is only ever
+    /// reported to your handler. The flags are preserved purely so vendor themes survive a
+    /// decode/encode round trip; for your own themes prefer <see cref="Command"/>.
+    ///
+    /// Confirmed via a real capture (tools/Captures/capture7, a key assigned to text input in
+    /// the vendor editor): real text keys carry <c>description":"Text"</c>,
+    /// <c>parentDescription":"System input control"</c>,
+    /// <c>iconPath":"/static/icon/dark/Text.png"</c> and an (empty)
+    /// <c>AISoundControlKeyword</c> alongside the three operational fields.
+    /// </summary>
+    /// <param name="text">The string to carry.</param>
+    /// <param name="pressEnterAfter">Vendor flag, preserved for round-tripping; this library does not act on it.</param>
+    /// <param name="useCopyPaste">Vendor flag, preserved for round-tripping; this library does not act on it.</param>
     public static TextInputAction TypeText(string text, bool pressEnterAfter = false, bool useCopyPaste = false, string? description = null) => new()
     {
         RawType = "text",
-        Description = description,
-        RawFields = Empty,
+        Description = description ?? "Text",
+        ParentDescription = "System input control",
+        IconPath = "/static/icon/dark/Text.png",
+        // Seed the exact field order a real ScreenKeyWindows-written text key uses - insertion
+        // order survives encoding, and the codec overwrites existing keys in place rather
+        // than appending. Confirmed byte-for-byte against a vendor-saved text key.
+        RawFields = new Dictionary<string, TaggedValue>
+        {
+            ["type"] = TaggedValue.Of("text"),
+            ["parentDescription"] = TaggedValue.Of("System input control"),
+            ["isInputEnter"] = TaggedValue.Of(pressEnterAfter),
+            ["isCopyPaste"] = TaggedValue.Of(useCopyPaste),
+            ["inputText"] = TaggedValue.Of(text),
+            ["iconPath"] = TaggedValue.Of("/static/icon/dark/Text.png"),
+            ["description"] = TaggedValue.Of(description ?? "Text"),
+            ["AISoundControlKeyword"] = TaggedValue.Of(""),
+        },
         InputText = text,
         IsInputEnter = pressEnterAfter,
         IsCopyPaste = useCopyPaste,
     };
 
-    /// <summary>Adjusts the volume of a specific, named OS audio device (recording or playback).</summary>
-    public static AudioVolumeAction AudioVolume(AudioDeviceClass deviceClass, string targetDeviceName, int adjustMode, int adjustValue, bool switchDefaultDevice = false, string? description = null) => new()
-    {
-        RawType = deviceClass == AudioDeviceClass.Microphone ? "Microphone" : "Loudspeaker",
-        Description = description,
-        RawFields = Empty,
-        DeviceClass = deviceClass,
-        TargetDeviceName = targetDeviceName,
-        VolumeAdjustMode = adjustMode,
-        VolumeAdjustValue = adjustValue,
-        IsSwitchDefaultDevice = switchDefaultDevice,
-    };
-
-    /// <summary>Toggles/switches the active keyboard layout - no extra operational fields beyond the common base.</summary>
-    public static KeyboardSwitchAction KeyboardSwitch(string? description = null) => new()
-    {
-        RawType = "keyboard_switch",
-        Description = description,
-        RawFields = Empty,
-    };
-
-    /// <summary>Binds the rotary encoder's three physical actions (rotate left, click, rotate right) each to a keystroke - e.g. volume down/mute/up.</summary>
+    /// <summary>
+    /// Binds the rotary encoder's three physical actions (rotate left, click, rotate right)
+    /// each to a keystroke - e.g. volume down/mute/up.
+    ///
+    /// Seeds the exact field set and order a real vendor <c>encoder_keyboard</c> action
+    /// carries, decoded from <c>defaultTheme.Theme</c>: <c>type</c>,
+    /// <c>parentDescription</c>, <c>iconPath</c>, then RIGHT, MIDDLE and LEFT keycode/label
+    /// pairs in that order, then <c>description</c> and <c>category</c>.
+    ///
+    /// Note the device executes this natively (it emits HID keystrokes) and reports NOTHING
+    /// over the serial channel - confirmed on hardware - so it cannot be observed via
+    /// <c>KeyBindings</c>. It is, however, the only way to distinguish rotation DIRECTION,
+    /// since rotate-left and rotate-right carry different keycodes.
+    /// </summary>
     public static EncoderKeyboardAction EncoderKeyboard(
         int leftKeycode, string? leftKeyLabel,
         int middleKeycode, string? middleKeyLabel,
@@ -238,8 +275,23 @@ public static class KeyActions
         string? description = null) => new()
     {
         RawType = "encoder_keyboard",
-        Description = description,
-        RawFields = Empty,
+        Description = description ?? "Keyboard",
+        ParentDescription = "Encoder",
+        IconPath = "/static/icon/white/keyboard.png",
+        RawFields = new Dictionary<string, TaggedValue>
+        {
+            ["type"] = TaggedValue.Of("encoder_keyboard"),
+            ["parentDescription"] = TaggedValue.Of("Encoder"),
+            ["iconPath"] = TaggedValue.Of("/static/icon/white/keyboard.png"),
+            ["encoder_right_keycode"] = TaggedValue.Of(rightKeycode),
+            ["encoder_right_keyString"] = TaggedValue.Of(rightKeyLabel ?? ""),
+            ["encoder_middle_keycode"] = TaggedValue.Of(middleKeycode),
+            ["encoder_middle_keyString"] = TaggedValue.Of(middleKeyLabel ?? ""),
+            ["encoder_left_keycode"] = TaggedValue.Of(leftKeycode),
+            ["encoder_left_keyString"] = TaggedValue.Of(leftKeyLabel ?? ""),
+            ["description"] = TaggedValue.Of(description ?? "Keyboard"),
+            ["category"] = TaggedValue.Of("encoder"),
+        },
         Category = "encoder",
         LeftKeycode = leftKeycode,
         LeftKeyLabel = leftKeyLabel,
@@ -250,19 +302,108 @@ public static class KeyActions
     };
 
     /// <summary>
+    /// Binds each of the encoder's three motions to a keystroke WITH optional modifiers -
+    /// e.g. rotate-left = Ctrl+Z, click = Ctrl+Shift+C, rotate-right = Ctrl+Y. Pass
+    /// <c>null</c> for a motion you do not want bound, which emits keycode 0 and an empty
+    /// label - exactly what ScreenKeyWindows writes for an unassigned slot.
+    ///
+    /// Confirmed by having the vendor app assign Ctrl+Shift+C to an encoder click and
+    /// re-saving: the modifier bitmask is packed into the upper byte of the same keycode
+    /// field a plain keystroke uses (<c>(modifiers &lt;&lt; 8) | key</c>, so Ctrl+Shift+C is
+    /// <c>0x0306</c> = 774), and the label is written as <c>"L Ctrl L Shift C"</c>.
+    /// </summary>
+    public static EncoderKeyboardAction EncoderKeyboard(
+        (KeyModifiers Modifiers, HidKey Key)? rotateLeft,
+        (KeyModifiers Modifiers, HidKey Key)? click,
+        (KeyModifiers Modifiers, HidKey Key)? rotateRight,
+        string? description = null)
+    {
+        static (int Keycode, string Label) Slot((KeyModifiers Modifiers, HidKey Key)? binding) =>
+            binding is { } b
+                ? (((int)b.Modifiers << 8) | ((int)b.Key & 0xFF), DescribeEncoderCombo(b.Modifiers, b.Key))
+                : (0, "");
+
+        var (leftCode, leftLabel) = Slot(rotateLeft);
+        var (middleCode, middleLabel) = Slot(click);
+        var (rightCode, rightLabel) = Slot(rotateRight);
+
+        return EncoderKeyboard(leftCode, leftLabel, middleCode, middleLabel, rightCode, rightLabel, description);
+    }
+
+    /// <summary>
+    /// Formats an encoder keystroke label the way ScreenKeyWindows does - modifiers as
+    /// <c>"L Ctrl"</c>/<c>"L Shift"</c>/... separated by spaces, then the key, e.g.
+    /// <c>"L Ctrl L Shift C"</c> (confirmed from a vendor-saved theme).
+    /// </summary>
+    private static string DescribeEncoderCombo(KeyModifiers modifiers, HidKey key)
+    {
+        var parts = new List<string>();
+        foreach (KeyModifiers flag in Enum.GetValues<KeyModifiers>())
+        {
+            if (flag == KeyModifiers.None || !modifiers.HasFlag(flag)) continue;
+            parts.Add(flag switch
+            {
+                KeyModifiers.LeftCtrl => "L Ctrl",
+                KeyModifiers.LeftShift => "L Shift",
+                KeyModifiers.LeftAlt => "L Alt",
+                KeyModifiers.LeftWin => "L Win",
+                KeyModifiers.RightCtrl => "R Ctrl",
+                KeyModifiers.RightShift => "R Shift",
+                KeyModifiers.RightAlt => "R Alt",
+                KeyModifiers.RightWin => "R Win",
+                _ => flag.ToString(),
+            });
+        }
+        parts.Add(key.ToString());
+        return string.Join(" ", parts);
+    }
+
+    /// <summary>
     /// A built-in encoder function - "encoder_system_volume", "encoder_system_media", or
     /// "encoder_device_brightness". The volume/brightness variants optionally reference a
     /// separate <c>.Theme</c> file shown on the encoder's small display while active.
     /// Prefer the <see cref="EncoderFunctionType"/> overload below for compile-time-checked
     /// values; this raw-string overload remains for any future/unconfirmed function type.
+    ///
+    /// Seeds the exact field set and order a real vendor encoder action carries - confirmed
+    /// by decoding <c>defaultTheme.Theme</c> and <c>海边吹风.Theme</c> and by a live
+    /// DEVICE_ProactiveEscalationCMD capture: <c>type</c>, optional <c>relatedTheme</c>,
+    /// <c>parentDescription</c>, <c>iconPath</c>, <c>description</c>, <c>category</c>.
+    /// Emitting only <c>type</c>/<c>category</c> (as this factory previously did) produces an
+    /// action no real theme resembles.
     /// </summary>
-    public static EncoderFunctionAction EncoderFunction(string rawType, string? relatedThemePath = null, string? description = null) => new()
+    public static EncoderFunctionAction EncoderFunction(string rawType, string? relatedThemePath = null, string? description = null)
     {
-        RawType = rawType,
-        Description = description,
-        RawFields = Empty,
-        Category = "encoder",
-        RelatedThemePath = relatedThemePath,
+        var (defaultIconPath, defaultDescription) = EncoderFunctionMetadata(rawType);
+
+        var fields = new Dictionary<string, TaggedValue> { ["type"] = TaggedValue.Of(rawType) };
+        if (relatedThemePath is not null) fields["relatedTheme"] = TaggedValue.Of(relatedThemePath);
+        fields["parentDescription"] = TaggedValue.Of("Encoder");
+        fields["iconPath"] = TaggedValue.Of(defaultIconPath);
+        fields["description"] = TaggedValue.Of(description ?? defaultDescription);
+        fields["category"] = TaggedValue.Of("encoder");
+
+        return new()
+        {
+            RawType = rawType,
+            Description = description ?? defaultDescription,
+            ParentDescription = "Encoder",
+            IconPath = defaultIconPath,
+            RawFields = fields,
+            Category = "encoder",
+            RelatedThemePath = relatedThemePath,
+        };
+    }
+
+    /// <summary>The confirmed real <c>iconPath</c>/<c>description</c> a vendor encoder action carries for each function type.</summary>
+    private static (string IconPath, string Description) EncoderFunctionMetadata(string rawType) => rawType switch
+    {
+        "encoder_system_volume" => ("/static/icon/white/systemVolume.png", "System volume"),
+        "encoder_device_brightness" => ("/static/icon/white/deviceBrightness.png", "Device brightness"),
+        "encoder_system_media" => ("/static/icon/white/systemMedia.png", "System audio"),
+        "encoder_device_volume" => ("/static/icon/white/deviceVolume.png", "Device volume"),
+        "encoder_keyboard" => ("/static/icon/white/keyboard.png", "Keyboard"),
+        _ => ("/static/icon/white/systemVolume.png", "Encoder"),
     };
 
     /// <summary>

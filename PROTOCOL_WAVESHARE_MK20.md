@@ -43,6 +43,12 @@ Each fact is tagged:
 | Endianness | Frame header fields: **little-endian**. Payload-internal length/count fields: **big-endian**. Two different serializers are in play — do not assume one endianness for the whole stack. |
 | Checksum | CRC-32 (zlib variant: poly `0xEDB88320`, init `0xFFFFFFFF`, final XOR `0xFFFFFFFF`) |
 
+**The MK20 enumerates as two independent USB devices**: a HID composite device (`4250:426F`,
+four interfaces) that carries keystrokes and consumer-control usages, and the CDC-ACM serial
+device (`1D6B:0104`) that carries this protocol. They fail independently — the serial side can
+stop responding while HID keys keep working normally, so a device that still types is not
+evidence that the command processor is alive.
+
 ---
 
 ## 3. Wire Frame Format **(C)**
@@ -237,11 +243,31 @@ Confirmed event — key at row 3, col 4, assigned "next page":
 ]
 ```
 
-`pageSwitchMode`: `1` = previous page, `2` = next page.
+`pageSwitchMode`: `1` = previous page, `2` = next page, `0` = absolute jump to `jumpToPage`
+(zero-based page index).
 
-Encoder-function events use a sentinel key position instead of a real matrix cell:
-`row`/`col` observed as `100`–`105` depending on which encoder/edge fired (not a physical
-key location).
+**The `keyState` map carries no page identity.** It reports only `type`/`row`/`col`/`pressed`,
+so the same grid cell on two different pages — or inside a folder — is indistinguishable from
+the event alone. The second map (the echoed action descriptor) is the only per-key
+discriminator available to a host, which is why an application that needs to tell keys apart
+must put an identifier there (see §6.3).
+
+**Encoder events** use a sentinel position rather than a matrix cell: `row` and `col` both
+carry the same pseudo-row, and `pressed` is always `1` (an encoder produces **no release
+event**). Confirmed pseudo-rows:
+
+| Pseudo-row | Meaning |
+|---|---|
+| `100` | left encoder |
+| `101`, `102` | left encoder, direction-specific (observed only for built-in `encoder_*` functions) |
+| `103` | right encoder |
+| `104`, `105` | right encoder, direction-specific (observed only for built-in `encoder_*` functions) |
+
+A knob bound to a `text` action reports only the base row (`100`/`103`) regardless of
+direction. Captures of knobs bound to `encoder_device_brightness` show the two
+direction-specific rows alternating for the same action (e.g. 37×`101` and 29×`102` in one
+session), consistent with counter-clockwise/clockwise. A knob bound to `encoder_keyboard`
+reports **nothing at all** on this channel — it is executed natively as HID keystrokes.
 
 ### 5.3 System Data Map — `SEND_SYSTEM_DATA_TO_DEVICE`
 
@@ -318,14 +344,37 @@ leading numeric portion for gauge fill level and ignores the rest.
 ### 6.3 Key press / encoder events
 
 `DEVICE_ProactiveEscalationCMD` (commandId 13) fires **only** for a key or encoder that has
-a "rich" action bound to it in the currently loaded theme (page-switch, encoder function,
-etc.). A key with no bound action produces **no wire traffic at all** on press — there is
-no generic "any key pressed" event.
+an action bound to it in the currently loaded theme. A key with no bound action produces **no
+wire traffic at all** on press — there is no generic "any key pressed" event. A host that
+wants to observe a key must therefore give it *some* action, even an inert one.
 
-Encoder rotation is **not** a discrete event. Turning a brightness/volume-bound encoder
-instead causes the host to continuously push the live value via
-`SEND_SYSTEM_DATA_TO_DEVICE` (e.g. `device_bl=80`), rendered by an on-screen element bound
-to that key. No "rotated by N detents" message exists on the wire.
+Each event is an array of two maps: `keyState` (position + pressed) and the key's full action
+descriptor, echoed back verbatim from the theme's `controlData`. Because `keyState` carries no
+page identity (§5.2), the echoed descriptor is the only way to distinguish keys across pages
+and folders — an arbitrary string placed in a `text` action's `inputText` survives the round
+trip and is returned on every press, which is the supported mechanism for host-defined key
+identifiers.
+
+**Encoder rotation IS a discrete event.** Turning a knob emits the same
+`DEVICE_ProactiveEscalationCMD` structure as a key press, using the pseudo-rows in §5.2 and
+always `pressed=1`. Which pseudo-row is reported depends on the bound action type:
+
+| Encoder action | Event on this channel | Direction distinguishable? |
+|---|---|---|
+| `text` | base row only (`100`/`103`) | No — clockwise, counter-clockwise and click are identical |
+| `encoder_system_volume`, `encoder_device_brightness`, … | direction-specific rows (`101`/`102`, `104`/`105`) | Yes, by row number |
+| `encoder_keyboard` | none — executed natively as HID keystrokes | Yes, but only as three distinct keystrokes |
+
+Separately, a brightness/volume-bound encoder also causes the live value to be pushed via
+`SEND_SYSTEM_DATA_TO_DEVICE` (e.g. `device_bl=80`) for display by an on-screen element. No
+"rotated by N detents" delta message exists on the wire in any case.
+
+**Some actions are delegated to the host rather than executed.** Confirmed by capturing the
+device's HID endpoint while pressing keys: a `text` key emits **zero** HID keystrokes — 35
+presses of text keys produced no keyboard input whatsoever, while a `keyboard` key on the same
+theme produced its keystroke normally. The device reports the press with the string attached
+and takes no further action; whether anything happens is entirely up to the host. `keyboard`,
+`pageSwitch`, `openPage`, `oneLevelUp` and the `encoder_*` functions are device-native.
 
 ```mermaid
 sequenceDiagram
@@ -337,6 +386,9 @@ sequenceDiagram
     User->>MK20: releases the key
     MK20-->>Host: DEVICE_ProactiveEscalationCMD (pressed=false, row/col, action descriptor)
     Note over MK20,Host: A key with no bound action produces NO wire traffic at all.
+    User->>MK20: turns an encoder
+    MK20-->>Host: DEVICE_ProactiveEscalationCMD (pressed=1, row=col=pseudo-row, action descriptor)
+    Note over MK20,Host: Encoders never send a release event.
 ```
 
 ### 6.4 Setting a key's picture or function
@@ -377,9 +429,8 @@ GIFs, videos (`.mp4`), and PNGs are not distinct wire concepts.
 
 **Which page opens after activation.** `"main"."currentPage"` (a page GUID) names the page
 shown immediately after `SET_DEVICE_RELOAD` — it is not required to match `pages[0]` and
-can drift (e.g. after re-saving in an external editor). `Mk20DeviceClient.UploadThemeFileAsync`
-normalizes this automatically: before every upload it re-encodes the file with `currentPage`
-set to `pages[0]` if they don't already match.
+can drift (e.g. after re-saving in an external editor). A host that wants deterministic
+activation should normalize `currentPage` to `pages[0]` before uploading.
 
 ### 6.5 Secondary screen
 
@@ -391,8 +442,7 @@ main-screen theme — it is simply another theme file/slot, not a separate proto
 with a 428x142 canvas (`theme/MK20/SecondaryScreen/<N>/<N>.theme`) is one option. A second,
 confirmed option: embed a `DynamicImageItem` (type 114) at the fixed position
 `x=106, y=0, w=428, h=142` with `"backgroundType":"secondary"` directly inside a 640x656
-main-screen page, driving both screens from one theme file. See
-`DynamicImageItemBuilder.SecondaryScreenBackground(...)`. Confirmed working with an
+main-screen page, driving both screens from one theme file. Confirmed working with an
 animated GIF on real hardware.
 
 **Main-screen background: two independent mechanisms.**
@@ -410,10 +460,9 @@ identical between the picture and GIF case (`backgroundType, h, id, lock, maxHei
 maxWidth, path, rotate, scale, type, w, x, y, z`, no `paths`/`system_data_flag`/
 `backupX`/`backupY`) — only the asset's extension/content differs. One confirmed rendering
 difference: a static image is resized/cropped to exactly fill 640x512; a GIF is embedded at
-its original, unresized size. This library has no MP4 encoder — `BackgroundItemBuilder
-.MainScreen(...)` accepts pre-encoded MP4 bytes; `DynamicImageItemBuilder
-.MainScreenBackground(...)` is the mechanism for a picture or GIF built from scratch.
-Confirmed visually on real hardware for both a static image and a GIF.
+its original, unresized size. Confirmed visually on real hardware for both a static image and
+a GIF. Note the video mechanism requires pre-encoded MP4 bytes — there is no encoder in this
+protocol.
 
 ### 6.6 Deleting a theme
 
@@ -444,55 +493,52 @@ Deleting the currently-active theme was not tested; behavior in that case is unc
 The protocol has no device-side "cancel" or "reset stuck operation" command beyond the
 abort-transfer control message (§3.1), which is sent proactively before a new operation,
 not as runtime recovery for one already in flight. Correctness therefore depends on host
-discipline. `Mk20DeviceClient` enforces two rules observed in every real capture:
+discipline. Two rules are observed in every real capture and are mandatory for a host:
 
-1. **Never overlap theme-mutating operations.** `ReloadThemeAsync`, `DeleteThemeAsync`, and
-   `UploadThemeFileAsync` are serialized against each other via an internal lock — a second
-   call made before the first finishes waits its turn.
+1. **Never overlap theme-mutating operations.** Reload, delete and upload must be serialized
+   against each other; a second request must wait for the first to finish rather than racing
+   bytes onto the wire.
 2. **Never delete a theme whose reload hasn't been confirmed.** Deleting a theme while its
    `SET_DEVICE_RELOAD` was still unacknowledged (confirmed via direct testing; a client-side
    timeout does not prove the device gave up) left the render subsystem stuck, requiring a
    physical power-cycle — `FIND_DEVICE`/`GET_DEVICE_THEME` kept responding normally
-   throughout. `DeleteThemeAsync` now refuses to delete a path with an unconfirmed pending
-   reload, throwing `InvalidOperationException` before sending anything; use
-   `IsReloadPending`/`ClearPendingReloadState` to inspect or override once independently
-   confirmed safe (e.g. after a power-cycle).
+   throughout. Track the pending-reload path and refuse the delete until it is acknowledged.
 
 ```mermaid
 stateDiagram-v2
     [*] --> Idle
-    Idle --> Operating: ReloadThemeAsync / DeleteThemeAsync / UploadThemeFileAsync\n(acquires _themeOperationLock)
-    Operating --> Idle: operation completes (success or exception)\n(releases _themeOperationLock)
+    Idle --> Operating: reload / delete / upload requested\n(acquires the theme-operation lock)
+    Operating --> Idle: operation completes (success or failure)\n(releases the lock)
     note right of Operating
-        A second concurrent call to any of the three
-        theme-mutating methods simply awaits the lock -
-        it never races bytes onto the wire.
+        A second concurrent theme-mutating request
+        awaits the lock - it never races bytes
+        onto the wire.
     end note
 
     state "Reload pending for path P" as PendingReload
     Idle --> PendingReload: SET_DEVICE_RELOAD sent for P
     PendingReload --> Idle: SET_DEVICE_RELOAD ack received for P
-    PendingReload --> PendingReload: DeleteThemeAsync(P) attempted\n→ throws InvalidOperationException,\nnothing sent on the wire
+    PendingReload --> PendingReload: delete(P) attempted\n→ rejected locally, nothing sent
 ```
 
 ### 6.8 End-to-end theme authoring workflow (recommended)
 
 This is the confirmed-safe sequence for building and validating a new/edited theme against
-real hardware, as used throughout this project's own testing:
+real hardware:
 
 ```mermaid
 flowchart TD
-    A["Build theme via ThemeBuilder / edit via ThemeEditor"] --> B["ThemeFileCodec.Encode(theme)"]
-    B --> C["Local round-trip check:\nThemeFileCodec.Decode(bytes) and verify\nexpected pages/keys/actions"]
+    A["Build or edit the theme"] --> B["Encode to .Theme bytes"]
+    B --> C["Local round-trip check:\ndecode the bytes and verify\nexpected pages/keys/actions"]
     C -->|mismatch| A
-    C -->|OK| D["dotnet run --project tools/CaptureAnalyzer -- --selftest\n(17 regression self-tests)"]
+    C -->|OK| D["Run the codec regression self-tests"]
     D -->|fail| A
-    D -->|pass| E["Upload via Mk20DeviceClient.UploadThemeFileAsync\n(auto-normalizes currentPage to page 1)"]
+    D -->|pass| E["Upload\n(normalize currentPage to page 1 first)"]
     E --> F["Device: FILE_START/bulk/FILE_END/SET_DEVICE_RELOAD\nall acknowledged?"]
-    F -->|timeout| G["TryPingAsync: device still alive?"]
+    F -->|timeout| G["FIND_DEVICE: device still alive?"]
     G -->|no| H["STOP - physical power-cycle required\n(do not retry against a dead link)"]
     G -->|yes| E
-    F -->|yes| I["TryPingAsync: confirm device stayed responsive\nafter reload"]
+    F -->|yes| I["FIND_DEVICE: confirm device stayed responsive\nafter reload"]
     I --> J["Optional: also place .Theme + matching .png preview\nin ScreenKeyWindows theme/MK20 folder for\nindependent vendor-software validation"]
     J --> K["Done - confirmed on real hardware"]
 ```
@@ -514,7 +560,19 @@ assetCount × {
     pathLen(u32 BE) + path(UTF-16BE)      // e.g. "/image/428x142/PhotoAlbum/x.gif"
     dataLen(u32 BE) + data(bytes)          // PNG / GIF / MP4, per magic bytes
 }
+[4 zero bytes — trailer after the LAST asset]
 ```
+
+**Trailing 4 zero bytes (required).** Every one of the 41 real theme files examined ends with
+four zero bytes after the final asset. Files produced without it were the only ones lacking
+it, and their `text` keys were inert on the device. Decoders should tolerate its absence;
+encoders must write it.
+
+**Header `keyMacroValue` (required).** All 38 vendor themes examined carry an identical
+92-byte value, base64
+`AAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=`.
+Confirmed on hardware: with an empty `keyMacroValue`, `keyboard` keys still work but `text`
+keys are completely dead. Write the value verbatim.
 
 Decoding does not need to trust the 8-byte length field - scanning for balanced `{}`/`[]`
 (respecting quoted-string escapes) finds the JSON's true end correctly regardless - but
@@ -532,16 +590,25 @@ escaping (`\"` for a literal quote, not `\u0022`).
 
 **`main.currentPage`:** the page GUID (must match one entry in `"pages"[].pageName`) the
 device renders immediately upon activation via `SET_DEVICE_RELOAD` - see §6.4 for the
-confirmed drift hazard (it is not guaranteed to match `pages[0]`) and how
-`Mk20DeviceClient.UploadThemeFileAsync` now corrects it automatically before every upload.
+confirmed drift hazard (it is not guaranteed to match `pages[0]`).
 
 **Page count:** a theme is not required to have more than 1 page — confirmed by a real
 user-created theme (5 keys, no background, 1 page) reloading normally.
 
 **Required page-level field `"encoder"`:** every main-screen page carries an `"encoder"`
 array alongside `"canvas"`/`"items"`/`"pageName"`, describing the physical rotary-encoder
-hardware:
+hardware. Two forms exist; both are boilerplate that never varies with the encoders' actual
+assignments (those live in key items — see §7.2a):
 ```json
+// 4-entry form, written by current ScreenKeyWindows (51 real pages)
+"encoder": [
+    {"col": 0, "keyString": "",  "keycode": 0,     "row": 103},
+    {"col": 0, "keyString": "",  "keycode": 0,     "row": 104},
+    {"col": 0, "keyString": "E", "keycode": 8,     "row": 100},
+    {"col": 0, "keyString": "",  "keycode": 38992, "row": 105}
+]
+
+// older 2-entry form (35 real pages)
 "encoder": [
     {"col": 0, "keyString": "", "keycode": 0, "row": 103},
     {"col": 0, "keyString": "", "keycode": 0, "row": 104}
@@ -549,8 +616,24 @@ hardware:
 ```
 Absent only from secondary-screen/sub-page theme files (`Key/*.theme`,
 `SecondaryScreen/*.theme`, `Encoder/relatedTheme/*.Theme`). Omitting it from a main-screen
-theme causes ScreenKeyWindows to lock up when loading the file. `ThemeFileCodec` always
-emits this field, preserved from source or defaulted for a new page.
+theme causes ScreenKeyWindows to lock up when loading the file. Encoders must always emit
+this field — preserved from the source page when re-encoding, or defaulted for a new page.
+
+**Optional page-level field `"parentPageName"` — this is what makes a page a folder.** A
+folder is an ordinary page carrying one extra field naming its parent page's GUID:
+
+```json
+{ "canvas": {...}, "items": [...], "pageName": "<this page GUID>",
+  "parentPageName": "<parent page GUID>" }
+```
+
+Ordinary pages omit it entirely. It is load-bearing for navigation: an `oneLevelUp` key emits
+the fixed sentinel `"pageName": "parentPage"`, which means *"go to my page's
+`parentPageName`"* — the destination comes from the **page**, not from the key. Confirmed on
+hardware: without `parentPageName`, the device navigates *into* a folder via `openPage` and
+then cannot leave — the return key's press is received and decoded correctly, but nothing
+happens. Nesting is arbitrary-depth (a real theme was found five levels deep); each level
+names the level above it.
 
 ### 7.1 Page item types (`items[].type`)
 
@@ -614,10 +697,8 @@ against this device; the same bit layout is expected to generalize (see
 | 6 (`0x40`) | Right Alt | U |
 | 7 (`0x80`) | Right Win | U |
 
-Use `KeyActions.KeyboardCombo(modifiers, key, ...)`, combining `KeyModifiers` with `|` and
-passing the base key as a `HidKey` enum value (e.g. `HidKey.Delete`) instead of a raw
-integer — every combo goes through this one strongly-typed function. See `README.md`'s
-"Keyboard modifiers and combos" section for worked examples.
+Modifiers are combined as a bitmask OR'd together, with the base key's USB HID usage in the
+low byte.
 
 **Text/title over a button and icon transparency** (`title`/`opacity`/`titleParam`):
 confirmed via capture that these are fields on the *same* `KeyItem`, not a separate overlay
@@ -629,14 +710,17 @@ item:
   `Microsoft YaHei`, size 24, white, `"top"`/`"bottom"` alignment only (`"center"` has no
   visible effect on real hardware).
 
-Implemented as `KeyItemBuilder.Title(string)`, `.Opacity(int 0-100)`, `.TitleStyle(fontFamily,
-fontSize, alignment, colorHex)`, and `ThemeEditor.PageEditor.SetKeyOpacity(row, column, opacityPercent)`.
+**Key icon PNG format:** every icon in a vendor theme is exactly 128x128, RGB (no alpha
+channel), 8-bit. `scaledWidthTo`/`scaledHeightTo` describe the *rendered* size and do not
+substitute for the asset itself being correctly sized — a wrong-size icon was one confirmed
+contributor to ScreenKeyWindows locking up when loading a file.
 
-**Required key icon PNG format:** exactly 128x128 pixels, RGB (no alpha channel), 8-bit
-depth. `scaledWidthTo`/`scaledHeightTo` describe the *rendered* size but do not substitute
-for the asset itself being correctly sized — a wrong-size or alpha-carrying icon causes
-ScreenKeyWindows to lock up loading the file. `KeyItemBuilder.Icon`/`ThemeEditor.SetKeyIcon`
-normalize any input image to this format automatically.
+**Icon alpha is supported by the firmware** even though the vendor editor never produces it:
+a 128x128 **RGBA** icon is composited by the device against whatever is behind the key, so
+transparent and partially transparent areas reveal the screen background, including an
+animated one. Confirmed on hardware with fully transparent holes, a uniform 50% wash and a
+0→255 alpha gradient. This is a device-only capability — such a theme is outside what the
+vendor app can author, and loading one back into it is untested.
 
 **Animated key icons:** leave `path` empty, set `paths` to a folder path (e.g.
 `/image/MK20/cache/pop-cat_1`) and `frameDelays` to a comma-separated per-frame delay list
@@ -651,42 +735,88 @@ asset, even though both render an animation.
 | `keyboard` | Emit a keystroke (optionally with held modifiers) | `keycode` (USB HID usage; upper byte = modifier bitmask for combos, see below), `keyString` |
 | `openWeb` | Open a URL | `Url` |
 | `qmk_mouse` | Mouse click/move/scroll | `qmk_mouse_key`, `qmk_mouse_event`, `mouse_x`/`y`/`v`/`h` |
-| `pageSwitch` | Relative page navigation | `pageSwitchMode`: `1`=previous, `2`=next |
-| `openPage` | Jump to a specific page | `pageName` (target page GUID) |
-| `oneLevelUp` | Navigate to parent page | `pageName` = fixed sentinel `"parentPage"` |
+| `pageSwitch` | Relative page navigation, or absolute jump | `pageSwitchMode`: `1`=previous, `2`=next, `0`=jump to `jumpToPage` (zero-based index) |
+| `openPage` | Jump to a specific page (enter a folder) | `pageName` (target page GUID) |
+| `oneLevelUp` | Navigate to parent page | `pageName` = fixed sentinel `"parentPage"`; destination comes from the page's `parentPageName` |
 | `keyboard_switch` | Toggle keyboard layout | — |
 | `Microphone` / `Loudspeaker` | Adjust a named OS audio device's volume | `volumeAdjustDevice`, `volumeAdjustMode`, `volumeadjustValue` |
-| `text` | Inject typed text | `inputText`, `isInputEnter`, `isCopyPaste` |
+| `text` | Carries a string; **the device executes nothing** and reports the press with the string attached (§6.3) | `inputText`, `isInputEnter`, `isCopyPaste` |
 | `ControlFlow` | Multi-step macro | `controlDataList` (bytes) — populated-step schema not yet observed |
-| `encoder_system_volume` / `encoder_system_media` / `encoder_device_brightness` | Encoder function | `category`="encoder", optional `relatedTheme` (a `.Theme` path shown on the encoder's mini-display) |
-| `encoder_keyboard` | Encoder bound to 3 keystrokes | `encoder_left_keycode`/`middle`/`right_keycode` (+ `keyString` each) |
+| `encoder_*` | Encoder functions — see §7.2a | |
 
-### 7.3 Theme builder/editor API (`Mk20Control.Protocol.Theme.Building`)
+This table documents the **wire format**, i.e. every action type the vendor's own editor can
+produce. It is not the list the library gives you typed access to — see §7.3. Types without a
+strongly-typed model decode to `UnknownKeyAction` and re-encode verbatim, so reading and
+rewriting a vendor theme preserves them exactly.
 
-For programmatic theme construction/editing without hand-writing JSON:
+### 7.2a Encoder assignments
 
-- **`ThemeBuilder`** — fluent builder for a new `ThemeFile`. Chain `.AddPage(page => ...)`,
-  and within a page use `.AddKey(row, col, key => ...)`, `.AddBackground(bg => ...)`,
-  `.AddText(...)`, `.AddProgressBar(...)`, `.AddLinearGauge(...)`, `.AddRadialGauge(...)`,
-  `.AddDigitalClockField(...)`, `.AddDynamicImage(...)`. Call `.Build()` then
-  `ThemeFileCodec.Encode(...)` for bytes ready for `Mk20DeviceClient.UploadThemeFileAsync`.
-- **`ThemeEditor`** — wraps a decoded `ThemeFile` for targeted edits:
-  `editor.Page(n).SetKeyIcon(row, col, ...)`, `.SetKeyAction(...)`, `.SetKeyTitle(...)`,
-  `.SetKeyOpacity(...)`, `.AddKey(...)`, `.RemoveKey(...)`, `.SetMainBackground(...)`. Call
-  `editor.Save()` for the updated `ThemeFile`.
-- **`KeyActions`** — factory methods for every `KeyAction` variant from §7.2
-  (`.Keyboard(HidKey key, label)` / `.Keyboard(int keycode, label)`,
-  `.KeyboardCombo(KeyModifiers modifiers, HidKey key, label)`, `.OpenWeb(url)`,
-  `.Mouse(...)`, `.PreviousPage()`/`.NextPage()`, `.OpenPage(pageId)`, `.OneLevelUp()`,
-  `.TypeText(...)`, `.AudioVolume(...)`, `.KeyboardSwitch()`, `.EncoderKeyboard(...)`,
-  `.EncoderFunction(rawType, ...)`).
+An encoder is **not a distinct item type**. It is an ordinary type-115 key item placed at a
+fixed secondary-screen coordinate, which is how the device recognises it. Both encoder keys
+carry `row: 0, col: 0` — their position, not their matrix cell, identifies them:
 
-Every item produced by this API matches the confirmed-required JSON field skeleton from
-§7.1. Cross-check method: decode a real theme file, rebuild its items through this API from
-the decoded data, re-encode, re-decode, and diff — reproduces every key's icon and action
-with zero mismatches. Exact byte-for-byte file equality is not the bar (the real editor
-embeds bookkeeping fields with no confirmed device-behavior effect); see
-`CaptureAnalyzer --builder-byte-diff <file.Theme>` to reproduce this check.
+| Encoder | Item position | Reports pseudo-row (§5.2) |
+|---|---|---|
+| Left | `x = 106, y = 0` | `100` (`101`/`102` direction-specific) |
+| Right | `x = 320, y = 0` | `103` (`104`/`105` direction-specific) |
+
+Encoder keys are normally invisible — vendor themes point them at a built-in icon path and set
+`opacity` to 0, since the binding works regardless of what is drawn.
+
+**Confirmed function types** (strings present in the ScreenKeyWindows binaries):
+`encoder_system_volume`, `encoder_device_volume` (the device's own speaker),
+`encoder_device_brightness`, `encoder_system_media`, `encoder_keyboard`, `encoder_qmk_mouse`,
+`encoder_system_brightness`.
+
+**Field set — built-in functions.** Written in exactly this order:
+
+```
+type, [relatedTheme,] parentDescription, iconPath, description, category
+```
+
+`parentDescription` is `"Encoder"`, `category` is `"encoder"`, and `iconPath`/`description`
+are per-function (e.g. `/static/icon/white/systemVolume.png` / `"System volume"`). Vendor
+descriptions are localised, so their text is not load-bearing. `relatedTheme` is present for
+the volume/brightness variants and holds an **absolute host path** to the mini-theme rendered
+on the encoder's own small display, e.g.
+`C:/Users/<user>/.../ScreenKeyWindows_v1_1/theme/MK20/Encoder/relatedTheme/system_volume.Theme`.
+Downloaded themes retain the original author's path — one examined still points at a
+`MK20-PLUS` folder on another machine — so the device tolerates a path that does not resolve.
+
+**Field set — `encoder_keyboard`.** Note the keycode pairs are written **right, middle, left**,
+not left-to-right:
+
+```
+type, parentDescription, iconPath,
+encoder_right_keycode, encoder_right_keyString,
+encoder_middle_keycode, encoder_middle_keyString,
+encoder_left_keycode, encoder_left_keyString,
+description, category
+```
+
+`left` = rotate counter-clockwise, `middle` = click, `right` = rotate clockwise. Each slot
+uses the **same modifier packing as a `keyboard` key** — `(modifiers << 8) | usage` — so
+Ctrl+Shift+C is `0x0306` = `774`, labelled `"L Ctrl L Shift C"`. An **unassigned slot is
+keycode `0` with an empty label**, which the vendor writes itself and is therefore valid.
+
+Because `encoder_keyboard` is executed natively, it is the only assignment that distinguishes
+rotation direction to the host — as three different keystrokes, not as protocol events.
+
+### 7.3 Conformance
+
+A theme file is device-acceptable when every item carries the confirmed-required field
+skeleton of §7.1, the page-level `"encoder"` array is present (§7), the header
+`keyMacroValue` is written (§7), and the file ends with the 4-byte zero trailer (§7).
+
+Verification method: decode a real theme file, rebuild its items from the decoded data,
+re-encode, re-decode and diff — this reproduces every key's icon and action with zero
+mismatches. Exact byte-for-byte equality with a vendor file is **not** the bar, because the
+vendor editor embeds bookkeeping fields with no confirmed device-behaviour effect;
+`CaptureAnalyzer --builder-byte-diff <file.Theme>` reproduces the check.
+
+> C# API usage — builders, editors, action factories and event binding — is documented
+> separately in `Mk20Control.Protocol.API.md`. This datasheet describes the wire and file
+> formats only.
 
 ---
 
@@ -979,6 +1109,27 @@ Decodes to the tagged-value map:
 The device only receives this bundled inside a re-uploaded `.Theme` file (§6.4/§9.7) —
 there is no live command to push a single key's `controlData` on its own.
 
+### 9.10a Encoder event — `DEVICE_ProactiveEscalationCMD`
+
+Turning the right-hand knob while it is bound to `encoder_device_brightness` (§7.2a). Note
+`row == col == 105` (a pseudo-row, not a matrix cell), `pressed = 1` with no matching release,
+and the full action descriptor echoed as the second map:
+
+```json
+[
+  { "type": "keyState", "row": 105, "pressed": 1, "col": 105 },
+  { "type": "encoder_device_brightness",
+    "relatedTheme": "C:/Users/.../theme/MK20/Encoder/relatedTheme/device_brightness.Theme",
+    "parentDescription": "Encoder",
+    "iconPath": "/static/icon/white/deviceBrightness.png",
+    "description": "Device brightness",
+    "category": "encoder" }
+]
+```
+
+Rotating the same knob the other way reports `104` instead — the only place direction appears
+on this channel. A knob bound to a `text` action would report `103` for every motion.
+
 ### 9.11 Picture / GIF asset — `.Theme` file asset entry
 
 Real asset entry from `时尚按键.Theme` (§7 asset section), one PNG icon:
@@ -1012,6 +1163,7 @@ picture vs. GIF vs. video — only a bigger/smaller asset entry inside the same 
 | 5 | Bulk-transfer resilience: whether the device rejects/retries on a corrupt chunk or dropped connection mid-transfer | **U** — a retried upload was observed in the confirming capture but the retry-trigger condition was not isolated |
 | 7 | A specific 1-page/5-key synthesized test theme reloads far slower than any real theme | **Open, low severity.** Uploads successfully, does not freeze the device, CRC verifies correctly, but `SET_DEVICE_RELOAD` ack was not observed even after 60s (vs. 1-16s for real themes up to 33MB). Not isolated to a specific cause; deprioritized since every real-world theme tested (13/13 vendor themes) reloads normally. |
 | 15 | ScreenKeyWindows editor widget sub-variants: horizontal progress bar "seg-hor" variant, and clock face style (`analog` vs `digital`) | **U** — resolved for multiline text (type 116), shadow text (type 117), and circular gauge variants (type 101 plain, type 104 "seg-circular", type 110 "light-shadow") via `widgetThemeDemo.Theme` + `capture20_widget_data.pcapng`, decoded 2026-08-13 (see §7.1). Still unconfirmed: a segmented/notched horizontal progress bar ("seg-hor") and an analog clock face — type 111 (`DigitalClockItem`) is confirmed digital-only. |
+| 17 | Rotation direction for `text`-bound encoders | **U / believed not exposed.** A knob bound to a `text` action reports one pseudo-row for clockwise, counter-clockwise and click alike, whereas built-in `encoder_*` functions report direction-specific rows (§5.2). Whether the firmware can be made to emit the directional rows for a non-built-in action was not established. Use `encoder_keyboard` where direction matters. |
 
 ### Resolved items
 
@@ -1027,6 +1179,12 @@ Previously-open issues, now closed - kept as terse historical notes only.
 | 12 | How to encode a keyboard combo (e.g. Ctrl+Alt+Del) | Modifiers are packed into the upper byte of the 16-bit `keycode` field. Implemented as `HidKey` + `KeyModifiers` enums and `KeyActions.KeyboardCombo(...)`. |
 | 13 | How "title over button" + "transparency" are encoded | Same key item, not an overlay: `title` + `opacity` fields. Added `KeyItemBuilder.Opacity`/`.TitleStyle` and `ThemeEditor.SetKeyOpacity`. |
 | 14 | How to set a main-screen + secondary-screen background | Both are `DynamicImageItem` (type 114), not `BackgroundItem` (which is `.mp4`-video-only). Main: `x=0,y=144,w=640,h=512`, path `/image/640x656/cache/<file>`. Secondary: `x=106,y=0,w=428,h=142`, path `/image/428x142/PhotoAlbum/<file>`. Confirmed visually on real hardware for both a static image and a GIF. Added `DynamicImageItemBuilder.MainScreenBackground`/`.SecondaryScreenBackground`. |
+| 18 | Why folder navigation entered but never returned | The page-level `parentPageName` field (§7) was being dropped. `oneLevelUp`'s `"parentPage"` sentinel resolves against the page, not the key, so without it the return key does nothing. Confirmed fixed on hardware. |
+| 19 | How a host distinguishes keys across pages/folders | The `keyState` map carries no page identity (§5.2). The echoed action descriptor does, so an identifier placed in a `text` action's `inputText` is returned on every press. Confirmed on hardware across two pages and a folder sharing the same grid cell. |
+| 20 | Whether `text` keys type anything | No. Capturing the HID endpoint during 35 text-key presses produced zero keystrokes (§6.3); the device delegates entirely to the host. |
+| 21 | Whether key icons can be transparent | Yes — a 128x128 RGBA icon is composited against the screen background by the firmware (§7.1), though no vendor theme uses it. |
+| 22 | Encoder assignment and event model | Encoders are ordinary key items at fixed coordinates reporting pseudo-rows; full field sets and the modifier packing for `encoder_keyboard` documented in §7.2a, verified by having ScreenKeyWindows re-save a library-built theme and diffing. |
+| 16 | Command processor locked up on upload, requiring a physical replug | Occurred twice, both times uploading a theme whose `encoder_*` actions omitted four of the six fields a real one carries (§7.2a): `FILE_END` went unacknowledged and the device then ignored `FIND_DEVICE` while staying enumerated. After emitting the full vendor field set, the same upload was repeated twice against real hardware — `FILE_END` and `SET_DEVICE_RELOAD` both acknowledged in ~15s, device responsive to `FIND_DEVICE` afterwards, encoder functions driving the hardware. Hosts should still treat an unacknowledged `FILE_END` as potentially fatal: verify liveness with `FIND_DEVICE` before retrying rather than retrying indefinitely. |
 
 ---
 
@@ -1039,11 +1197,11 @@ Previously-open issues, now closed - kept as terse historical notes only.
 | §5.1/§5.3 Simple String Map | `Mk20Control.Protocol.Codecs.SimpleStringMapCodec` |
 | §5.2 Tagged-Value Map | `Mk20Control.Protocol.Codecs.VariantMapCodec` |
 | §7 `.Theme` file format | `Mk20Control.Protocol.Codecs.ThemeFileCodec`, `Mk20Control.Protocol.Theme.*` |
-| §7.3 Theme builder/editor API | `Mk20Control.Protocol.Theme.Building.*` (`ThemeBuilder`, `ThemeEditor`, `KeyActions`) |
+| §7.2a Encoder assignments | `Mk20Control.Protocol.Theme.Building.EncoderPositions` |
 | §8 Command sequences | `Mk20Control.Protocol.Client.Mk20DeviceClient` |
 
-See `README.md` for build/usage instructions and additional narrative detail on how each
-fact in this document was derived.
+This table is a navigation index only. C# API usage is documented in
+`Mk20Control.Protocol.API.md`; see `README.md` for build instructions.
 
 ---
 

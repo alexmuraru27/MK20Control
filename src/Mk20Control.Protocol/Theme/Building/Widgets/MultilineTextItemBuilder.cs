@@ -12,7 +12,7 @@ public sealed class MultilineTextItemBuilder
     private string? _systemDataName;
     private string? _text;
     private string _font = "Microsoft YaHei,20,-1,5,50,0,0,0,0,0";
-    private string _frontColor = "r=255,g=255,b=255,a=255";
+    private ThemeColor _frontColor = ThemeColor.Parse("r=255,g=255,b=255,a=255");
 
     internal MultilineTextItemBuilder(IThemeAssetRegistry owner) => _owner = owner;
 
@@ -26,7 +26,7 @@ public sealed class MultilineTextItemBuilder
 
     public MultilineTextItemBuilder Font(string fontDescriptor) { _font = fontDescriptor; return this; }
 
-    public MultilineTextItemBuilder Color(string frontRgba) { _frontColor = frontRgba; return this; }
+    public MultilineTextItemBuilder Color(ThemeColor frontRgba) { _frontColor = frontRgba; return this; }
 
     internal ThemeItem Build() => new MultilineTextItem
     {
@@ -36,7 +36,7 @@ public sealed class MultilineTextItemBuilder
         SystemDataName = _systemDataName,
         Text = _text ?? "Text",
         Font = _font,
-        FrontColor = _frontColor,
-        RawJson = ThemeItemSkeletons.MultilineTextItem(_frontColor, _font),
+        FrontColor = _frontColor.ToWireString(),
+        RawJson = ThemeItemSkeletons.MultilineTextItem(_frontColor.ToWireString(), _font),
     };
 }

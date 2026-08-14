@@ -29,6 +29,10 @@ public static class DevicePaths
     public static readonly string SecondaryScreenGaugesOverlay = $"{Root}/gaugesbox/gaugesbox.Theme";
     public static readonly string MainScreenAllWidgetTypes = $"{Root}/widgettest/widgettest.Theme";
     public static readonly string ThemeEditorAddKey = $"{Root}/edited/edited.Theme";
+    public static readonly string TextMacros = $"{Root}/textmacros/textmacros.Theme";
+    public static readonly string Commands = $"{Root}/commands/commands.Theme";
+    public static readonly string EncoderCommands = $"{Root}/enccmd/enccmd.Theme";
+    public static readonly string Showcase = $"{Root}/showcase/showcase.Theme";
     public static readonly string Navigation = $"{Root}/navigation/navigation.Theme";
 
     /// <summary>Returns the <c>MK20_UPLOAD_DEVICE_PATH</c> environment variable's value if set, otherwise <paramref name="defaultPath"/>.</summary>

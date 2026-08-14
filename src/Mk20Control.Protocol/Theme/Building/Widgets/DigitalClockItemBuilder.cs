@@ -16,9 +16,9 @@ public sealed class DigitalClockItemBuilder
     private double _x, _y, _z = 1, _w = 128, _h = 128;
     private string _field = "minute";
     private string _font = "Microsoft YaHei,12,-1,5,50,0,0,0,0,0";
-    private string _frontColor = "r=255,g=255,b=255,a=255";
-    private string _backColor = "r=245,g=245,b=245,a=0";
-    private string _borderColor = "r=000,g=000,b=255,a=255";
+    private ThemeColor _frontColor = ThemeColor.Parse("r=255,g=255,b=255,a=255");
+    private ThemeColor _backColor = ThemeColor.Parse("r=245,g=245,b=245,a=0");
+    private ThemeColor _borderColor = ThemeColor.Parse("r=000,g=000,b=255,a=255");
     private int _displayNum = 2;
 
     internal DigitalClockItemBuilder(IThemeAssetRegistry owner) => _owner = owner;
@@ -30,7 +30,7 @@ public sealed class DigitalClockItemBuilder
 
     public DigitalClockItemBuilder Font(string font) { _font = font; return this; }
 
-    public DigitalClockItemBuilder Colors(string frontRgba, string backRgba, string borderRgba) { _frontColor = frontRgba; _backColor = backRgba; _borderColor = borderRgba; return this; }
+    public DigitalClockItemBuilder Colors(ThemeColor frontRgba, ThemeColor backRgba, ThemeColor borderRgba) { _frontColor = frontRgba; _backColor = backRgba; _borderColor = borderRgba; return this; }
 
     internal ThemeItem Build() => new DigitalClockItem
     {
@@ -39,11 +39,11 @@ public sealed class DigitalClockItemBuilder
         X = _x, Y = _y, Z = _z, Width = _w, Height = _h, Rotate = 0, Scale = 1, IsLocked = true,
         SystemDataName = _field,
         Font = _font,
-        FrontColor = _frontColor,
-        BackColor = _backColor,
-        BorderColor = _borderColor,
+        FrontColor = _frontColor.ToWireString(),
+        BackColor = _backColor.ToWireString(),
+        BorderColor = _borderColor.ToWireString(),
         BorderWidth = 0,
         CornerRadius = 0,
-        RawJson = ThemeItemSkeletons.DigitalClockItem(_frontColor, _backColor, _borderColor, _font, _displayNum),
+        RawJson = ThemeItemSkeletons.DigitalClockItem(_frontColor.ToWireString(), _backColor.ToWireString(), _borderColor.ToWireString(), _font, _displayNum),
     };
 }

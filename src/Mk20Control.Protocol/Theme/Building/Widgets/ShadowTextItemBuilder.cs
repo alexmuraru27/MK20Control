@@ -12,10 +12,10 @@ public sealed class ShadowTextItemBuilder
     private string? _systemDataName;
     private string? _text;
     private string _font = "Microsoft YaHei,65,-1,5,50,0,0,0,0,0";
-    private string _frontColor = "r=255,g=255,b=255,a=255";
-    private string _borderColor = "r=23,g=54,b=255,a=255";
+    private ThemeColor _frontColor = ThemeColor.Parse("r=255,g=255,b=255,a=255");
+    private ThemeColor _borderColor = ThemeColor.Parse("r=23,g=54,b=255,a=255");
     private double _borderWidth = 5;
-    private string _shadeColor = "r=0,g=0,b=0,a=128";
+    private ThemeColor _shadeColor = ThemeColor.Parse("r=0,g=0,b=0,a=128");
     private double _shadeSize = 10;
 
     internal ShadowTextItemBuilder(IThemeAssetRegistry owner) => _owner = owner;
@@ -30,11 +30,11 @@ public sealed class ShadowTextItemBuilder
 
     public ShadowTextItemBuilder Font(string fontDescriptor) { _font = fontDescriptor; return this; }
 
-    public ShadowTextItemBuilder Color(string frontRgba) { _frontColor = frontRgba; return this; }
+    public ShadowTextItemBuilder Color(ThemeColor frontRgba) { _frontColor = frontRgba; return this; }
 
-    public ShadowTextItemBuilder Border(string borderRgba, double borderWidth = 5) { _borderColor = borderRgba; _borderWidth = borderWidth; return this; }
+    public ShadowTextItemBuilder Border(ThemeColor borderRgba, double borderWidth = 5) { _borderColor = borderRgba; _borderWidth = borderWidth; return this; }
 
-    public ShadowTextItemBuilder Shadow(string shadeRgba, double shadeSize = 10) { _shadeColor = shadeRgba; _shadeSize = shadeSize; return this; }
+    public ShadowTextItemBuilder Shadow(ThemeColor shadeRgba, double shadeSize = 10) { _shadeColor = shadeRgba; _shadeSize = shadeSize; return this; }
 
     internal ThemeItem Build() => new ShadowTextItem
     {
@@ -44,11 +44,11 @@ public sealed class ShadowTextItemBuilder
         SystemDataName = _systemDataName,
         Text = _text ?? "Text",
         Font = _font,
-        FrontColor = _frontColor,
-        BorderColor = _borderColor,
+        FrontColor = _frontColor.ToWireString(),
+        BorderColor = _borderColor.ToWireString(),
         BorderWidth = _borderWidth,
-        ShadeColor = _shadeColor,
+        ShadeColor = _shadeColor.ToWireString(),
         ShadeSize = _shadeSize,
-        RawJson = ThemeItemSkeletons.ShadowTextItem(_frontColor, _font, _borderColor, _borderWidth, _shadeColor, _shadeSize),
+        RawJson = ThemeItemSkeletons.ShadowTextItem(_frontColor.ToWireString(), _font, _borderColor.ToWireString(), _borderWidth, _shadeColor.ToWireString(), _shadeSize),
     };
 }

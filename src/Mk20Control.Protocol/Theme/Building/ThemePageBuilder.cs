@@ -95,6 +95,35 @@ public sealed class ThemePageBuilder
         return this;
     }
 
+    /// <summary>
+    /// Binds one of the two physical rotary encoders, by placing a key at that encoder's
+    /// fixed secondary-screen coordinate (see <see cref="EncoderPositions"/>) - which is how
+    /// the device recognises a key as an encoder.
+    ///
+    /// Give it <c>KeyActions.EncoderFunction(...)</c> for a device-native built-in (volume /
+    /// brightness / media), <c>KeyActions.EncoderKeyboard(...)</c> to emit a different
+    /// keystroke for rotate-left / click / rotate-right, or <c>KeyActions.Command(id)</c> to
+    /// route the encoder to your own C# via <c>KeyBindings</c>.
+    ///
+    /// <b>A command-bound encoder reports no direction.</b> Confirmed on real hardware:
+    /// clockwise, counter-clockwise and click all report the same pseudo-row with no
+    /// distinguishing field, so your handler learns that the knob moved, not which way. Use
+    /// <c>EncoderKeyboard</c> when direction matters.
+    ///
+    /// The encoder key is normally invisible - vendor themes point it at a built-in icon path
+    /// and set opacity 0, since the binding works regardless of what is drawn.
+    /// </summary>
+    public ThemePageBuilder AddEncoder(EncoderSide side, Action<KeyItemBuilder> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        var (x, y) = EncoderPositions.PositionOf(side);
+        var b = new KeyItemBuilder(_owner, 0, 0, _canvasWidth, _canvasHeight);
+        b.At(x, y);
+        configure(b);
+        _items.Add(b.Build());
+        return this;
+    }
+
     /// <summary>Adds a static or data-bound text item (type 113).</summary>
     public ThemePageBuilder AddText(Action<TextItemBuilder> configure)
     {

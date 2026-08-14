@@ -654,8 +654,9 @@ static int RunBuilderByteDiff(string themePath)
             {
                 (null, null) => true,
                 (Mk20Control.Protocol.Theme.Actions.KeyboardAction a, Mk20Control.Protocol.Theme.Actions.KeyboardAction b) => a.Keycode == b.Keycode,
-                (Mk20Control.Protocol.Theme.Actions.OpenWebAction a, Mk20Control.Protocol.Theme.Actions.OpenWebAction b) => a.Url == b.Url,
-                _ => sk.Action?.GetType() == nk.Action?.GetType(),
+                // Unmodelled action types compare on their raw type plus full field map,
+                // which is all the library retains for them (and all it writes back).
+                _ => sk.Action?.RawType == nk.Action?.RawType && sk.Action?.GetType() == nk.Action?.GetType(),
             };
             if ((nk.IconAssetPath ?? "") != (sk.IconAssetPath ?? "") || !actionMatches)
             {
@@ -836,18 +837,17 @@ static int RunThemeDecode(string themePath)
 static string DescribeAction(Mk20Control.Protocol.Theme.Actions.KeyAction action) => action switch
 {
     Mk20Control.Protocol.Theme.Actions.KeyboardAction k => $"keycode={k.Keycode} label='{k.KeyLabel}'",
-    Mk20Control.Protocol.Theme.Actions.OpenWebAction w => $"url={w.Url}",
-    Mk20Control.Protocol.Theme.Actions.MouseAction m => $"key={m.MouseKey} event={m.MouseEvent} x={m.MouseX} y={m.MouseY}",
     Mk20Control.Protocol.Theme.Actions.PageSwitchAction p => $"mode={p.PageSwitchMode} jumpTo={p.JumpToPage}",
-    Mk20Control.Protocol.Theme.Actions.AudioVolumeAction a => $"device={a.DeviceClass} target='{a.TargetDeviceName}'",
     Mk20Control.Protocol.Theme.Actions.TextInputAction t => $"text='{t.InputText}'",
-    Mk20Control.Protocol.Theme.Actions.KeyboardSwitchAction => "(switch keyboard layout)",
     Mk20Control.Protocol.Theme.Actions.OpenPageAction op => $"pageName={op.PageName}",
     Mk20Control.Protocol.Theme.Actions.OneLevelUpAction ol => $"pageName={ol.PageName}",
-    Mk20Control.Protocol.Theme.Actions.ControlFlowAction cf => $"controlDataList={(cf.ControlDataList is null ? "(none)" : Convert.ToHexString(cf.ControlDataList))}",
     Mk20Control.Protocol.Theme.Actions.EncoderKeyboardAction ek => $"left={ek.LeftKeycode}('{ek.LeftKeyLabel}') middle={ek.MiddleKeycode}('{ek.MiddleKeyLabel}') right={ek.RightKeycode}('{ek.RightKeyLabel}')",
     Mk20Control.Protocol.Theme.Actions.EncoderFunctionAction ef => $"category={ef.Category} relatedTheme='{ef.RelatedThemePath}'",
-    _ => "(unrecognized)",
+    // Action types the library does not model (openWeb, qmk_mouse, Microphone/Loudspeaker,
+    // keyboard_switch, ControlFlow, ...): dump the raw fields, which are retained in full.
+    _ => "(unmodelled) " + string.Join(" ", action.RawFields
+        .Where(f => f.Key != "type")
+        .Select(f => $"{f.Key}={Mk20Control.Protocol.Codecs.VariantMapCodec.ToDisplayString(f.Value)}")),
 };
 
 static int RunSelfTest()
@@ -1159,7 +1159,9 @@ static bool TestPageEncoderFieldPresence()
     byte[] builtEncoded = ThemeFileCodec.Encode(builtTheme);
     if (!System.Text.Encoding.UTF8.GetString(builtEncoded).Contains("\"encoder\"")) return false;
     var builtDecoded = ThemeFileCodec.Decode(builtEncoded);
-    if (builtDecoded.Pages[0].Encoder is not { } builtEnc || builtEnc.ValueKind != JsonValueKind.Array || builtEnc.GetArrayLength() != 2)
+    // The default is the 4-entry form the current vendor software writes (rows 100/103/104/
+    // 105), observed on 51 real pages; an older 2-entry form (rows 103/104) also exists.
+    if (builtDecoded.Pages[0].Encoder is not { } builtEnc || builtEnc.ValueKind != JsonValueKind.Array || builtEnc.GetArrayLength() != 4)
         return false;
 
     // Real theme (decoded from the empty.Theme-style header/JSON/asset layout, reconstructed
@@ -1307,7 +1309,7 @@ static bool TestKeyTitleAndOpacity()
                 .IconAssetPath("/static/icon/dark/keyboard_128x128.png")
                 .Title("text over")
                 .Opacity(15)
-                .TitleStyle(alignment: "top", colorHex: "#ff0000")
+                .TitleStyle(alignment: "top", color: "#ff0000")
                 .Action(KeyActions.Keyboard(HidKey.A))))
         .Build();
     byte[] encoded = ThemeFileCodec.Encode(theme);
@@ -1386,7 +1388,7 @@ static bool TestThemeBuilderEditorRoundTrip()
         page.SetCanvas(640, 656)
             .AddBackground(bg => bg.MainScreen("bg.png", new byte[] { 0x89, 0x50, 0x4E, 0x47, 1, 2, 3, 4 }))
             .AddKey(0, 0, key => key.Icon("icon0.png", tinyValidPng).Action(KeyActions.Keyboard(0x1E, "1")))
-            .AddKey(0, 1, key => key.Icon("icon1.png", tinyValidPng).Action(KeyActions.OpenWeb("https://example.com")))
+            .AddKey(0, 1, key => key.Icon("icon1.png", tinyValidPng).Action(KeyActions.Command("selftest.command")))
             .AddText(t => t.At(10, 10).Text("Hello"))
             .AddProgressBar(p => p.At(0, 0, 80, 12).BoundTo("Volume"))
             .AddLinearGauge(g => g.At(0, 0, 52, 9).BoundTo("内存利用率"))
@@ -1412,7 +1414,7 @@ static bool TestThemeBuilderEditorRoundTrip()
     if (key0?.Action is not Mk20Control.Protocol.Theme.Actions.KeyboardAction ka || ka.Keycode != 0x1E) return false;
 
     var key1 = decoded.Pages[0].Items.OfType<KeyItem>().FirstOrDefault(k => k.Row == 0 && k.Column == 1);
-    if (key1?.Action is not Mk20Control.Protocol.Theme.Actions.OpenWebAction owa || owa.Url != "https://example.com") return false;
+    if (key1?.Action is not Mk20Control.Protocol.Theme.Actions.TextInputAction cmd || cmd.InputText != "selftest.command") return false;
 
     // Now edit via ThemeEditor: change key0's icon+action, add a new key, remove key1.
     var editor = new ThemeEditor(decoded);

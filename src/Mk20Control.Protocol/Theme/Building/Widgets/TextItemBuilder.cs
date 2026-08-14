@@ -12,7 +12,7 @@ public sealed class TextItemBuilder
     private string? _systemDataName;
     private string _text = "Text";
     private string _font = "Microsoft YaHei,72,-1,5,50,0,0,0,0,0";
-    private string _frontColor = "r=255,g=255,b=255,a=255";
+    private ThemeColor _frontColor = ThemeColor.Parse("r=255,g=255,b=255,a=255");
     private double _scale = 1;
 
     internal TextItemBuilder(IThemeAssetRegistry owner) => _owner = owner;
@@ -30,7 +30,7 @@ public sealed class TextItemBuilder
     public TextItemBuilder Font(string font, double scale = 1) { _font = font; _scale = scale; return this; }
 
     /// <summary>Sets the text color as an "r=..,g=..,b=..,a=.." string (0-255 each channel).</summary>
-    public TextItemBuilder Color(string rgba) { _frontColor = rgba; return this; }
+    public TextItemBuilder Color(ThemeColor rgba) { _frontColor = rgba; return this; }
 
     internal ThemeItem Build() => new TextItem
     {
@@ -40,6 +40,6 @@ public sealed class TextItemBuilder
         SystemDataName = _systemDataName,
         Text = _text,
         Font = _font,
-        RawJson = ThemeItemSkeletons.TextItem(_frontColor, _font),
+        RawJson = ThemeItemSkeletons.TextItem(_frontColor.ToWireString(), _font),
     };
 }

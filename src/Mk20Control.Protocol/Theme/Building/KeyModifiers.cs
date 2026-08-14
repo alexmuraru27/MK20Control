@@ -18,6 +18,8 @@ public enum KeyModifiers
 
     /// <summary>Confirmed via a real capture (Ctrl+Alt+Del): bit 0 of the modifier byte.</summary>
     LeftCtrl = 1 << 0,
+
+    /// <summary>Confirmed via a vendor-saved encoder binding (Ctrl+Shift+C packed as 0x0306): bit 1 of the modifier byte.</summary>
     LeftShift = 1 << 1,
 
     /// <summary>Confirmed via a real capture (Ctrl+Alt+Del): bit 2 of the modifier byte.</summary>
