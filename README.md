@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="waveshare_mk20_logo.png" alt="MK20 Control — a playful Waveshare MK20 button-box mascot" width="360">
+
 # MK20 Control
 
 **A .NET library for the Waveshare MK20 macro keypad — reverse-engineered from the wire up.**
