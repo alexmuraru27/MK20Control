@@ -85,7 +85,7 @@ buttons.OnCommand("build.start", () => StartBuild());
 
 That's the whole loop: describe a layout, upload it, bind handlers.
 
-See **[examples/](./examples)** for five complete programs, from a ten-line connection check
+See **[examples/](./examples)** for six complete programs, from a ten-line connection check
 to a full sim racing button box with pages, folders and encoders.
 
 ## Features
@@ -119,7 +119,7 @@ animated background through the artwork. **No vendor theme can do this.**
 ## Repository layout
 
 ```
-examples/                        five runnable programs, each with its own solution
+examples/                        six runnable programs, each with its own solution
 src/
   Mk20Control.Protocol/          the library
     Client/                      Mk20DeviceClient - connect, upload, control, receive events

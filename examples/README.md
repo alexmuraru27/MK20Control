@@ -1,6 +1,6 @@
 # Examples
 
-Five self-contained programs, in increasing order of complexity. Each one is a complete
+Six self-contained programs, in increasing order of complexity. Each one is a complete
 project with its own assets — copy a folder somewhere else, change the project reference to
 a NuGet/DLL reference, and it still runs.
 
@@ -24,6 +24,7 @@ dotnet run --project examples/01.HelloDevice
 | 3 | **[SystemMonitor](./03.SystemMonitor)** | Gauges and text bound to named channels, fed by a push loop |
 | 4 | **[SimRacingButtonBox](./04.SimRacingButtonBox)** | Multiple pages, folders, logging every press by name, and both encoders |
 | 5 | **[EncodersAndArtwork](./05.EncodersAndArtwork)** | Animated backgrounds, transparent icons, and encoders the device drives itself |
+| 6 | **[EveryBuildingBlock](./06.EveryBuildingBlock)** | One of everything — all 10 widget types, all 5 icon styles, all 11 actions, both encoders |
 
 Looking for one specific piece rather than a whole program? See
 [Building blocks](#building-blocks) at the bottom — every block, what it does, and which
@@ -75,6 +76,24 @@ twice — once with their alpha channel preserved so the animation shows through
 once flattened — so the difference is visible side by side. Also includes an animated key
 icon, and gives both encoders a built-in device function so they work with nothing running.
 
+### 6. EveryBuildingBlock
+
+A reference sheet you can hold in your hand: **one of everything**, laid out so each piece is
+visible on the device and traceable back to the line that produced it — all 10 widget types,
+all 5 ways to put an icon on a key, all 11 key actions and both encoders.
+
+Two rules keep it readable instead of a soup of overlapping pixels. Every widget sits either
+on the secondary screen or inside **one** 128 px key cell — nothing spans two — and every
+position comes from `ScreenLayout.KeyCell(row, column)` rather than hand-counted pixels. The
+main-screen background draws that cell grid, so you can see exactly which cell each widget
+occupies.
+
+Both screens carry a background picture, and page 2 swaps them for the animated variety, so
+the two ways of dressing a screen sit side by side. Page 1 holds the widgets, page 2 the key
+actions, and a folder hangs off page 2.
+
+`--save <path>` writes the `.Theme` file and exits without touching the device.
+
 ---
 
 ## Building blocks
@@ -92,42 +111,44 @@ it. Everything below is covered in depth in
 | `TryPingAsync()` | Asks the device to identify itself — the quickest "is it alive?" check | 1 |
 | `GetInstalledThemesAsync()` | Lists the themes already on the device | 1 |
 | `SetBacklightAsync(percent)` | Sets screen brightness, 0–100 | 1 |
-| `UploadThemeAsync(name, theme)` | Sends a theme and activates it. You give it a **name** — the library builds the device path, so a typo cannot write somewhere unrelated | 2–5 |
-| `PushSystemDataAsync(dictionary)` | Pushes named values for widgets to display. The device never fetches data itself | 3, 4 |
-| `PageSwitched` | Fires when the active page changes — useful while laying a box out | 4 |
+| `UploadThemeAsync(name, theme)` | Sends a theme and activates it. You give it a **name** — the library builds the device path, so a typo cannot write somewhere unrelated | 2–6 |
+| `PushSystemDataAsync(dictionary)` | Pushes named values for widgets to display. The device never fetches data itself | 3, 4, 6 |
+| `PageSwitched` | Fires when the active page changes — useful while laying a box out | 4, 6 |
 
 **Building a theme** — `ThemeBuilder`
 
 | Block | What it does | In |
 |---|---|---|
-| `new ThemeBuilder()` … `.Build()` | Collects pages, then produces the `ThemeFile` you upload | 2–5 |
-| `ThemeFileCodec.Encode(theme)` | Turns a `ThemeFile` into bytes — only needed to save one to disk | 2, 3 |
-| `builder.AddPage().SetCanvas(640, 656)` | Adds a page. `640×656` is the full device canvas | 2–5 |
-| `.AsFolderOf(parentPage)` | Marks a page as a folder of another — that is all a "folder" is | 4 |
-| `page.AddKey(row, col, …)` | Places a key on the 5×4 grid | 2–5 |
-| `page.AddEncoder(EncoderSide.Left \| .Right, …)` | Configures one of the two rotary encoders | 4, 5 |
+| `new ThemeBuilder()` … `.Build()` | Collects pages, then produces the `ThemeFile` you upload | 2–6 |
+| `ThemeFileCodec.Encode(theme)` | Turns a `ThemeFile` into bytes — only needed to save one to disk | 2, 3, 6 |
+| `builder.AddPage().SetCanvas(640, 656)` | Adds a page. `640×656` is the full device canvas | 2–6 |
+| `.AsFolderOf(parentPage)` | Marks a page as a folder of another — that is all a "folder" is | 4, 6 |
+| `page.AddKey(row, col, …)` | Places a key on the 5×4 grid | 2–6 |
+| `page.AddEncoder(EncoderSide.Left \| .Right, …)` | Configures one of the two rotary encoders | 4, 5, 6 |
 
 **How a key looks**
 
 | Block | What it does | In |
 |---|---|---|
-| `.Title("BOOST")` | The text drawn on the key. Independent of the action | 2–5 |
-| `.Icon("x.png", bytes)` | Draws your own image on the key, flattened onto the key background | 2–5 |
-| `.IconPreservingAlpha("x.png", bytes)` | The same, but keeps the PNG's alpha so whatever is behind shows through | 5 |
-| `.AnimatedIcon("name", gifBytes)` | An animated GIF as the key's icon | 5 |
-| `.IconDevice(DeviceIcon.OpenFolder)` | Uses an icon already built into the device, picked by name from the `DeviceIcon` enum | 4, 5 |
-| `.Opacity(0)` | Hides the default key background so a transparent icon shows the page behind it | 4, 5 |
+| `.Title("BOOST")` | The text drawn on the key. Independent of the action | 2–6 |
+| `.Icon("x.png", bytes)` | Draws your own image on the key, flattened onto the key background | 2–6 |
+| `.IconPreservingAlpha("x.png", bytes)` | The same, but keeps the PNG's alpha so whatever is behind shows through | 5, 6 |
+| `.AnimatedIcon("name", gifBytes)` | An animated GIF as the key's icon | 5, 6 |
+| `.IconDevice(DeviceIcon.OpenFolder)` | Uses an icon already built into the device, picked by name from the `DeviceIcon` enum | 4, 5, 6 |
+| `.Opacity(0)` | Hides the default key background so a transparent icon shows the page behind it | 4, 5, 6 |
 
 **What a press does** — `KeyActions`
 
 | Block | What it does | In |
 |---|---|---|
-| `Command("racing.limiter")` | Reports the press to your program. The only way the host learns a key was pressed | 2, 3, 4 |
-| `Keyboard(key)` / `KeyboardCombo(mods, key)` | The device types a real keystroke itself. Works with your program closed, but the host never sees it | 5 / 2, 5 |
-| `OpenPage(id)` / `OneLevelUp()` | Enters a folder / leaves one. Performed by the device | 4 |
-| `PreviousPage()` / `NextPage()` | Steps between top-level pages. Performed by the device | 4 |
-| `EncoderKeyboard(rotateLeft, click, rotateRight)` | A different keystroke per motion — the only way to tell the two directions apart | 4 |
-| `EncoderFunction(EncoderFunctionType.SystemVolume)` | A built-in function the device performs alone, e.g. volume or brightness | 4, 5 |
+| `Command("racing.limiter")` | Reports the press to your program. The only way the host learns a key was pressed | 2, 3, 4, 6 |
+| `Keyboard(key)` / `KeyboardCombo(mods, key)` | The device types a real keystroke itself. Works with your program closed, but the host never sees it | 5, 6 / 2, 5, 6 |
+| `TypeText("MK20 ")` | The device types a whole string. Reports to the host, unlike the keystroke actions | 6 |
+| `OpenPage(id)` / `OneLevelUp()` | Enters a folder / leaves one. Performed by the device | 4, 6 |
+| `PreviousPage()` / `NextPage()` | Steps between top-level pages. Performed by the device | 4, 6 |
+| `JumpToPage(index)` | Jumps straight to a page by index, rather than stepping | 6 |
+| `EncoderKeyboard(rotateLeft, click, rotateRight)` | A different keystroke per motion — the only way to tell the two directions apart | 4, 6 |
+| `EncoderFunction(EncoderFunctionType.SystemVolume)` | A built-in function the device performs alone, e.g. volume or brightness | 4, 5, 6 |
 
 > Pick per key: an action either notifies the host **or** produces a keystroke, never both.
 
@@ -135,23 +156,31 @@ it. Everything below is covered in depth in
 
 | Block | What it does | In |
 |---|---|---|
-| `page.AddText(…)` | Static or data-bound text | 3 |
-| `page.AddProgressBar(…)` | A horizontal bar that fills to a value | 3 |
-| `page.AddRadialGauge(…)` | A circular dial. Rendered at `radius × 2`, anchored top-left | 3 |
-| `page.AddDigitalClockField(…)` | One clock digit group — add `hour`, `minute` and `second` for a full clock | 4 |
-| `page.AddDynamicImage(…)` | An animated GIF, including full-screen backgrounds | 5 |
-| `.At(x, y, w, h)` | Position and size on the canvas | 3, 4 |
-| `.BoundTo("cpu_usage", 0, 100)` | Binds the element to a name you push with `PushSystemDataAsync` | 3 |
-| `.MainScreenBackgroundAutoFit(…)` / `.SecondaryScreenBackgroundAutoFit(…)` | Scales an image to fill a whole screen | 5 |
+| `page.AddText(…)` | Static or data-bound text | 3, 6 |
+| `page.AddMultilineText(…)` | The same, wrapped inside an explicit width and height | 6 |
+| `page.AddShadowText(…)` | Text with an outline and a drop shadow | 6 |
+| `page.AddProgressBar(…)` | A horizontal bar with rounded ends that fills to a value | 3, 6 |
+| `page.AddLinearGauge(…)` | A square-ended bar — the editor's "seg-hor" | 6 |
+| `page.AddRadialGauge(…)` | A gradient arc dial. Rendered at `radius × 2 × scale`, anchored top-left | 3, 6 |
+| `page.AddCircularGauge(…)` | A solid ring | 6 |
+| `page.AddSegmentedCircularGauge(…)` | The same ring, drawn as notched segments | 6 |
+| `page.AddLightShadowGauge(…)` | A ring with a separate arc stroke and a glow | 6 |
+| `page.AddDigitalClockField(…)` | One clock digit group — add `hour`, `minute` and `second` for a full clock | 4, 6 |
+| `page.AddDynamicImage(…)` | An animated GIF, as a widget or a full-screen background | 5, 6 |
+| `page.AddBackground(…)` | A still background picture for one screen | 6 |
+| `.At(x, y, w, h)` | Position and size on the canvas | 3, 4, 6 |
+| `.BoundTo("cpu_usage", 0, 100)` | Binds the element to a name you push with `PushSystemDataAsync` | 3, 6 |
+| `.MainScreenBackgroundAutoFit(…)` / `.SecondaryScreenBackgroundAutoFit(…)` | Scales an image to fill a whole screen | 5, 6 |
+| `ScreenLayout.KeyCell(row, col)` | The rectangle of one key cell — position widgets by cell instead of counting pixels | 6 |
 
 **Reacting to presses** — `KeyBindings`
 
 | Block | What it does | In |
 |---|---|---|
-| `new KeyBindings(client)` | Routes incoming key events. Dispose it to stop listening | 2, 4 |
-| `OnCommand(id, handler)` | Runs your C# when the key with that id is pressed | 2, 4 |
+| `new KeyBindings(client)` | Routes incoming key events. Dispose it to stop listening | 2, 4, 6 |
+| `OnCommand(id, handler)` | Runs your C# when the key with that id is pressed | 2, 4, 6 |
 | `OnCommandRelease(id, handler)` | The same, on release — for hold-style controls | 2 |
-| `Unbound` | Catches every press without its own handler. Ideal for one shared log | 2, 4 |
+| `Unbound` | Catches every press without its own handler. Ideal for one shared log | 2, 4, 6 |
 
 Two facts worth knowing before you design a layout: a press reports only `{row, column,
 pressed}` and never says which page it came from, so the **command id is what identifies a

@@ -65,14 +65,15 @@ public class MainScreenAllWidgetTypesThemeTests
                 .Font("Microsoft YaHei,50,-1,5,50,0,0,0,0,0").Color("r=255,g=255,b=0,a=255")
                 .Border("r=23,g=54,b=255,a=255", 5).Shadow("r=0,g=0,b=0,a=128", 10));
 
-            // Row 3, right side: DigitalClock (hour:minute:second) - fed by the device's own
-            // RTC, not a pushed test channel, so it ticks on its own without any telemetry push.
+            // Row 3, right side: DigitalClock (hour:minute:second). The digits are laid out
+            // inside each item's own box and there is no letter-spacing field, so the box has
+            // to be big enough or the two digits overlap - see Mk20Control.Protocol.API.md.
             page.AddText(t => t.At(470, 380).Text("Clock").Font("Microsoft YaHei,14,-1,5,50,0,0,0,0,0").Color("r=255,g=255,b=255,a=200"));
-            page.AddDigitalClockField(c => c.At(460, 410, 40, 40, z: 2).Field("hour").Colors(
+            page.AddDigitalClockField(c => c.At(444, 410, 64, 52, z: 2).Field("hour").Font("Microsoft YaHei,28,-1,5,75,0,0,0,0,0").Colors(
                 "r=255,g=255,b=0,a=255", "r=0,g=0,b=0,a=0", "r=0,g=0,b=0,a=0"));
-            page.AddDigitalClockField(c => c.At(505, 410, 40, 40, z: 2).Field("minute").Colors(
+            page.AddDigitalClockField(c => c.At(508, 410, 64, 52, z: 2).Field("minute").Font("Microsoft YaHei,28,-1,5,75,0,0,0,0,0").Colors(
                 "r=255,g=255,b=0,a=255", "r=0,g=0,b=0,a=0", "r=0,g=0,b=0,a=0"));
-            page.AddDigitalClockField(c => c.At(550, 410, 40, 40, z: 2).Field("second").Colors(
+            page.AddDigitalClockField(c => c.At(572, 410, 64, 52, z: 2).Field("second").Font("Microsoft YaHei,28,-1,5,75,0,0,0,0,0").Colors(
                 "r=255,g=255,b=0,a=255", "r=0,g=0,b=0,a=0", "r=0,g=0,b=0,a=0"));
         });
 

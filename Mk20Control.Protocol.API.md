@@ -769,6 +769,14 @@ Nothing types it. For real keystrokes use `Keyboard(...)` / `KeyboardCombo(...)`
 
 ### Screen backgrounds
 
+A background is an **item on a page**, not a device-wide setting, so every page — folders
+included — carries its own pair, one per screen. Confirmed in the vendor's own data:
+`快捷键.Theme` has two pages each with its own `BackgroundItem` and two different main-screen
+assets, and `defaultTheme.Theme` carries four distinct main-screen backgrounds and three
+secondary ones across its pages. Pages may equally *share* one asset — `字母.Theme`'s two
+pages both reference the same file, which is stored once — so reusing a background across
+pages costs nothing extra in file size.
+
 ```csharp
 // Video background (main OR secondary screen) - the mechanism every vendor theme uses.
 page.AddBackground(bg => bg.MainScreen("bg.mp4", mp4Bytes));
@@ -912,6 +920,13 @@ updated at runtime with `PushSystemDataAsync` (§3). Builders live in
 > Note the vendor editor also offers an **analog** clock face. That is not implemented here,
 > and no shipped vendor theme contains one — see `PROTOCOL_WAVESHARE_MK20.md` §10 item 15.
 > `.AddDigitalClockField(...)` always emits a digital face.
+>
+> **Give a clock field room.** A clock has no letter-spacing property — type 111 carries only
+> the field name, digit count, font and colours — so the digits are laid out inside the item's
+> own box and *the box is the spacing*. Make it too narrow and the two digits visibly overlap
+> (a 40px-wide box at 28pt runs "30" together). Every clock field in the vendor's own themes
+> is a large square: **128×128 or 158×158**, spaced 256px apart. 64×52 at 28pt is about the
+> smallest that still reads cleanly; below that, widen the box or drop the font size.
 
 #### Colours
 
