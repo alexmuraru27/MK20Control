@@ -874,8 +874,8 @@ updated at runtime with `PushSystemDataAsync` (§3). Builders live in
 
 | Widget | `ThemePageBuilder` method | Item type | Key configuration methods |
 |---|---|---|---|
-| Progress bar | `.AddProgressBar(configure)` | 102 | `.At(x, y, w, h, z=1)`, `.BoundTo(name, min=0, max=100)`, `.Colors(front, back, border, borderWidth=2, cornerRadius=5)` |
-| Linear gauge | `.AddLinearGauge(configure)` | 103 | `.At(x, y, w, h, z=1)`, `.BoundTo(name, min, max)`, `.Colors(front, back, border, borderWidth=2)` |
+| Progress bar (rounded) | `.AddProgressBar(configure)` | 102 | `.At(x, y, w, h, z=1)`, `.BoundTo(name, min=0, max=100)`, `.Colors(front, back, border, borderWidth=2, cornerRadius=5)` |
+| Linear gauge — the editor's "seg-hor" bar | `.AddLinearGauge(configure)` | 103 | `.At(x, y, w, h, z=1)`, `.BoundTo(name, min, max)`, `.Colors(front, back, border, borderWidth=2)` |
 | Radial gauge | `.AddRadialGauge(configure)` | 109 | `.At(x, y, z=1, scale=0.5)`, `.BoundTo(name, min, max)`, `.AngleRange(minDeg=225, maxDeg=315)`, `.Gradient(c1, c2?, c3?)`, `.Direction(clockwise=true)` |
 | Circular gauge | `.AddCircularGauge(configure)` | 101 | `.At(x, y, z=1)`, `.BoundTo(name, min, max)`, `.Colors(front, back)`, `.Geometry(margin=20, radius=100)` |
 | Segmented circular gauge | `.AddSegmentedCircularGauge(configure)` | 104 | Same as circular gauge (identical JSON shape; renders as a segmented/notched ring) |
@@ -884,6 +884,17 @@ updated at runtime with `PushSystemDataAsync` (§3). Builders live in
 | Multiline text | `.AddMultilineText(configure)` | 116 | `.At(x, y, w=200, h=100, z=1)`, `.Text(...)`/`.BoundTo(name)`, `.Font(descriptor)`, `.Color(colour)` |
 | Shadow text | `.AddShadowText(configure)` | 117 | `.At(x, y, z=1)`, `.Text(...)`/`.BoundTo(name)`, `.Font(descriptor)`, `.Color(colour)`, `.Border(colour, width=5)`, `.Shadow(colour, size=10)` |
 | Digital clock field | `.AddDigitalClockField(configure)` | 111 | `.At(x, y, w=128, h=128, z=1)`, `.Field("hour"\|"minute"\|"second", displayDigits=2)`, `.Font(descriptor)`, `.Colors(front, back, border)` |
+
+> **Which horizontal bar do I want?** The vendor editor shows two, and they are different
+> item types rather than a style flag. `.AddProgressBar(...)` (102) has rounded ends and
+> supports a linear-gradient fill; `.AddLinearGauge(...)` (103) is the rectangular/segmented
+> bar the editor calls **"seg-hor"** — it carries no `corner_radius` and no
+> `lineargradient_*` fields. Confirmed by authoring a seg-hor bar in ScreenKeyWindows: the
+> saved file round-trips byte-identically through this library and renders on hardware.
+>
+> Note the vendor editor also offers an **analog** clock face. That is not implemented here,
+> and no shipped vendor theme contains one — see `PROTOCOL_WAVESHARE_MK20.md` §10 item 15.
+> `.AddDigitalClockField(...)` always emits a digital face.
 
 #### Colours
 

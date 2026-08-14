@@ -134,7 +134,7 @@ public sealed class ThemePageBuilder
         return this;
     }
 
-    /// <summary>Adds a data-bound progress bar item (type 102).</summary>
+    /// <summary>Adds a data-bound progress bar item (type 102) - the ROUNDED horizontal bar, with a corner radius and optional linear-gradient fill. Use <see cref="AddLinearGauge"/> for the editor's rectangular "seg-hor" bar.</summary>
     public ThemePageBuilder AddProgressBar(Action<ProgressBarItemBuilder> configure)
     {
         ArgumentNullException.ThrowIfNull(configure);
@@ -144,7 +144,7 @@ public sealed class ThemePageBuilder
         return this;
     }
 
-    /// <summary>Adds a data-bound linear gauge item (type 103).</summary>
+    /// <summary>Adds a data-bound linear gauge item (type 103) - the rectangular/segmented horizontal bar the ScreenKeyWindows editor calls "seg-hor". Unlike <see cref="AddProgressBar"/> it has no corner radius and no gradient fill; confirmed by authoring one in the vendor editor and round-tripping it byte-identically.</summary>
     public ThemePageBuilder AddLinearGauge(Action<LinearGaugeItemBuilder> configure)
     {
         ArgumentNullException.ThrowIfNull(configure);

@@ -690,12 +690,12 @@ names the level above it.
 |------|------|---------|-----------|
 | 100 | Background | `.mp4` video background (main or secondary screen) | `backgroundType`: `main`\|`secondary`, `path` |
 | 101 | Circular gauge | Data-bound solid-color ring/dial, no gradient/angle range | `system_data_name`, `front_color`/`back_color`, `margin`, `radius` |
-| 102 | Progress bar | Data-bound circular/linear bar | `system_data_name`, `system_data_min_value`/`max_value` |
-| 103 | Linear gauge | Data-bound bar, solid front/back/border colors | `system_data_name`, `front_color`/`back_color`/`border_color` |
+| 102 | Progress bar (rounded) | Data-bound bar with rounded ends and optional linear-gradient fill | `system_data_name`, `system_data_min_value`/`max_value`, `corner_radius`, `lineargradient_color`/`lineargradient_flag` |
+| 103 | Linear gauge — the editor's segmented horizontal bar ("seg-hor") | Data-bound bar, solid front/back/border colors. Distinguished from type 102 by carrying **no** `corner_radius` and **no** `lineargradient_*` fields | `system_data_name`, `front_color`/`back_color`/`border_color`, `w`, `h` |
 | 104 | Segmented circular gauge ("seg-circular") | Same JSON field set as type 101; editor renders it as a segmented/notched ring instead of a solid arc | `system_data_name`, `front_color`/`back_color`, `margin`, `radius` |
 | 109 | Radial gauge | Data-bound arc gauge, up to 3 gradient stops | `system_data_name`, `angleMinValue`/`angleMaxValue`, `gradientColor1`–`3`, `Clockwise` |
 | 110 | Light-shadow gauge | Data-bound ring, separate arc stroke color/width plus a glow/shadow highlight | `system_data_name`, `back_color`, `arcColor`/`arcWidth`, `lightShadowColor`/`Lighter`/`Position`, `Clockwise`, `DisplayDirection` |
-| 111 | Digital clock | Live clock field (one item per field) | `system_data_name`: `hour`\|`minute`\|`second` |
+| 111 | Digital clock | Live clock field (one item per field). `displayType` selects how the digits are drawn — see below | `system_data_name`: `hour`\|`minute`\|`second`, `displayNum`, `displayType`, `paths` |
 | 113 | Text | Static or data-bound text | `system_data_name`, `text_font`, `text_str` |
 | 114 | Dynamic image | Decorative animated GIF (item-local); also the mechanism for a main/secondary-screen picture or GIF background (`backgroundType`) — see §6.5 | `path` → embedded asset |
 | 115 | Key | Physical key definition | `row`, `col`, `path` (icon), `controlData` (base64, see §7.2) |
@@ -705,8 +705,34 @@ names the level above it.
 All type 101/104/110/116/117 rows confirmed via `widgetThemeDemo.Theme` (ScreenKeyWindows
 editor's "widget" demo, decoded 2026-08-13) — the editor's UI groups image / text /
 multiline text / shadow text / circular progress bar (plain, segmented, light-shadow) /
-horizontal progress bar / clock widgets; only a horizontal-progress-bar segmented variant
-("seg-hor") and an analog clock face remain unconfirmed (§10 Open Item #15).
+horizontal progress bar / clock widgets.
+
+**This table is complete for the shipped vendor library.** Every `.theme` across all four
+device models (MK10, MK20, MK20-PLUS, SK18) was searched twice — once decoded through this
+library, once by scanning raw/decompressed bytes for `"type":"NNN"` with no decoder involved.
+Both agree exactly on the 13 codes listed above: there is **no type 112**, and no other
+unlisted code. Unknown codes would surface either way, since the codec maps them to
+`UnknownThemeItem` rather than discarding them.
+
+**The "seg-hor" horizontal bar is type 103 — CONFIRMED, no new type.** Authoring one in the
+ScreenKeyWindows editor and saving it (`MK20/SecondaryScreen/seghor.Theme`) produced a plain
+type-103 item whose field set matches what this library already emits: it decodes to
+`LinearGaugeItem`, re-encodes **byte-identically** (2,362 bytes in, 2,362 out), and uploads
+and renders correctly on real hardware. The editor's two horizontal bars therefore map to
+types 102 (rounded, gradient-capable) and 103 (segmented/rectangular). Only the analog clock
+face remains unconfirmed (§10 Open Item #15).
+
+**Clock digit rendering (`displayType`) — CONFIRMED, two values observed.** A type-111 item
+does not only draw digits with a font. Both values below were found in shipped vendor
+themes (`MK10/defaultTheme.Theme`, `SK18/defaultTheme.Theme`):
+
+| `displayType` | `paths` | Rendering |
+|---|---|---|
+| `0` | empty | Digits drawn with the font in `text_font` |
+| `1` | e.g. `/image/MK10/PictureFont/点数字` | Digits drawn from a **picture font** — a folder of per-glyph images |
+
+Both are digital faces; `displayType` is NOT an analog/digital switch. This library always
+emits `displayType: "0"` and does not expose the picture-font variant.
 
 **Required fields for a type-115 Key item:** `id`, `itemName` (e.g. `"control1"`), `x`,
 `y`, `z`, `rotate`, `scale`, `lock`, `row`, `col`, `path`, `controlData`, `maxWidth`,
@@ -1212,8 +1238,7 @@ picture vs. GIF vs. video — only a bigger/smaller asset entry inside the same 
 | 3 | `ControlFlow` action with actual configured steps | **U** — only an empty/never-configured instance observed |
 | 4 | Achievable telemetry push rate | **U** — not benchmarked |
 | 5 | Bulk-transfer resilience: whether the device rejects/retries on a corrupt chunk or dropped connection mid-transfer | **U** — a retried upload was observed in the confirming capture but the retry-trigger condition was not isolated |
-| 7 | A specific 1-page/5-key synthesized test theme reloads far slower than any real theme | **Open, low severity.** Uploads successfully, does not freeze the device, CRC verifies correctly, but `SET_DEVICE_RELOAD` ack was not observed even after 60s (vs. 1-16s for real themes up to 33MB). Not isolated to a specific cause; deprioritized since every real-world theme tested (13/13 vendor themes) reloads normally. |
-| 15 | ScreenKeyWindows editor widget sub-variants: horizontal progress bar "seg-hor" variant, and clock face style (`analog` vs `digital`) | **U** — resolved for multiline text (type 116), shadow text (type 117), and circular gauge variants (type 101 plain, type 104 "seg-circular", type 110 "light-shadow") via `widgetThemeDemo.Theme` + `capture20_widget_data.pcapng`, decoded 2026-08-13 (see §7.1). Still unconfirmed: a segmented/notched horizontal progress bar ("seg-hor") and an analog clock face — type 111 (`DigitalClockItem`) is confirmed digital-only. |
+| 15 | An **analog clock face** in the ScreenKeyWindows editor | **U — and NOT answerable from shipped data.** The other editor widget sub-variants are now resolved: multiline text (116), shadow text (117), the circular gauge variants (101 plain, 104 "seg-circular", 110 "light-shadow"), and — on 2026-08-14 — the **"seg-hor" horizontal bar, which is simply type 103** (§7.1): a theme authored in the vendor editor round-trips byte-identically through this library and renders on hardware, so no new type exists. For the analog clock, every shipped `.theme` across **all four device models** (MK10, MK20, MK20-PLUS, SK18) was searched two independent ways — decoded through this library, and by scanning the raw/decompressed bytes for `"type":"NNN"` without using the decoder at all. Both agree exactly: **only the 13 types above occur, there is no type 112, and `analog` appears nowhere.** (The decoder route is trustworthy here because unknown type codes decode to `UnknownThemeItem` rather than being dropped.) The analog face exists only as vendor-EXE palette artwork (`analog_clock_item.png` / `analog_clock_select.png`, beside `digital_clocks_item.png`) — an editor option no sample theme uses. Confirming it therefore REQUIRES authoring one in ScreenKeyWindows, saving, and decoding the result, then uploading it to confirm the firmware renders it. Note the same search resolved a separate unknown: type 111's `displayType` selects font digits (`0`) vs picture-font digits (`1`), and is not an analog/digital switch (§7.1). |
 | 17 | Rotation direction for `text`-bound encoders | **U / believed not exposed.** A knob bound to a `text` action reports one pseudo-row for clockwise, counter-clockwise and click alike, whereas built-in `encoder_*` functions report direction-specific rows (§5.2). Whether the firmware can be made to emit the directional rows for a non-built-in action was not established. Use `encoder_keyboard` where direction matters. |
 
 ### Resolved items
@@ -1223,6 +1248,7 @@ Previously-open issues, now closed - kept as terse historical notes only.
 | # | Item | Resolution summary |
 |---|------|--------|
 | 6 | Real hangs during `FILE_END`/`SET_DEVICE_RELOAD` | Root cause was client-side: a missing abort-transfer control message around the transfer, and missing serial write backpressure. Fixed in `Mk20DeviceClient`/`SerialPortTransport`. (An earlier note here claimed the vendor host does not await `FILE_END`'s ack before `SET_DEVICE_RELOAD`; that was a misreading — it does, see §4.1 and item 16.) |
+| 7 | A specific 1-page/5-key synthesized theme appeared to take over 60s to reload | **Resolved — stale result from the pre-fix upload sequence.** With the corrected `FILE_START`/`FILE_END` ordering (§4.1), the same 17,089-byte theme uploaded and activated in 1s. Ten subsequent standalone `SET_DEVICE_RELOAD` tests all acknowledged in 435-575ms. |
 | 8 | Deleting a theme mid-reload could stick the render engine | `DeleteThemeAsync` now refuses to delete a path with an unconfirmed pending reload; all theme-mutating ops are serialized. |
 | 9 | Synthetic themes reloaded slowly or hung | Fixed missing `lock:"1"`, missing pre-upload `GET_DEVICE_THEME` call, and write backpressure; added retry-with-health-check for a residual low-probability firmware hang. All 13 vendor themes upload cleanly. |
 | 10 | Builder-produced `.Theme` files locked up ScreenKeyWindows itself | Root cause was a missing `itemName`, incomplete `KeyboardAction.controlData`, wrong icon PNG format, wrong asset namespace, missing page `"encoder"` array, and 3 serialization bugs (header length field, JSON formatting, string escaping). Confirmed byte-identical to a real reference file; confirmed loading in ScreenKeyWindows itself. |
