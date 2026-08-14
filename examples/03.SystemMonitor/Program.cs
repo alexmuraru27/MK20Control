@@ -192,13 +192,13 @@ namespace Mk20Control.Examples.SystemMonitor
                     .Icon("icon_06.png", LoadIcon("icon_06.png"))
                     .Title("CPU")
                     .TitleStyle(fontSize: 20, color: ThemeColor.White)
-                    .Action(KeyActions.Command(CpuCommandId, description: "CPU")));
+                    .Action(KeyActions.Command(CpuCommandId)));
 
                 page.AddKey(0, 4, key => key
                     .Icon("icon_07.png", LoadIcon("icon_07.png"))
                     .Title("RAM")
                     .TitleStyle(fontSize: 20, color: ThemeColor.White)
-                    .Action(KeyActions.Command(RamCommandId, description: "RAM")));
+                    .Action(KeyActions.Command(RamCommandId)));
             });
 
             return builder.Build();

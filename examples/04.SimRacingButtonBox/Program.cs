@@ -29,11 +29,15 @@ namespace Mk20Control.Examples.SimRacingButtonBox
     /// Every button here uses a <c>Command</c> action, so the device reports each press to
     /// this program and one shared log prints which button it was:
     ///
-    ///   [press] GEAR +   r0c3  racing.gear-up
+    ///   [press] r0c3  racing.gear-up
+    ///   [press] r3c0  FUEL (openPage)
     ///
-    /// The first argument is the routing id <c>OnCommand</c> matches on and must be unique;
-    /// <c>description:</c> is a separate field, echoed back on every press, which is what
-    /// lets the log name the button instead of printing a bare r0c3.
+    /// The argument to <c>Command</c> is the routing id <c>OnCommand</c> matches on, and it
+    /// must be unique - which already makes it a readable name, so these keys need nothing
+    /// else. The navigation keys are the ones that do: <c>OpenPage</c>, <c>OneLevelUp</c> and
+    /// <c>PreviousPage</c>/<c>NextPage</c> are handled by the device itself and carry no id,
+    /// so without <c>description:</c> all three folder keys would log as a bare "openPage".
+    /// That is the field's real purpose - a label for actions that have no id of their own.
     ///
     /// The alternative is <c>KeyActions.Keyboard(...)</c>, which makes the device emit a real
     /// keystroke on its own - ideal for a sim with this program closed, but such a key is
@@ -204,75 +208,75 @@ namespace Mk20Control.Examples.SimRacingButtonBox
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
                 // The description is echoed back on every press, so the log can name the
                 // button instead of printing a bare r0c0.
-                .Action(KeyActions.Command("racing.start", description: "START")));
+                .Action(KeyActions.Command("racing.start")));
 
             page.AddKey(0, 1, key => key
                 .Icon("pit-limiter.png", LoadIcon("pit-limiter.png"))
                 .Title("LIMITER")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.limiter", description: "LIMITER")));
+                .Action(KeyActions.Command("racing.limiter")));
 
             page.AddKey(0, 2, key => key
                 .Icon("neutral.png", LoadIcon("neutral.png"))
                 .Title("NEUTRAL")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.neutral", description: "NEUTRAL")));
+                .Action(KeyActions.Command("racing.neutral")));
 
             page.AddKey(0, 3, key => key
                 .Icon("gear-up.png", LoadIcon("gear-up.png"))
                 .Title("GEAR +")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.gear-up", description: "GEAR +")));
+                .Action(KeyActions.Command("racing.gear-up")));
 
             page.AddKey(0, 4, key => key
                 .Icon("gear-down.png", LoadIcon("gear-down.png"))
                 .Title("GEAR -")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.gear-down", description: "GEAR -")));
+                .Action(KeyActions.Command("racing.gear-down")));
 
             // Row 1 - driver aids and DRS.
             page.AddKey(1, 0, key => key
                 .Icon("tc-toggle.png", LoadIcon("tc-toggle.png"))
                 .Title("TC")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.tc", description: "TC")));
+                .Action(KeyActions.Command("racing.tc")));
 
             page.AddKey(1, 1, key => key
                 .Icon("abs-toggle.png", LoadIcon("abs-toggle.png"))
                 .Title("ABS")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.abs", description: "ABS")));
+                .Action(KeyActions.Command("racing.abs")));
 
             page.AddKey(1, 2, key => key
                 .Icon("drs-activate.png", LoadIcon("drs-activate.png"))
                 .Title("DRS")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.drs", description: "DRS")));
+                .Action(KeyActions.Command("racing.drs")));
 
             page.AddKey(1, 3, key => key
                 .Icon("headlights-on-off.png", LoadIcon("headlights-on-off.png"))
                 .Title("LIGHTS")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.lights", description: "LIGHTS")));
+                .Action(KeyActions.Command("racing.lights")));
 
             page.AddKey(1, 4, key => key
                 .Icon("headlight-flash.png", LoadIcon("headlight-flash.png"))
                 .Title("FLASH")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.flash", description: "FLASH")));
+                .Action(KeyActions.Command("racing.flash")));
 
             // Row 2 - two buttons that also run their own handler, not just the shared log.
             page.AddKey(2, 0, key => key
                 .Icon("horn.png", LoadIcon("horn.png"))
                 .Title("MARK")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command(MarkLapCommandId, description: "MARK")));
+                .Action(KeyActions.Command(MarkLapCommandId)));
 
             page.AddKey(2, 1, key => key
                 .Icon("fuel-to-end.png", LoadIcon("fuel-to-end.png"))
                 .Title("REPORT")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command(FuelReportCommandId, description: "REPORT")));
+                .Action(KeyActions.Command(FuelReportCommandId)));
 
             // Row 3 - navigation. A folder key names the page it opens; the device performs
             // the jump itself, so no handler is needed for these.
@@ -308,49 +312,49 @@ namespace Mk20Control.Examples.SimRacingButtonBox
                 .Icon("fuel-mix-lean.png", LoadIcon("fuel-mix-lean.png"))
                 .Title("MIX -")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.mix-down", description: "MIX -")));
+                .Action(KeyActions.Command("racing.mix-down")));
 
             page.AddKey(0, 1, key => key
                 .Icon("fuel-mix-rich.png", LoadIcon("fuel-mix-rich.png"))
                 .Title("MIX +")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.mix-up", description: "MIX +")));
+                .Action(KeyActions.Command("racing.mix-up")));
 
             page.AddKey(0, 2, key => key
                 .Icon("engine-map-decrease.png", LoadIcon("engine-map-decrease.png"))
                 .Title("MAP -")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.map-down", description: "MAP -")));
+                .Action(KeyActions.Command("racing.map-down")));
 
             page.AddKey(0, 3, key => key
                 .Icon("engine-map-increase.png", LoadIcon("engine-map-increase.png"))
                 .Title("MAP +")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.map-up", description: "MAP +")));
+                .Action(KeyActions.Command("racing.map-up")));
 
             page.AddKey(0, 4, key => key
                 .Icon("brake-bias-forward.png", LoadIcon("brake-bias-forward.png"))
                 .Title("BIAS F")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.bias-forward", description: "BIAS F")));
+                .Action(KeyActions.Command("racing.bias-forward")));
 
             page.AddKey(1, 0, key => key
                 .Icon("brake-bias-rearward.png", LoadIcon("brake-bias-rearward.png"))
                 .Title("BIAS R")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.bias-rear", description: "BIAS R")));
+                .Action(KeyActions.Command("racing.bias-rear")));
 
             page.AddKey(1, 1, key => key
                 .Icon("wiper-speed-increase.png", LoadIcon("wiper-speed-increase.png"))
                 .Title("WIPE +")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.wipers-up", description: "WIPE +")));
+                .Action(KeyActions.Command("racing.wipers-up")));
 
             page.AddKey(1, 2, key => key
                 .Icon("wiper-speed-decrease.png", LoadIcon("wiper-speed-decrease.png"))
                 .Title("WIPE -")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("racing.wipers-down", description: "WIPE -")));
+                .Action(KeyActions.Command("racing.wipers-down")));
 
             page.AddKey(3, 0, key => key
                 .IconAssetPath(SystemIconPaths.CreateFolder)
@@ -377,31 +381,31 @@ namespace Mk20Control.Examples.SimRacingButtonBox
                 .Icon("refuel-toggle.png", LoadIcon("refuel-toggle.png"))
                 .Title("REFUEL")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("pit.refuel", description: "REFUEL")));
+                .Action(KeyActions.Command("pit.refuel")));
 
             folder.AddKey(0, 1, key => key
                 .Icon("fuel-amount-increase.png", LoadIcon("fuel-amount-increase.png"))
                 .Title("FUEL +")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("pit.fuel-up", description: "FUEL +")));
+                .Action(KeyActions.Command("pit.fuel-up")));
 
             folder.AddKey(0, 2, key => key
                 .Icon("fuel-amount-decrease.png", LoadIcon("fuel-amount-decrease.png"))
                 .Title("FUEL -")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("pit.fuel-down", description: "FUEL -")));
+                .Action(KeyActions.Command("pit.fuel-down")));
 
             folder.AddKey(0, 3, key => key
                 .Icon("fuel-to-end.png", LoadIcon("fuel-to-end.png"))
                 .Title("TO END")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("pit.fuel-to-end", description: "TO END")));
+                .Action(KeyActions.Command("pit.fuel-to-end")));
 
             folder.AddKey(0, 4, key => key
                 .Icon("cancel-pit-request.png", LoadIcon("cancel-pit-request.png"))
                 .Title("CANCEL")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("pit.cancel", description: "CANCEL")));
+                .Action(KeyActions.Command("pit.cancel")));
 
             // The bottom-right cell is reserved for BACK by convention, matching the vendor's
             // own folders and leaving 19 usable cells.
@@ -418,31 +422,31 @@ namespace Mk20Control.Examples.SimRacingButtonBox
                 .Icon("abs-increase.png", LoadIcon("abs-increase.png"))
                 .Title("ABS +")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("aids.abs-up", description: "ABS +")));
+                .Action(KeyActions.Command("aids.abs-up")));
 
             folder.AddKey(0, 1, key => key
                 .Icon("abs-decrease.png", LoadIcon("abs-decrease.png"))
                 .Title("ABS -")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("aids.abs-down", description: "ABS -")));
+                .Action(KeyActions.Command("aids.abs-down")));
 
             folder.AddKey(0, 2, key => key
                 .Icon("tc-toggle.png", LoadIcon("tc-toggle.png"))
                 .Title("TC")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("aids.tc", description: "TC")));
+                .Action(KeyActions.Command("aids.tc")));
 
             folder.AddKey(0, 3, key => key
                 .Icon("brake-bias-forward.png", LoadIcon("brake-bias-forward.png"))
                 .Title("BIAS F")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("aids.bias-forward", description: "BIAS F")));
+                .Action(KeyActions.Command("aids.bias-forward")));
 
             folder.AddKey(0, 4, key => key
                 .Icon("brake-bias-rearward.png", LoadIcon("brake-bias-rearward.png"))
                 .Title("BIAS R")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("aids.bias-rear", description: "BIAS R")));
+                .Action(KeyActions.Command("aids.bias-rear")));
 
             folder.AddKey(3, 4, key => key
                 .IconAssetPath(SystemIconPaths.OneLevelUp)
@@ -457,25 +461,25 @@ namespace Mk20Control.Examples.SimRacingButtonBox
                 .Icon("headlights-on-off.png", LoadIcon("headlights-on-off.png"))
                 .Title("ON/OFF")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("lights.toggle", description: "ON/OFF")));
+                .Action(KeyActions.Command("lights.toggle")));
 
             folder.AddKey(0, 1, key => key
                 .Icon("headlight-flash.png", LoadIcon("headlight-flash.png"))
                 .Title("FLASH")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("lights.flash", description: "FLASH")));
+                .Action(KeyActions.Command("lights.flash")));
 
             folder.AddKey(0, 2, key => key
                 .Icon("wiper-speed-increase.png", LoadIcon("wiper-speed-increase.png"))
                 .Title("WIPE +")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("lights.wipers-up", description: "WIPE +")));
+                .Action(KeyActions.Command("lights.wipers-up")));
 
             folder.AddKey(0, 3, key => key
                 .Icon("wiper-speed-decrease.png", LoadIcon("wiper-speed-decrease.png"))
                 .Title("WIPE -")
                 .TitleStyle(fontSize: 18, color: ThemeColor.White)
-                .Action(KeyActions.Command("lights.wipers-down", description: "WIPE -")));
+                .Action(KeyActions.Command("lights.wipers-down")));
 
             folder.AddKey(3, 4, key => key
                 .IconAssetPath(SystemIconPaths.OneLevelUp)
@@ -541,10 +545,12 @@ namespace Mk20Control.Examples.SimRacingButtonBox
                 return;
             }
 
-            string name = context.Action?.Description ?? "(unlabelled)";
-            string id = context.CommandId ?? context.Action?.RawType ?? "-";
+            // A Command key is identified by its id. A navigation key is executed by the
+            // device and has none, so it falls back to the label given when the theme was built.
+            string what = context.CommandId
+                ?? $"{context.Action?.Description ?? "(unlabelled)"} ({context.Action?.RawType})";
 
-            Console.WriteLine($"[press] {name,-8} r{context.Position.Row}c{context.Position.Column}  {id}");
+            Console.WriteLine($"[press] r{context.Position.Row}c{context.Position.Column}  {what}");
         }
 
         private static byte[] LoadIcon(string fileName) =>

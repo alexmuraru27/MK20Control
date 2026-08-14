@@ -119,31 +119,31 @@ namespace Mk20Control.Examples.ButtonHandlers
                     .Icon("icon_01.png", LoadIcon("icon_01.png"))
                     .Title("HELLO")
                     .TitleStyle(fontSize: 20, color: ThemeColor.White)
-                    .Action(KeyActions.Command("demo.hello", description: "HELLO")));
+                    .Action(KeyActions.Command("demo.hello")));
 
                 page.AddKey(0, 1, key => key
                     .Icon("icon_01.png", LoadIcon("icon_01.png"))
                     .Title("TIME")
                     .TitleStyle(fontSize: 20, color: ThemeColor.White)
-                    .Action(KeyActions.Command("demo.time", description: "TIME")));
+                    .Action(KeyActions.Command("demo.time")));
 
                 page.AddKey(0, 2, key => key
                     .Icon("icon_01.png", LoadIcon("icon_01.png"))
                     .Title("FILES")
                     .TitleStyle(fontSize: 20, color: ThemeColor.White)
-                    .Action(KeyActions.Command("demo.dir", description: "FILES")));
+                    .Action(KeyActions.Command("demo.dir")));
 
                 page.AddKey(0, 3, key => key
                     .Icon("icon_01.png", LoadIcon("icon_01.png"))
                     .Title("BEEP")
                     .TitleStyle(fontSize: 20, color: ThemeColor.White)
-                    .Action(KeyActions.Command("demo.beep", description: "BEEP")));
+                    .Action(KeyActions.Command("demo.beep")));
 
                 page.AddKey(0, 4, key => key
                     .Icon("icon_01.png", LoadIcon("icon_01.png"))
                     .Title("QUIT")
                     .TitleStyle(fontSize: 20, color: ThemeColor.White)
-                    .Action(KeyActions.Command("demo.quit", description: "QUIT")));
+                    .Action(KeyActions.Command("demo.quit")));
 
                 // A key the DEVICE performs by itself. It still types Ctrl+C once this
                 // program exits - unlike the command keys above, which need a listener.

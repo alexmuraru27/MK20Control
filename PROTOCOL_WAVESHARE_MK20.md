@@ -816,7 +816,9 @@ asset, even though both render an animation.
 | `keyboard_switch` | Toggle keyboard layout | — |
 | `Microphone` / `Loudspeaker` | Adjust a named OS audio device's volume | `volumeAdjustDevice`, `volumeAdjustMode`, `volumeadjustValue` |
 | `text` | Carries a string; **the device executes nothing** and reports the press with the string attached (§6.3) | `inputText`, `isInputEnter`, `isCopyPaste` |
-| `ControlFlow` | Multi-step macro | `controlDataList` (bytes) — populated-step schema not yet observed |
+| `ControlFlow` | Multi-step macro, **executed by the host, not the device** — see §7.2b | `controlDataList`: base64 of a Tagged-Value **map array**, one map per step |
+| `delay`, `startLoop`, `stopLoop` | **Step-only** — valid inside a `ControlFlow` list, never as a key's own action | `delayMs` / `loopCount` / — |
+| `qmk_string` | Types a whole string (as opposed to `keyboard`'s single keystroke). Observed as a `ControlFlow` step | `inputTextPercentEncoding` |
 | `encoder_*` | Encoder functions — see §7.2a | |
 
 This table documents the **wire format**, i.e. every action type the vendor's own editor can
@@ -876,6 +878,47 @@ keycode `0` with an empty label**, which the vendor writes itself and is therefo
 
 Because `encoder_keyboard` is executed natively, it is the only assignment that distinguishes
 rotation direction to the host — as three different keystrokes, not as protocol events.
+
+### 7.2b `ControlFlow` — multi-step macros **(C — decoded, deliberately not implemented)**
+
+A `ControlFlow` key runs an ordered list of actions. The steps are **not** in `controlData`
+(which carries only the usual type/description/icon stub); they live in a sibling item field:
+
+```
+KeyItem.controlDataList  →  base64 text  →  Tagged-Value MAP ARRAY (§5.2), one map per step
+```
+
+An unconfigured key stores `"AAAAAA=="` — base64 of four zero bytes, i.e. an array of zero
+steps. That empty case is what previously made the populated schema look unobserved.
+
+Step types observed, each an ordinary action descriptor plus step-only fields:
+
+| Step `type` | Extra fields | Notes |
+|-------------|--------------|-------|
+| `keyboard` | `keycode`, `keyString` | Same `(mods << 8) \| usage` packing as a key action |
+| `text` | `inputText`, `isInputEnter`, `isCopyPaste` | Same shape as a `text` key |
+| `qmk_string` | `inputTextPercentEncoding` | Types a whole string; `description` is `"QMKString"` |
+| `delay` | `delayMs` | Step-only |
+| `startLoop` | `loopCount` | Step-only; repeats until `stopLoop` |
+| `stopLoop` | — | Step-only; closes the preceding `startLoop` |
+
+Every step also carries `childTitle` (per-step label, usually empty) and
+`AISoundControlKeyword`. Confirmed by decoding the vendor's own "APP" macro
+(`MK10`/`MK20` `defaultTheme.Theme`, 7 steps: Win+R → delay → `qmk_string` URL → Enter) and a
+macro authored in ScreenKeyWindows covering all six step types.
+
+> **The device does not execute macros — the host does.** Confirmed on hardware: with the
+> vendor app closed, pressing a `ControlFlow` key performs nothing. On the wire the device
+> reports an ordinary press event whose echoed descriptor is the macro's **first step**
+> (identifiable by the step-only `childTitle` field), and the remaining steps are not sent at
+> all. So a macro key is really just "notify the host", with the step list stored in the theme
+> purely for the vendor app's own use.
+>
+> **This library therefore does not implement `ControlFlow`, by design** (§10 item 20).
+> `KeyActions.Command(id)` plus a `KeyBindings` handler achieves the same thing and is
+> strictly more capable: arbitrary C# rather than a fixed six-verb step list, with no
+> dependency on the vendor app. `ControlFlow` keys still decode to `UnknownKeyAction` and
+> round-trip byte-identically, so reading and rewriting a vendor theme preserves them intact.
 
 ### 7.3 Conformance
 
@@ -1235,11 +1278,18 @@ picture vs. GIF vs. video — only a bigger/smaller asset entry inside the same 
 |---|------|--------|
 | 1 | `SEND_PIXMAP` (12) send-path tagged-value wrapping | **U** — receive/detect only; exact wrapper type not decoded |
 | 2 | Command IDs 5, 8, 9, 10, 14 | **U** — ordering only, no observed payload |
-| 3 | `ControlFlow` action with actual configured steps | **U** — only an empty/never-configured instance observed |
 | 4 | Achievable telemetry push rate | **U** — not benchmarked |
 | 5 | Bulk-transfer resilience: whether the device rejects/retries on a corrupt chunk or dropped connection mid-transfer | **U** — a retried upload was observed in the confirming capture but the retry-trigger condition was not isolated |
 | 15 | An **analog clock face** in the ScreenKeyWindows editor | **U — and NOT answerable from shipped data.** The other editor widget sub-variants are now resolved: multiline text (116), shadow text (117), the circular gauge variants (101 plain, 104 "seg-circular", 110 "light-shadow"), and — on 2026-08-14 — the **"seg-hor" horizontal bar, which is simply type 103** (§7.1): a theme authored in the vendor editor round-trips byte-identically through this library and renders on hardware, so no new type exists. For the analog clock, every shipped `.theme` across **all four device models** (MK10, MK20, MK20-PLUS, SK18) was searched two independent ways — decoded through this library, and by scanning the raw/decompressed bytes for `"type":"NNN"` without using the decoder at all. Both agree exactly: **only the 13 types above occur, there is no type 112, and `analog` appears nowhere.** (The decoder route is trustworthy here because unknown type codes decode to `UnknownThemeItem` rather than being dropped.) The analog face exists only as vendor-EXE palette artwork (`analog_clock_item.png` / `analog_clock_select.png`, beside `digital_clocks_item.png`) — an editor option no sample theme uses. Confirming it therefore REQUIRES authoring one in ScreenKeyWindows, saving, and decoding the result, then uploading it to confirm the firmware renders it. Note the same search resolved a separate unknown: type 111's `displayType` selects font digits (`0`) vs picture-font digits (`1`), and is not an analog/digital switch (§7.1). |
 | 17 | Rotation direction for `text`-bound encoders | **U / believed not exposed.** A knob bound to a `text` action reports one pseudo-row for clockwise, counter-clockwise and click alike, whereas built-in `encoder_*` functions report direction-specific rows (§5.2). Whether the firmware can be made to emit the directional rows for a non-built-in action was not established. Use `encoder_keyboard` where direction matters. |
+
+### Won't do
+
+Decided against, with the reason — so the question is not reopened.
+
+| # | Item | Decision |
+|---|------|----------|
+| 20 | Implement `ControlFlow` (multi-step macros) in this library | **Won't do.** The wire format is fully decoded (§7.2b), but the device does not execute macros — confirmed on hardware: with the vendor app closed a `ControlFlow` key does nothing, and the device merely reports a press whose descriptor is the macro's *first step*. A macro is therefore only "notify the host", which `KeyActions.Command(id)` + a `KeyBindings` handler already does — with arbitrary C# instead of a fixed six-verb step list, and no dependency on the vendor app. Implementing it would add API surface that is strictly less capable than what exists. `ControlFlow` keys still decode to `UnknownKeyAction` and round-trip byte-identically, so vendor themes are preserved. |
 
 ### Resolved items
 
@@ -1247,6 +1297,7 @@ Previously-open issues, now closed - kept as terse historical notes only.
 
 | # | Item | Resolution summary |
 |---|------|--------|
+| 3 | `ControlFlow` action with actual configured steps | **Resolved from shipped data + a vendor-authored macro.** The steps are not in `controlData` but in the item's sibling `controlDataList` field: base64 of a Tagged-Value map array, one map per step. The empty stub `"AAAAAA=="` (zero steps) is what made this look unobserved. Six step types are now documented in §7.2b (`keyboard`, `text`, `qmk_string`, `delay`, `startLoop`, `stopLoop`). Implementing it was then deliberately declined — see Won't-do item 20. |
 | 6 | Real hangs during `FILE_END`/`SET_DEVICE_RELOAD` | Root cause was client-side: a missing abort-transfer control message around the transfer, and missing serial write backpressure. Fixed in `Mk20DeviceClient`/`SerialPortTransport`. (An earlier note here claimed the vendor host does not await `FILE_END`'s ack before `SET_DEVICE_RELOAD`; that was a misreading — it does, see §4.1 and item 16.) |
 | 7 | A specific 1-page/5-key synthesized theme appeared to take over 60s to reload | **Resolved — stale result from the pre-fix upload sequence.** With the corrected `FILE_START`/`FILE_END` ordering (§4.1), the same 17,089-byte theme uploaded and activated in 1s. Ten subsequent standalone `SET_DEVICE_RELOAD` tests all acknowledged in 435-575ms. |
 | 8 | Deleting a theme mid-reload could stick the render engine | `DeleteThemeAsync` now refuses to delete a path with an unconfirmed pending reload; all theme-mutating ops are serialized. |

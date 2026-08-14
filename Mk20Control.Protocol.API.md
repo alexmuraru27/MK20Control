@@ -166,9 +166,7 @@ arguments have distinct jobs and are stored as separate fields:
 ```csharp
 page.AddKey(2, 0, key => key
     .Title("MARK")                                              // drawn on the device
-    .Action(KeyActions.Command(
-        "racing.mark-lap",                                       // routing id -> OnCommand
-        description: "MARK")));                                  // label echoed back
+    .Action(KeyActions.Command("racing.mark-lap")));            // routing id -> OnCommand
 ```
 
 | Argument | Wire field | Role |
@@ -177,26 +175,29 @@ page.AddKey(2, 0, key => key
 | `description:` | `description` | A label echoed back on every press, for logs and diagnostics. Not used for routing; duplicates are fine. Defaults to `"Text"`. |
 
 `description` does **not** change what the device draws — that is `.Title(...)`, a property of
-the key itself, not of its action. They are independent, so passing the title as the
-description is a convention, not a requirement: it simply makes a press report a name you
-recognise instead of `r2c0`. Keeping them in step is easiest via a helper:
+the key itself, not of its action.
+
+**When to pass it.** On a `Command` key, usually never: the routing ID is already unique and
+readable, so `description: "MARK"` next to `"racing.mark-lap"` only restates it. The field
+earns its place on the actions the *device* executes, which carry no ID of their own —
+`OpenPage`, `OneLevelUp`, `PreviousPage` and `NextPage`. Three folder keys are otherwise
+indistinguishable in a log, all reporting a bare `openPage`:
 
 ```csharp
-void AddButton(int row, int col, string title, string commandId) =>
-    page.AddKey(row, col, key => key
-        .Title(title)
-        .Action(KeyActions.Command(commandId, description: title)));
+.Action(KeyActions.OpenPage(pitFolder.PageId, description: "FUEL"));
+.Action(KeyActions.OpenPage(aidsFolder.PageId, description: "AIDS"));
 ```
 
-Then log from a single place:
+Then log from a single place, preferring the ID and falling back to the label:
 
 ```csharp
 bindings.Unbound += (_, ctx) =>
 {
     if (!ctx.IsPressed) return;
-    Console.WriteLine($"{ctx.Action?.Description ?? "(unlabelled)"} ({ctx.CommandId})");
+    Console.WriteLine(ctx.CommandId ?? $"{ctx.Action?.Description} ({ctx.Action?.RawType})");
 };
-// MARK (racing.mark-lap)
+// racing.mark-lap
+// FUEL (openPage)
 ```
 
 `Unbound` covers every key without its own handler; a bound key logs from inside its handler,
@@ -512,6 +513,21 @@ KeyActions.EncoderFunction("encoder_system_volume", relatedThemePath: null)   //
 integers. `KeyModifiers` is a `[Flags]` enum (`LeftCtrl`, `LeftShift`, `LeftAlt`, `LeftWin`,
 `RightCtrl`, `RightShift`, `RightAlt`, `RightWin`); modifiers are packed into the upper byte
 of the keycode, so `Ctrl+Shift+C` encodes as `0x0306`.
+
+> **What about multi-step macros?** The vendor editor has an "Action flow" (`ControlFlow`)
+> key that runs a list of steps. This library does not implement it, deliberately: the
+> **device does not execute macros** — with the vendor app closed, such a key does nothing.
+> It only reports a press, so `KeyActions.Command(id)` plus a `KeyBindings` handler does the
+> same job with arbitrary C# instead of a fixed six-verb step list:
+>
+> ```csharp
+> .Action(KeyActions.Command("deploy"));
+>
+> bindings.OnCommand("deploy", async () => { await Build(); await Publish(); });
+> ```
+>
+> Vendor themes containing macros still decode and re-encode byte-identically, so reading and
+> rewriting one preserves them. See `PROTOCOL_WAVESHARE_MK20.md` §7.2b for the wire format.
 
 ### Page navigation: paging, jumps and folders
 
