@@ -27,7 +27,7 @@ how to use it.
 | `Mk20Control.Protocol.Theme.Items` | Core page item types (`KeyItem`, `BackgroundItem`, `DynamicImageItem`) |
 | `Mk20Control.Protocol.Theme.Items.Widgets` | Data-bound widget item types (`TextItem`, `MultilineTextItem`, `ShadowTextItem`, `ProgressBarItem`, `LinearGaugeItem`, `RadialGaugeItem`, `CircularGaugeItem`, `SegmentedCircularGaugeItem`, `LightShadowGaugeItem`, `DigitalClockItem`) |
 | `Mk20Control.Protocol.Theme.Actions` | Key action types (`KeyboardAction`, `PageSwitchAction`, etc.) |
-| `Mk20Control.Protocol.Theme.Building` | `ThemeBuilder`, `ThemeEditor`, `ThemePageBuilder`, `KeyItemBuilder`, `KeyActions`, `ThemeColor`, `ScreenLayout`, `LayoutRect`, `HidKey`, `KeyModifiers`, `EncoderSide`, `EncoderPositions`, `EncoderFunctionType`, `SystemIconPaths` — fluent theme construction/editing |
+| `Mk20Control.Protocol.Theme.Building` | `ThemeBuilder`, `ThemeEditor`, `ThemePageBuilder`, `KeyItemBuilder`, `KeyActions`, `ThemeColor`, `ScreenLayout`, `LayoutRect`, `HidKey`, `KeyModifiers`, `EncoderSide`, `EncoderPositions`, `EncoderFunctionType`, `DeviceIcon` — fluent theme construction/editing |
 | `Mk20Control.Protocol.Theme.Building.Widgets` | Fluent builders for the widget item types above (`TextItemBuilder`, `ProgressBarItemBuilder`, `RadialGaugeItemBuilder`, etc.) |
 | `Mk20Control.Protocol.Framing` | Wire-frame primitives (`DeviceFrame`, `DeviceFrameParser`) — needed only to build a custom transport or analyse raw captures |
 | `Mk20Control.Protocol.Checksums` | `Crc32` (zlib variant) as used by the frame header |
@@ -245,9 +245,9 @@ All async methods accept an optional `TimeSpan? timeout` and `CancellationToken`
 | `SetBacklightAsync(int percentage)` | Set backlight brightness, 0–100. |
 | `PushSystemDataAsync(IReadOnlyDictionary<string,string> values)` | Push live telemetry values (e.g. `{"CPU Usage": "42%"}`) that the loaded theme's gauges/text bind to by name. |
 | `GetInstalledThemesAsync()` → `ThemeListing` | List installed themes (device paths + CRC-32) and free/total storage. |
-| `ReloadThemeAsync(string deviceThemePath)` | Activate an already-installed theme by its device-side path. |
-| `UploadThemeFileAsync(string deviceThemePath, byte[] themeFileBytes)` | Upload and activate a new/edited `.Theme` file (see §6). |
-| `DeleteThemeAsync(string deviceThemePath)` | Remove an installed theme. |
+| `UploadThemeAsync(string themeName, ThemeFile theme)` | Upload and activate a theme **by name** — the library resolves the device path (see §8). |
+| `ReloadThemeAsync(string themeName)` | Activate an already-installed theme by name. |
+| `DeleteThemeAsync(string themeName)` | Remove an installed theme by name. |
 | `SendJsonAsync(string json)` | Send a raw `SEND_JSON` payload — used internally for the telemetry-request contract; rarely needed directly. |
 
 ### `DeviceIdentity`
@@ -297,7 +297,7 @@ numeric-bound gauge does not error, it is simply not usable as a fill percentage
 
 ### Operational safety (built-in)
 
-`ReloadThemeAsync`, `DeleteThemeAsync`, and `UploadThemeFileAsync` are automatically
+`ReloadThemeAsync`, `DeleteThemeAsync`, and `UploadThemeAsync` are automatically
 serialized against each other (never more than one in flight), and `DeleteThemeAsync`
 refuses to delete a theme whose reload is still unconfirmed (throws
 `InvalidOperationException`) — this mirrors the real vendor host's behavior and avoids a
@@ -476,7 +476,8 @@ an immutable `ThemeFile`. The first added page becomes the active page on load
 | `.Icon(fileName, bytes)` | Sets a static icon, normalised to the vendor format (128x128, RGB, no alpha). |
 | `.IconPreservingAlpha(fileName, pngBytes)` | Same, but keeps the alpha channel so the background shows through — see [Transparent key icons](#transparent-key-icons). |
 | `.AnimatedIcon(folderName, gifBytes)` | Sets a multi-frame animated icon (pressable key, unlike a decorative dynamic image). |
-| `.IconAssetPath(path)` | Points at an already-registered/static system asset path (e.g. `/static/icon/dark/PageSwitch.png`) instead of registering a new one. |
+| `.IconDevice(DeviceIcon)` | Shows one of the device's own built-in icons — you pick it by name, the library resolves the path. |
+| `.IconAssetPath(path)` | Points at an already-registered asset path (e.g. one read back from an existing theme). Prefer `.IconDevice(...)` for built-in artwork. |
 | `.Action(keyAction)` | Assigns behavior — build one via `KeyActions` (below). |
 | `.Title(text)` | On-screen label text over the icon. |
 | `.Opacity(0-100)` | Icon transparency (100 = opaque, the default). |
@@ -551,12 +552,12 @@ Two things to keep straight:
   via `.AsFolderOf(parent)` — see below. Without it the device navigates *into* the page and
   then refuses to leave.
 
-Navigation keys normally reuse the vendor's built-in artwork instead of embedding an icon —
-see `SystemIconPaths` (`PageSwitch`, `CreateFolder`, `OneLevelUp`, plus the smaller
-`*Glyph` variants used as an action's own `iconPath`):
+Navigation keys normally reuse the vendor's built-in artwork instead of embedding an icon.
+Pick it from the `DeviceIcon` enum (`PageSwitch`, `OpenFolder`, `OneLevelUp`, `Keyboard`, plus
+the five encoder-sized ones) and the library resolves the device path:
 
 ```csharp
-key.IconAssetPath(SystemIconPaths.CreateFolder).Action(KeyActions.OpenPage(folder.PageId));
+key.IconDevice(DeviceIcon.OpenFolder).Action(KeyActions.OpenPage(folder.PageId));
 ```
 
 #### Relative paging (a ring)
@@ -573,11 +574,11 @@ for (int i = 0; i < 6; i++)
     {
         page.SetCanvas(640, 656);
         page.AddKey(3, 0, key => key
-            .IconAssetPath(SystemIconPaths.PageSwitch)
+            .IconDevice(DeviceIcon.PageSwitch)
             .Title("PREV")
             .Action(KeyActions.PreviousPage()));
         page.AddKey(3, 4, key => key
-            .IconAssetPath(SystemIconPaths.PageSwitch)
+            .IconDevice(DeviceIcon.PageSwitch)
             .Title("NEXT")
             .Action(KeyActions.NextPage()));
     });
@@ -601,7 +602,7 @@ hub.AddKey(0, 1, key => key.Title("WINDOW").Action(KeyActions.JumpToPage(2)));
 foreach (var section in new[] { media, window })
 {
     section.AddKey(3, 4, key => key
-        .IconAssetPath(SystemIconPaths.PageSwitch)
+        .IconDevice(DeviceIcon.PageSwitch)
         .Title("HOME")
         .Action(KeyActions.JumpToPage(0)));           // 0 = the hub's index
 }
@@ -652,12 +653,12 @@ var folder = builder.AddPage().SetCanvas(640, 656)
     .AsFolderOf(home);                                // <- emits parentPageName; REQUIRED
 
 home.AddKey(0, 0, key => key
-    .IconAssetPath(SystemIconPaths.CreateFolder)
+    .IconDevice(DeviceIcon.OpenFolder)
     .Title("TOOLS")
     .Action(KeyActions.OpenPage(folder.PageId)));     // in
 
 folder.AddKey(3, 4, key => key
-    .IconAssetPath(SystemIconPaths.OneLevelUp)
+    .IconDevice(DeviceIcon.OneLevelUp)
     .Title("BACK")
     .Action(KeyActions.OneLevelUp()));                // back out to `home`
 ```
@@ -690,7 +691,7 @@ foreach (var (label, hidKey) in functions)
 }
 
 tools.AddKey(3, 4, key => key                          // reserved: return key
-    .IconAssetPath(SystemIconPaths.OneLevelUp)
+    .IconDevice(DeviceIcon.OneLevelUp)
     .Title("BACK")
     .Action(KeyActions.OneLevelUp()));
 ```
@@ -722,7 +723,7 @@ for (int level = 0; level < pages.Count; level++)
     {
         var child = pages[level + 1];
         pages[level].AddKey(0, 0, key => key
-            .IconAssetPath(SystemIconPaths.CreateFolder)
+            .IconDevice(DeviceIcon.OpenFolder)
             .Title($"LEVEL {level + 1}")
             .Action(KeyActions.OpenPage(child.PageId)));
     }
@@ -730,7 +731,7 @@ for (int level = 0; level < pages.Count; level++)
     if (level > 0)                                     // ...and a way back up
     {
         pages[level].AddKey(3, 4, key => key
-            .IconAssetPath(SystemIconPaths.OneLevelUp)
+            .IconDevice(DeviceIcon.OneLevelUp)
             .Title("BACK")
             .Action(KeyActions.OneLevelUp()));
     }
@@ -803,7 +804,7 @@ correct position for you.
 | `EncoderPositions.LeftX` / `LeftY` | `106` / `0` |
 | `EncoderPositions.RightX` / `RightY` | `320` / `0` |
 | `EncoderPositions.LeftPseudoRow` / `RightPseudoRow` | `100` / `103` — the row/col reported on input |
-| `EncoderPositions.SystemVolumeIcon`, `DeviceVolumeIcon`, `DeviceBrightnessIcon`, `SystemMediaIcon`, `KeyboardIcon` | Built-in icon asset paths |
+| `DeviceIcon.EncoderSystemVolume`, `EncoderDeviceVolume`, `EncoderDeviceBrightness`, `EncoderSystemMedia`, `EncoderKeyboard` | Built-in encoder artwork, selected by name via `.IconDevice(...)` |
 | `EncoderPositions.PositionOf(side)`, `PseudoRowOf(side)`, `SideOfPseudoRow(row)` | Lookups |
 | `EncoderPositions.RelatedThemePath(root, type)` | Builds the mini-display theme path (below) |
 
@@ -815,7 +816,7 @@ running on the PC.
 
 ```csharp
 page.AddEncoder(EncoderSide.Left, key => key
-    .IconAssetPath(EncoderPositions.SystemVolumeIcon)
+    .IconDevice(DeviceIcon.EncoderSystemVolume)
     .Opacity(0)
     .Action(KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume)));
 ```
@@ -837,7 +838,7 @@ leave a motion unbound.
 
 ```csharp
 page.AddEncoder(EncoderSide.Right, key => key
-    .IconAssetPath(EncoderPositions.KeyboardIcon)
+    .IconDevice(DeviceIcon.EncoderKeyboard)
     .Opacity(0)
     .Action(KeyActions.EncoderKeyboard(
         rotateLeft:  (KeyModifiers.LeftCtrl, HidKey.Z),
@@ -962,7 +963,7 @@ var theme = new ThemeBuilder()
         .AddDigitalClockField(c => c.At(545, 20, 40, 40).Field("minute")))
     .Build();
 
-await client.UploadThemeFileAsync("/data/theme/MK20/dashboard/dashboard.Theme", ThemeFileCodec.Encode(theme));
+await client.UploadThemeAsync("dashboard", theme);
 
 // Push live values every second - the clock fields need this too (host-driven, not RTC-driven).
 var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
@@ -985,7 +986,7 @@ its own test channel, `test1`-`test9`, plus a live clock), and
 `HardwareTests/MainScreenAllWidgetTypesUploadTests.cs` for the live-hardware variant that
 pumps varied random/ramp/sine-wave values so each widget's live update behavior can be
 visually verified — run it with `dotnet test --environment MK20_COM_PORT=COM7
---environment MK20_UPLOAD_DEVICE_PATH=/data/theme/MK20/widgettest/widgettest.Theme`.
+--environment MK20_UPLOAD_THEME_NAME=widgettest`.
 
 ---
 
@@ -1018,7 +1019,7 @@ byte[] updatedBytes = ThemeFileCodec.Encode(editor.Save());
 | `.Page(index)` / `.PageById(pageId)` | Get a `PageEditor` for one page. |
 | `.PageCount` | Number of pages. |
 | `.SetCurrentPage(pageId)` | Change which page opens on activation. |
-| `.RegisterAsset(fileName, bytes)` / `.RegisterAssetAtPath(fullPath, bytes)` | Low-level asset registration (used internally by the item builders below; rarely needed directly). |
+| `.RemoveAsset(assetPath)` | Removes an asset by the path you read from `ThemeFile.Assets` (item references are not cleared automatically — update those first). |
 | `.Save()` | Returns the updated immutable `ThemeFile`. |
 
 | `PageEditor` member (`editor.Page(n).___`) | Effect |
@@ -1041,11 +1042,38 @@ any field this library doesn't model yet survives round-trip untouched.
 ## 8. Uploading a theme to the device
 
 ```csharp
-byte[] themeBytes = ThemeFileCodec.Encode(theme); // from ThemeBuilder or ThemeEditor
-await client.UploadThemeFileAsync("/data/theme/MK20/MyTheme/MyTheme.Theme", themeBytes);
+await client.UploadThemeAsync("MyTheme", theme); // from ThemeBuilder or ThemeEditor
 ```
 
-`UploadThemeFileAsync` performs the complete confirmed sequence internally
+You give the theme a **name**; the library decides where it goes. `DeviceThemePath.ForTheme`
+expands that name into the device's confirmed layout —
+`/data/theme/MK20/<name>/<name>.Theme` — so a caller cannot accidentally write outside the
+theme directory, use the wrong extension, or mismatch the folder and file name (the device
+does not list a theme whose file name differs from its folder).
+
+A name is a single folder name. Anything that could resolve elsewhere is rejected up front
+with an `ArgumentException`, before a byte is sent: path separators, `..`, `.`, leading or
+trailing whitespace, control characters, and names over 64 characters. Non-ASCII is fine —
+the vendor's own themes are named in Chinese.
+
+Uploading an existing name **replaces** that theme, which is what you want while iterating: a
+fresh name each run leaves an ever-growing pile of themes on the SD card, since every `.Theme`
+file embeds its own copy of every icon and background it uses.
+
+```csharp
+await client.UploadThemeAsync("MyTheme", themeBytes);         // pre-encoded bytes
+await client.ReloadThemeAsync("MyTheme");                     // switch back to it later
+await client.DeleteThemeAsync("MyTheme");                     // remove it
+
+DeviceThemePath.ForTheme("MyTheme");                          // the path, if you need it
+DeviceThemePath.TryGetThemeName(installed.Path, out string n);// …and back again
+```
+
+There is no path-based overload: every theme operation takes a name and resolves the path
+itself, so no caller composes a device path by hand. `DeviceThemePath` is public if you need
+the path for display or to match against `GetInstalledThemesAsync` results.
+
+Whichever you call, the same confirmed sequence runs internally
 (`GET_DEVICE_THEME` → abort-transfer → `FILE_START` → *wait for its ack* → 4096-byte bulk
 chunks → `FILE_END` → abort-transfer → `SET_DEVICE_RELOAD`). Both the `FILE_START` ack wait
 and the abort-transfer immediately after `FILE_END` are mandatory — omitting either makes
@@ -1055,9 +1083,6 @@ timeout, confirming the device is still alive between them and failing fast with
 message if it isn't, and automatically normalizes the theme's `currentPage` to
 its first page before sending, so activation always lands on page 1 regardless of what was
 embedded in the source bytes.
-
-Device-side paths follow the convention `/data/theme/MK20/<name>/<name>.Theme` (matching
-the vendor app), though any valid path the device accepts works.
 
 ---
 
@@ -1080,14 +1105,14 @@ var theme = new ThemeBuilder()
             .Title("Save").Action(KeyActions.KeyboardCombo(KeyModifiers.LeftCtrl, HidKey.S)))
         // The left knob adjusts the PC volume entirely on-device.
         .AddEncoder(EncoderSide.Left, key => key
-            .IconAssetPath(EncoderPositions.SystemVolumeIcon).Opacity(0)
+            .IconDevice(DeviceIcon.EncoderSystemVolume).Opacity(0)
             .Action(KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume)))
         // A gauge - the bound name is your own choice.
         .AddProgressBar(pb => pb.At(20, 20, 200, 30).BoundTo("cpu_usage", 0, 100)
             .Colors(new ThemeColor(0, 170, 255, 220), ThemeColor.White.WithAlpha(140), ThemeColor.Black.WithAlpha(180))))
     .Build();
 
-await client.UploadThemeFileAsync("/data/theme/MK20/MyApp/MyApp.Theme", ThemeFileCodec.Encode(theme));
+await client.UploadThemeAsync("MyApp", theme);
 
 // 3. Bind your code to command ids.
 var buttons = new KeyBindings(client);

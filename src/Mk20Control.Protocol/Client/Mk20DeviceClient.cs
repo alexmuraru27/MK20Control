@@ -260,20 +260,43 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
     }
 
     /// <summary>
-    /// CONFIRMED: instructs the device to (re)load the theme at the given device-side path
-    /// (e.g. "/data/theme/MK20/&lt;name&gt;/&lt;name&gt;.Theme"). The payload is the path as
-    /// plain UTF-8 text with no length prefix - unlike every other command's tagged/length-
-    /// prefixed fields.
+    /// Uploads and activates <paramref name="theme"/> under <paramref name="themeName"/>.
+    ///
+    /// You name the theme; the library decides where it goes (<see cref="DeviceThemePath"/>),
+    /// so a caller cannot write outside the theme directory or mismatch the folder and file
+    /// name. The name is validated before anything is sent - see
+    /// <see cref="DeviceThemePath.ForTheme"/> for what is rejected.
+    ///
+    /// Uploading an existing name replaces that theme, which is what you want while iterating:
+    /// a fresh name each run leaves an ever-growing pile of themes on the SD card, since every
+    /// .Theme file embeds its own copy of every icon and background it uses.
     /// </summary>
-    public async Task ReloadThemeAsync(string deviceThemePath, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    /// <param name="themeName">The theme's name, e.g. "example-monitor" - not a path.</param>
+    public Task UploadThemeAsync(string themeName, ThemeFile theme, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(deviceThemePath);
+        ArgumentNullException.ThrowIfNull(theme);
+        return UploadThemeAsync(themeName, ThemeFileCodec.Encode(theme), timeout, cancellationToken);
+    }
+
+    /// <summary>
+    /// CONFIRMED: instructs the device to (re)load the installed theme called
+    /// <paramref name="themeName"/>. Uploading already activates a theme, so this is only
+    /// needed to switch back to one that is already on the device.
+    ///
+    /// The wire payload is the resolved device path as plain UTF-8 text with no length prefix -
+    /// unlike every other command's tagged/length-prefixed fields.
+    /// </summary>
+    /// <param name="themeName">The theme's name, e.g. "example-monitor" - not a path.</param>
+    public async Task ReloadThemeAsync(string themeName, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    {
+        string deviceThemePath = DeviceThemePath.ForTheme(themeName);
+
         await _themeOperationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
             _pendingReloadPaths[deviceThemePath] = 0;
             var waitTask = WaitForReplyAsync(CommandId.SetDeviceReload, timeout ?? _options.DefaultRequestTimeout, cancellationToken);
-            // NOTE: unlike the upload pipeline (UploadThemeFileAsync, which always precedes
+            // NOTE: unlike the upload pipeline (UploadThemeAsync, which always precedes
             // SET_DEVICE_RELOAD with an abort-transfer immediately after FILE_END), a *standalone*
             // reload of an already-installed theme (no re-upload) was observed in the confirming
             // capture WITHOUT any preceding abort-transfer message - so this method intentionally
@@ -290,42 +313,41 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
     }
 
     /// <summary>
-    /// True if <paramref name="deviceThemePath"/> has a reload that was sent but never
-    /// confirmed acknowledged (including one that timed out) - see
+    /// True if the theme called <paramref name="themeName"/> has a reload that was sent but
+    /// never confirmed acknowledged (including one that timed out) - see
     /// <see cref="_pendingReloadPaths"/> remarks. <see cref="DeleteThemeAsync"/> refuses to
-    /// delete such a path; call <see cref="ClearPendingReloadState"/> to override once you
+    /// delete such a theme; call <see cref="ClearPendingReloadState"/> to override once you
     /// have independently confirmed it is safe to do so (e.g. after power-cycling the device).
     /// </summary>
-    public bool IsReloadPending(string deviceThemePath) => _pendingReloadPaths.ContainsKey(deviceThemePath);
+    public bool IsReloadPending(string themeName) => _pendingReloadPaths.ContainsKey(DeviceThemePath.ForTheme(themeName));
 
     /// <summary>
-    /// Clears the "pending reload" safeguard tracked for <paramref name="deviceThemePath"/>
-    /// (or every tracked path, if null) - see <see cref="_pendingReloadPaths"/> remarks. Only
-    /// call this once you have independently confirmed it's safe (e.g. the device was just
-    /// power-cycled, or a subsequent successful reload/ping proves it recovered) - this
-    /// safeguard exists specifically because a confirmed real-hardware hazard was observed
-    /// when it was bypassed (see PROTOCOL_WAVESHARE_MK20.md §10 Open Item #8).
+    /// Clears the "pending reload" safeguard tracked for <paramref name="themeName"/> (or every
+    /// tracked theme, if null) - see <see cref="_pendingReloadPaths"/> remarks. Only call this
+    /// once you have independently confirmed it's safe (e.g. the device was just power-cycled,
+    /// or a subsequent successful reload/ping proves it recovered) - this safeguard exists
+    /// specifically because a confirmed real-hardware hazard was observed when it was bypassed
+    /// (see PROTOCOL_WAVESHARE_MK20.md §10 Open Item #8).
     /// </summary>
-    public void ClearPendingReloadState(string? deviceThemePath = null)
+    public void ClearPendingReloadState(string? themeName = null)
     {
-        if (deviceThemePath is null) { _pendingReloadPaths.Clear(); return; }
-        _pendingReloadPaths.TryRemove(deviceThemePath, out _);
+        if (themeName is null) { _pendingReloadPaths.Clear(); return; }
+        _pendingReloadPaths.TryRemove(DeviceThemePath.ForTheme(themeName), out _);
     }
 
     /// <summary>
-    /// CONFIRMED: deletes an installed theme file from the device by its device-side path
-    /// (e.g. "/data/theme/MK20/&lt;name&gt;/&lt;name&gt;.Theme"). Request payload is a
-    /// <see cref="Codecs.SimpleStringMapCodec"/> map with a single entry mapping the path to
-    /// an empty string value: {path: ""}. The device replies with a
-    /// <see cref="Codecs.SimpleStringMapCodec"/> map {"res":"1"} on success; this method
+    /// CONFIRMED: deletes the installed theme called <paramref name="themeName"/> from the
+    /// device. Request payload is a <see cref="Codecs.SimpleStringMapCodec"/> map with a single
+    /// entry mapping the resolved path to an empty string value: {path: ""}. The device replies
+    /// with a <see cref="Codecs.SimpleStringMapCodec"/> map {"res":"1"} on success; this method
     /// throws <see cref="Mk20ProtocolException"/> if "res" is not "1".
     ///
     /// SAFEGUARD (confirmed hazard on real hardware): this method throws
-    /// <see cref="InvalidOperationException"/> up front, before sending anything, if
-    /// <paramref name="deviceThemePath"/> has a reload that was sent but never confirmed
-    /// acknowledged (including one that timed out) - see <see cref="IsReloadPending"/>.
-    /// Deleting a theme while its reload may still be in flight was observed to leave the
-    /// device's render/reload subsystem stuck (it keeps responding normally to
+    /// <see cref="InvalidOperationException"/> up front, before sending anything, if that theme
+    /// has a reload that was sent but never confirmed acknowledged (including one that timed
+    /// out) - see <see cref="IsReloadPending"/>. Deleting a theme while its reload may still be
+    /// in flight was observed to leave the device's render/reload subsystem stuck (it keeps
+    /// responding normally to
     /// <see cref="TryPingAsync"/>/<see cref="GetInstalledThemesAsync"/>, but every subsequent
     /// <see cref="ReloadThemeAsync"/> call - even for a different, previously-working theme -
     /// stops being acknowledged, and the physical display appears frozen). Only a physical
@@ -334,17 +356,19 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
     /// <see cref="ClearPendingReloadState"/> first if you have independently confirmed it's
     /// safe to proceed anyway.
     /// </summary>
-    public async Task DeleteThemeAsync(string deviceThemePath, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    /// <param name="themeName">The theme's name, e.g. "example-monitor" - not a path.</param>
+    public async Task DeleteThemeAsync(string themeName, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(deviceThemePath);
+        string deviceThemePath = DeviceThemePath.ForTheme(themeName);
+
         if (_pendingReloadPaths.ContainsKey(deviceThemePath))
         {
             throw new InvalidOperationException(
-                $"Refusing to delete '{deviceThemePath}': its SET_DEVICE_RELOAD was sent but never confirmed " +
+                $"Refusing to delete '{themeName}': its SET_DEVICE_RELOAD was sent but never confirmed " +
                 "acknowledged (this includes a call that timed out - a client-side timeout does not prove the " +
                 "device gave up on it). Deleting a theme while its reload may still be in flight was confirmed " +
                 "on real hardware to leave the device's render subsystem stuck, requiring a physical power-cycle " +
-                "to recover. Call ClearPendingReloadState(deviceThemePath) first if you have independently " +
+                "to recover. Call ClearPendingReloadState(themeName) first if you have independently " +
                 "confirmed it's safe to proceed (e.g. the device was just power-cycled).");
         }
 
@@ -399,12 +423,12 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
     /// replies are load-bearing: the FILE_START reply gates the bulk write, and the FILE_END
     /// reply gates SET_DEVICE_RELOAD.
     /// </summary>
-    /// <param name="deviceThemePath">The device-side path to store/activate the theme at, e.g. "/data/theme/MK20/&lt;name&gt;/&lt;name&gt;.Theme".</param>
+    /// <param name="themeName">The theme's name, e.g. "example-monitor" - not a path. The device path is resolved from it via <see cref="DeviceThemePath"/>.</param>
     /// <param name="themeFileBytes">The complete .Theme file bytes (see <c>Mk20Control.Protocol.Codecs.ThemeFileCodec</c> to build one).</param>
     /// <exception cref="Mk20ProtocolException">Thrown if the device does not acknowledge the upload as successful.</exception>
-    public async Task UploadThemeFileAsync(string deviceThemePath, byte[] themeFileBytes, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    public async Task UploadThemeAsync(string themeName, byte[] themeFileBytes, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(deviceThemePath);
+        string deviceThemePath = DeviceThemePath.ForTheme(themeName);
         ArgumentNullException.ThrowIfNull(themeFileBytes);
 
         // The device resumes on whichever page the layout JSON's "main.currentPage" names -

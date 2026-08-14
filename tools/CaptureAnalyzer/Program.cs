@@ -861,9 +861,9 @@ static int RunSelfTest()
     allPassed &= RunNamedTest("SimpleStringMapCodec decode of real FIND_DEVICE bytes", TestSimpleStringMapRealFindDevice);
     allPassed &= RunNamedTest("SimpleStringMapCodec encode/decode round-trip", TestSimpleStringMapRoundTrip);
     allPassed &= RunNamedTest("SimpleStringMapCodec decode of real SET_DEVICE_DELETE_THEME bytes", TestSimpleStringMapRealDeleteTheme);
-    allPassed &= RunNamedTest("Mk20DeviceClient.UploadThemeFileAsync chunking matches confirmed capture", TestUploadThemeFileChunking);
-    allPassed &= RunNamedTest("Mk20DeviceClient.UploadThemeFileAsync retries once on a FILE_END timeout", TestUploadRetriesOnceOnFileEndTimeout);
-    allPassed &= RunNamedTest("Mk20DeviceClient.UploadThemeFileAsync fails fast when the device is fully locked up", TestUploadFailsFastWhenDeviceFullyLockedUp);
+    allPassed &= RunNamedTest("Mk20DeviceClient.UploadThemeAsync chunking matches confirmed capture", TestUploadThemeFileChunking);
+    allPassed &= RunNamedTest("Mk20DeviceClient.UploadThemeAsync retries once on a FILE_END timeout", TestUploadRetriesOnceOnFileEndTimeout);
+    allPassed &= RunNamedTest("Mk20DeviceClient.UploadThemeAsync fails fast when the device is fully locked up", TestUploadFailsFastWhenDeviceFullyLockedUp);
     allPassed &= RunNamedTest("ThemeBuilder produces a KeyItem field set matching real hardware themes", TestThemeBuilderKeyItemFieldParity);
     allPassed &= RunNamedTest("Theme pages always emit the confirmed-required page-level 'encoder' field", TestPageEncoderFieldPresence);
     allPassed &= RunNamedTest("Theme file header's 8-byte gap encodes (JSON length + 1) matching real files", TestHeaderJsonLengthField);
@@ -1057,7 +1057,7 @@ static bool TestSimpleStringMapRealDeleteTheme()
 // Confirmed via capture14.pcapng (a real theme install, reconstructed byte-for-byte and
 // CRC-verified against the original 743,649-byte 可爱按键.Theme file): the bulk file data is
 // written as fixed 4096-byte chunks with a shorter final remainder chunk, no per-chunk
-// framing. This test drives Mk20DeviceClient.UploadThemeFileAsync against a fake transport
+// framing. This test drives Mk20DeviceClient.UploadThemeAsync against a fake transport
 // and checks its actual chunk sizes match that confirmed real-world pattern exactly.
 static bool TestThemeBuilderKeyItemFieldParity()
 {
@@ -1283,7 +1283,7 @@ static bool TestCtrlAltDelEncoding()
         .AddPage(page => page
             .SetCanvas(640, 656)
             .AddKey(0, 0, key => key
-                .IconAssetPath("/static/icon/dark/keyboard_128x128.png")
+                .IconDevice(DeviceIcon.Keyboard)
                 .Action(action)))
         .Build();
     byte[] encoded = ThemeFileCodec.Encode(theme);
@@ -1306,7 +1306,7 @@ static bool TestKeyTitleAndOpacity()
         .AddPage(page => page
             .SetCanvas(640, 656)
             .AddKey(0, 0, key => key
-                .IconAssetPath("/static/icon/dark/keyboard_128x128.png")
+                .IconDevice(DeviceIcon.Keyboard)
                 .Title("text over")
                 .Opacity(15)
                 .TitleStyle(alignment: "top", color: "#ff0000")
@@ -1448,7 +1448,7 @@ static bool TestUploadRetriesOnceOnFileEndTimeout()
     var bytes = new byte[8192];
     new Random(1).NextBytes(bytes);
 
-    client.UploadThemeFileAsync("/data/theme/MK20/retrytest/retrytest.Theme", bytes, TimeSpan.FromMilliseconds(300))
+    client.UploadThemeAsync("retrytest", bytes, TimeSpan.FromMilliseconds(300))
         .GetAwaiter().GetResult(); // should NOT throw - succeeds on the automatic retry
 
     return transport.FileEndAttempts == 2 && transport.FindDeviceRequests >= 1;
@@ -1470,12 +1470,14 @@ static bool TestUploadFailsFastWhenDeviceFullyLockedUp()
     bool threw = false;
     try
     {
-        client.UploadThemeFileAsync("/data/theme/MK20/deadtest/deadtest.Theme", bytes, TimeSpan.FromMilliseconds(200))
+        client.UploadThemeAsync("deadtest", bytes, TimeSpan.FromMilliseconds(200))
             .GetAwaiter().GetResult();
     }
     catch (Mk20Control.Protocol.Exceptions.Mk20TimeoutException ex)
     {
-        threw = ex.Message.Contains("power-cycle", StringComparison.OrdinalIgnoreCase);
+        // The message must name the only recovery that actually works - confirmed on
+        // hardware, neither waiting nor re-enumerating the USB device brings it back.
+        threw = ex.Message.Contains("replug", StringComparison.OrdinalIgnoreCase);
     }
     return threw && transport.FindDeviceRequests >= 1;
 }
@@ -1496,7 +1498,7 @@ static bool TestUploadThemeFileChunking()
 
     try
     {
-        client.UploadThemeFileAsync("/data/theme/MK20/test/test.Theme", fakeBytes, TimeSpan.FromSeconds(2))
+        client.UploadThemeAsync("test", fakeBytes, TimeSpan.FromSeconds(2))
             .GetAwaiter().GetResult();
     }
     catch (Exception)
@@ -1522,7 +1524,7 @@ static bool TestUploadThemeFileChunking()
 // that same path is refused up front (no bytes sent for the delete at all).
 static bool TestDeleteRefusedWhilePendingReload()
 {
-    const string path = "/data/theme/MK20/test/test.Theme";
+    const string themeName = "test";
     var transport = new NeverAckTransport();
     var client = new Mk20Control.Protocol.Client.Mk20DeviceClient(transport);
     transport.OpenAsync().GetAwaiter().GetResult();
@@ -1530,20 +1532,20 @@ static bool TestDeleteRefusedWhilePendingReload()
     bool reloadTimedOut = false;
     try
     {
-        client.ReloadThemeAsync(path, TimeSpan.FromMilliseconds(200)).GetAwaiter().GetResult();
+        client.ReloadThemeAsync(themeName, TimeSpan.FromMilliseconds(200)).GetAwaiter().GetResult();
     }
     catch (Mk20Control.Protocol.Exceptions.Mk20TimeoutException)
     {
         reloadTimedOut = true;
     }
     if (!reloadTimedOut) return false;
-    if (!client.IsReloadPending(path)) return false;
+    if (!client.IsReloadPending(themeName)) return false;
 
     int deleteFramesBefore = transport.SentCommandIds.Count(c => c == (uint)CommandId.SetDeviceDeleteTheme);
     bool deleteRefused = false;
     try
     {
-        client.DeleteThemeAsync(path).GetAwaiter().GetResult();
+        client.DeleteThemeAsync(themeName).GetAwaiter().GetResult();
     }
     catch (InvalidOperationException)
     {
@@ -1555,28 +1557,28 @@ static bool TestDeleteRefusedWhilePendingReload()
     if (deleteFramesAfter != deleteFramesBefore) return false; // must not have sent anything
 
     // Clearing the safeguard should allow the delete through (transport acks deletes normally).
-    client.ClearPendingReloadState(path);
-    if (client.IsReloadPending(path)) return false;
-    client.DeleteThemeAsync(path).GetAwaiter().GetResult(); // should not throw now
+    client.ClearPendingReloadState(themeName);
+    if (client.IsReloadPending(themeName)) return false;
+    client.DeleteThemeAsync(themeName).GetAwaiter().GetResult(); // should not throw now
     return true;
 }
 
 // Verifies the "don't spam the device" safeguard: ReloadThemeAsync/DeleteThemeAsync/
-// UploadThemeFileAsync are serialized against each other via an internal semaphore, so a
+// UploadThemeAsync are serialized against each other via an internal semaphore, so a
 // second call made before the first one finishes waits its turn rather than racing bytes
 // onto the wire concurrently.
 static bool TestThemeOperationsAreSerialized()
 {
-    const string pathA = "/data/theme/MK20/a/a.Theme";
-    const string pathB = "/data/theme/MK20/b/b.Theme";
+    const string themeNameA = "a";
+    const string themeNameB = "b";
     var transport = new SlowAckTransport(ackDelay: TimeSpan.FromMilliseconds(300));
     var client = new Mk20Control.Protocol.Client.Mk20DeviceClient(transport);
     transport.OpenAsync().GetAwaiter().GetResult();
 
-    var firstTask = client.ReloadThemeAsync(pathA, TimeSpan.FromSeconds(5));
+    var firstTask = client.ReloadThemeAsync(themeNameA, TimeSpan.FromSeconds(5));
     // Give the first call a moment to actually send its request before starting the second.
     Task.Delay(50).GetAwaiter().GetResult();
-    var secondTask = client.ReloadThemeAsync(pathB, TimeSpan.FromSeconds(5));
+    var secondTask = client.ReloadThemeAsync(themeNameB, TimeSpan.FromSeconds(5));
 
     Task.WaitAll(firstTask, secondTask);
 

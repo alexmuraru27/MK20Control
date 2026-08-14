@@ -19,12 +19,12 @@ public class EncoderCommandHardwareTests
     [Test]
     public async Task UploadAndObserve_WhatTheEncodersReport()
     {
-        string devicePath = DevicePaths.Resolve(DevicePaths.EncoderCommands);
+        string themeName = DeviceThemeNames.Resolve(DeviceThemeNames.EncoderCommands);
         byte[] encoded = EncoderCommandThemeTests.BuildTheme();
 
         await using var client = await HardwareConnection.OpenAsync();
-        TestContext.WriteLine($"Uploading {encoded.Length} bytes to {devicePath}...");
-        await client.UploadThemeFileAsync(devicePath, encoded, TimeSpan.FromSeconds(30));
+        TestContext.WriteLine($"Uploading {encoded.Length} bytes to {themeName}...");
+        await client.UploadThemeAsync(themeName, encoded, TimeSpan.FromSeconds(30));
 
         int events = 0;
         client.NotificationReceived += (_, e) =>

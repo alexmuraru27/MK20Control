@@ -24,12 +24,12 @@ public class CommandBindingsHardwareTests
     [Test]
     public async Task BuildAndUpload_ActivatesCommandTheme()
     {
-        string devicePath = DevicePaths.Resolve(DevicePaths.Commands);
+        string themeName = DeviceThemeNames.Resolve(DeviceThemeNames.Commands);
         byte[] encoded = CommandThemeBuilderTests.BuildCommandTheme();
 
         await using var client = await HardwareConnection.OpenAsync();
-        TestContext.WriteLine($"Uploading {encoded.Length} bytes to {devicePath}...");
-        await client.UploadThemeFileAsync(devicePath, encoded, TimeSpan.FromSeconds(30));
+        TestContext.WriteLine($"Uploading {encoded.Length} bytes to {themeName}...");
+        await client.UploadThemeAsync(themeName, encoded, TimeSpan.FromSeconds(30));
 
         TestContext.WriteLine(
             "Upload complete and theme activated. Every key is labelled with the command id it " +

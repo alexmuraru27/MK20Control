@@ -49,25 +49,6 @@ public static class EncoderPositions
     /// <summary>The row/col value the device reports for any RIGHT encoder activity (turn or click). Confirmed on hardware.</summary>
     public const int RightPseudoRow = 103;
 
-    /// <summary>The confirmed real icon path vendor themes use for the left (system volume) encoder.</summary>
-    public const string SystemVolumeIcon = "/static/icon/white/systemVolume_.png";
-
-    /// <summary>The confirmed real icon path vendor themes use for the right (device brightness) encoder.</summary>
-    public const string DeviceBrightnessIcon = "/static/icon/white/deviceBrightness_.png";
-
-    /// <summary>The confirmed real icon path for a DEVICE VOLUME encoder key (the device's own speaker, not the PC's).</summary>
-    public const string DeviceVolumeIcon = "/static/icon/white/deviceVolume_.png";
-
-    /// <summary>The confirmed real icon path for a SYSTEM MEDIA encoder key - note it uses the encoder display's dimensions in the name, like the keyboard icon.</summary>
-    public const string SystemMediaIcon = "/static/icon/white/systemMedia_214x142.png";
-
-    /// <summary>
-    /// The confirmed real icon path a vendor-saved <c>encoder_keyboard</c> key uses. Note it
-    /// carries the encoder display's dimensions in the name (214x142) rather than the
-    /// trailing-underscore form the volume/brightness icons use - taken from a theme saved by
-    /// ScreenKeyWindows itself.
-    /// </summary>
-    public const string KeyboardIcon = "/static/icon/white/keyboard_214x142.png";
 
     /// <summary>
     /// Builds the <c>relatedTheme</c> path a vendor encoder action carries - the mini-theme

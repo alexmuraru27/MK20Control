@@ -5,7 +5,6 @@ using System.IO.Ports;
 using System.Threading;
 using System.Threading.Tasks;
 using Mk20Control.Protocol.Client;
-using Mk20Control.Protocol.Codecs;
 using Mk20Control.Protocol.Host;
 using Mk20Control.Protocol.Theme;
 using Mk20Control.Protocol.Theme.Building;
@@ -49,7 +48,7 @@ namespace Mk20Control.Examples.SimRacingButtonBox
     /// </summary>
     internal static class Program
     {
-        private const string DevicePath = "/data/theme/MK20/example-racing/example-racing.Theme";
+        private const string ThemeName = "example-racing";
 
         // Ids for the two buttons that also run their own handler, named once so the theme
         // and the binding cannot drift apart.
@@ -69,8 +68,8 @@ namespace Mk20Control.Examples.SimRacingButtonBox
             await using Mk20DeviceClient client = Mk20DeviceClient.CreateForSerialPort(port);
             await client.ConnectAsync();
 
-            Console.WriteLine($"Uploading button box to {DevicePath} ...");
-            await client.UploadThemeFileAsync(DevicePath, ThemeFileCodec.Encode(theme), TimeSpan.FromSeconds(60));
+            Console.WriteLine($"Uploading button box '{ThemeName}' ...");
+            await client.UploadThemeAsync(ThemeName, theme, TimeSpan.FromSeconds(60));
             Console.WriteLine("Uploaded and activated.");
 
             using KeyBindings bindings = new(client);
@@ -281,25 +280,25 @@ namespace Mk20Control.Examples.SimRacingButtonBox
             // Row 3 - navigation. A folder key names the page it opens; the device performs
             // the jump itself, so no handler is needed for these.
             page.AddKey(3, 0, key => key
-                .IconAssetPath(SystemIconPaths.CreateFolder)
+                .IconDevice(DeviceIcon.OpenFolder)
                 .Title("FUEL")
                 .TitleStyle(fontSize: 20, color: ThemeColor.White)
                 .Action(KeyActions.OpenPage(pitFolder.PageId, description: "FUEL")));
 
             page.AddKey(3, 1, key => key
-                .IconAssetPath(SystemIconPaths.CreateFolder)
+                .IconDevice(DeviceIcon.OpenFolder)
                 .Title("AIDS")
                 .TitleStyle(fontSize: 20, color: ThemeColor.White)
                 .Action(KeyActions.OpenPage(aidsFolder.PageId, description: "AIDS")));
 
             page.AddKey(3, 3, key => key
-                .IconAssetPath(SystemIconPaths.PageSwitch)
+                .IconDevice(DeviceIcon.PageSwitch)
                 .Title("PREV")
                 .TitleStyle(fontSize: 20, color: ThemeColor.White)
                 .Action(KeyActions.PreviousPage(description: "PREV")));
 
             page.AddKey(3, 4, key => key
-                .IconAssetPath(SystemIconPaths.PageSwitch)
+                .IconDevice(DeviceIcon.PageSwitch)
                 .Title("NEXT")
                 .TitleStyle(fontSize: 20, color: ThemeColor.White)
                 .Action(KeyActions.NextPage(description: "NEXT")));
@@ -357,19 +356,19 @@ namespace Mk20Control.Examples.SimRacingButtonBox
                 .Action(KeyActions.Command("racing.wipers-down")));
 
             page.AddKey(3, 0, key => key
-                .IconAssetPath(SystemIconPaths.CreateFolder)
+                .IconDevice(DeviceIcon.OpenFolder)
                 .Title("LIGHTS")
                 .TitleStyle(fontSize: 20, color: ThemeColor.White)
                 .Action(KeyActions.OpenPage(lightsFolder.PageId, description: "LIGHTS")));
 
             page.AddKey(3, 3, key => key
-                .IconAssetPath(SystemIconPaths.PageSwitch)
+                .IconDevice(DeviceIcon.PageSwitch)
                 .Title("PREV")
                 .TitleStyle(fontSize: 20, color: ThemeColor.White)
                 .Action(KeyActions.PreviousPage(description: "PREV")));
 
             page.AddKey(3, 4, key => key
-                .IconAssetPath(SystemIconPaths.PageSwitch)
+                .IconDevice(DeviceIcon.PageSwitch)
                 .Title("NEXT")
                 .TitleStyle(fontSize: 20, color: ThemeColor.White)
                 .Action(KeyActions.NextPage(description: "NEXT")));
@@ -410,7 +409,7 @@ namespace Mk20Control.Examples.SimRacingButtonBox
             // The bottom-right cell is reserved for BACK by convention, matching the vendor's
             // own folders and leaving 19 usable cells.
             folder.AddKey(3, 4, key => key
-                .IconAssetPath(SystemIconPaths.OneLevelUp)
+                .IconDevice(DeviceIcon.OneLevelUp)
                 .Title("BACK")
                 .TitleStyle(fontSize: 20, color: ThemeColor.White)
                 .Action(KeyActions.OneLevelUp(description: "BACK")));
@@ -449,7 +448,7 @@ namespace Mk20Control.Examples.SimRacingButtonBox
                 .Action(KeyActions.Command("aids.bias-rear")));
 
             folder.AddKey(3, 4, key => key
-                .IconAssetPath(SystemIconPaths.OneLevelUp)
+                .IconDevice(DeviceIcon.OneLevelUp)
                 .Title("BACK")
                 .TitleStyle(fontSize: 20, color: ThemeColor.White)
                 .Action(KeyActions.OneLevelUp(description: "BACK")));
@@ -482,7 +481,7 @@ namespace Mk20Control.Examples.SimRacingButtonBox
                 .Action(KeyActions.Command("lights.wipers-down")));
 
             folder.AddKey(3, 4, key => key
-                .IconAssetPath(SystemIconPaths.OneLevelUp)
+                .IconDevice(DeviceIcon.OneLevelUp)
                 .Title("BACK")
                 .TitleStyle(fontSize: 20, color: ThemeColor.White)
                 .Action(KeyActions.OneLevelUp(description: "BACK")));
@@ -496,7 +495,7 @@ namespace Mk20Control.Examples.SimRacingButtonBox
         private static void AddEncoders(ThemePageBuilder page)
         {
             page.AddEncoder(EncoderSide.Left, key => key
-                .IconAssetPath(EncoderPositions.KeyboardIcon)
+                .IconDevice(DeviceIcon.EncoderKeyboard)
                 .Opacity(0)
                 .Action(KeyActions.EncoderKeyboard(
                     rotateLeft: (KeyModifiers.None, HidKey.Comma),   // bias rearward
@@ -504,7 +503,7 @@ namespace Mk20Control.Examples.SimRacingButtonBox
                     rotateRight: (KeyModifiers.None, HidKey.Period)))); // bias forward
 
             page.AddEncoder(EncoderSide.Right, key => key
-                .IconAssetPath(EncoderPositions.SystemVolumeIcon)
+                .IconDevice(DeviceIcon.EncoderSystemVolume)
                 .Opacity(0)
                 .Action(KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume)));
         }

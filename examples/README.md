@@ -92,7 +92,7 @@ it. Everything below is covered in depth in
 | `TryPingAsync()` | Asks the device to identify itself — the quickest "is it alive?" check | 1 |
 | `GetInstalledThemesAsync()` | Lists the themes already on the device | 1 |
 | `SetBacklightAsync(percent)` | Sets screen brightness, 0–100 | 1 |
-| `UploadThemeFileAsync(path, bytes, timeout)` | Sends a theme and activates it. The one call that puts your layout on screen | 2–5 |
+| `UploadThemeAsync(name, theme)` | Sends a theme and activates it. You give it a **name** — the library builds the device path, so a typo cannot write somewhere unrelated | 2–5 |
 | `PushSystemDataAsync(dictionary)` | Pushes named values for widgets to display. The device never fetches data itself | 3, 4 |
 | `PageSwitched` | Fires when the active page changes — useful while laying a box out | 4 |
 
@@ -100,8 +100,8 @@ it. Everything below is covered in depth in
 
 | Block | What it does | In |
 |---|---|---|
-| `new ThemeBuilder()` … `.Build()` | Collects pages, then produces the `ThemeFile` | 2–5 |
-| `ThemeFileCodec.Encode(theme)` | Turns that `ThemeFile` into the bytes you upload | 2–5 |
+| `new ThemeBuilder()` … `.Build()` | Collects pages, then produces the `ThemeFile` you upload | 2–5 |
+| `ThemeFileCodec.Encode(theme)` | Turns a `ThemeFile` into bytes — only needed to save one to disk | 2, 3 |
 | `builder.AddPage().SetCanvas(640, 656)` | Adds a page. `640×656` is the full device canvas | 2–5 |
 | `.AsFolderOf(parentPage)` | Marks a page as a folder of another — that is all a "folder" is | 4 |
 | `page.AddKey(row, col, …)` | Places a key on the 5×4 grid | 2–5 |
@@ -112,7 +112,10 @@ it. Everything below is covered in depth in
 | Block | What it does | In |
 |---|---|---|
 | `.Title("BOOST")` | The text drawn on the key. Independent of the action | 2–5 |
-| `.IconAssetPath(bytes)` | Draws an image on the key; PNG alpha is preserved | 4, 5 |
+| `.Icon("x.png", bytes)` | Draws your own image on the key, flattened onto the key background | 2–5 |
+| `.IconPreservingAlpha("x.png", bytes)` | The same, but keeps the PNG's alpha so whatever is behind shows through | 5 |
+| `.AnimatedIcon("name", gifBytes)` | An animated GIF as the key's icon | 5 |
+| `.IconDevice(DeviceIcon.OpenFolder)` | Uses an icon already built into the device, picked by name from the `DeviceIcon` enum | 4, 5 |
 | `.Opacity(0)` | Hides the default key background so a transparent icon shows the page behind it | 4, 5 |
 
 **What a press does** — `KeyActions`

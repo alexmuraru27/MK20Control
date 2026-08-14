@@ -53,13 +53,13 @@ public class EncoderCommandThemeTests
 
             page.AddKey(0, 0, key => key
                 .At(LeftEncoderX, LeftEncoderY)
-                .IconAssetPath("/static/icon/white/systemVolume_.png")
+                .IconDevice(DeviceIcon.EncoderSystemVolume)
                 .Opacity(0)
                 .Action(KeyActions.Command(LeftCommandId)));
 
             page.AddKey(0, 0, key => key
                 .At(RightEncoderX, RightEncoderY)
-                .IconAssetPath("/static/icon/white/deviceBrightness_.png")
+                .IconDevice(DeviceIcon.EncoderDeviceBrightness)
                 .Opacity(0)
                 .Action(EncoderCommand(RightCommandId)));
 

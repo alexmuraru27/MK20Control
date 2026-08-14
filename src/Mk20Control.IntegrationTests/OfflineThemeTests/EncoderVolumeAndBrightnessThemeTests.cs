@@ -45,11 +45,11 @@ public class EncoderVolumeAndBrightnessThemeTests
             page.SetCanvas(640, 656);
 
             // Left encoder -> system volume, confirmed real icon path
-            // "/static/icon/white/systemVolume_.png" (observed in defaultTheme.Theme).
+            // DeviceIcon.EncoderSystemVolume (observed in defaultTheme.Theme).
             // Opacity 0 hides the icon; the encoder function itself is unaffected.
             page.AddKey(0, 0, key => key
                 .At(LeftEncoderX, LeftEncoderY)
-                .IconAssetPath("/static/icon/white/systemVolume_.png")
+                .IconDevice(DeviceIcon.EncoderSystemVolume)
                 .Opacity(0)
                 .Action(KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume)));
             page.AddProgressBar(pb => pb.At(204, 96, 100, 12).BoundTo("Volume", 0, 100)
@@ -57,10 +57,10 @@ public class EncoderVolumeAndBrightnessThemeTests
             page.AddText(t => t.At(229, 62).BoundTo("Volume").Color(Transparent));
 
             // Right encoder -> device (screen) brightness, confirmed real icon path
-            // "/static/icon/white/deviceBrightness_.png" (observed in 海边吹风.Theme).
+            // DeviceIcon.EncoderDeviceBrightness (observed in 海边吹风.Theme).
             page.AddKey(0, 0, key => key
                 .At(RightEncoderX, RightEncoderY)
-                .IconAssetPath("/static/icon/white/deviceBrightness_.png")
+                .IconDevice(DeviceIcon.EncoderDeviceBrightness)
                 .Opacity(0)
                 .Action(KeyActions.EncoderFunction(EncoderFunctionType.DeviceBrightness)));
             page.AddProgressBar(pb => pb.At(420, 96, 100, 12).BoundTo("device_bl", 0, 100)
@@ -93,13 +93,13 @@ public class EncoderVolumeAndBrightnessThemeTests
         Assert.That(leftEncoderKey, Is.Not.Null, "Left encoder key item missing.");
         Assert.That(leftEncoderKey!.Action, Is.InstanceOf<EncoderFunctionAction>());
         Assert.That(((EncoderFunctionAction)leftEncoderKey.Action!).RawType, Is.EqualTo("encoder_system_volume"));
-        Assert.That(leftEncoderKey.IconAssetPath, Is.EqualTo("/static/icon/white/systemVolume_.png"));
+        Assert.That(leftEncoderKey.IconAssetPath, Is.EqualTo(DeviceIcons.PathOf(DeviceIcon.EncoderSystemVolume)));
         Assert.That(leftEncoderKey.RawJson.GetProperty("opacity").GetString(), Is.EqualTo("0"), "Left encoder icon should be invisible (opacity 0).");
 
         Assert.That(rightEncoderKey, Is.Not.Null, "Right encoder key item missing.");
         Assert.That(rightEncoderKey!.Action, Is.InstanceOf<EncoderFunctionAction>());
         Assert.That(((EncoderFunctionAction)rightEncoderKey.Action!).RawType, Is.EqualTo("encoder_device_brightness"));
-        Assert.That(rightEncoderKey.IconAssetPath, Is.EqualTo("/static/icon/white/deviceBrightness_.png"));
+        Assert.That(rightEncoderKey.IconAssetPath, Is.EqualTo(DeviceIcons.PathOf(DeviceIcon.EncoderDeviceBrightness)));
         Assert.That(rightEncoderKey.RawJson.GetProperty("opacity").GetString(), Is.EqualTo("0"), "Right encoder icon should be invisible (opacity 0).");
 
         var progressBars = decoded.Pages[0].Items.OfType<ProgressBarItem>().ToList();

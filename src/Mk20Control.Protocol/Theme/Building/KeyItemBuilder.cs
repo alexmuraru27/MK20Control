@@ -108,7 +108,18 @@ public sealed class KeyItemBuilder
         return this;
     }
 
-    /// <summary>Sets this key's icon to an already-registered asset path (e.g. shared across multiple keys).</summary>
+    /// <summary>
+    /// Shows one of the device's own built-in icons on this key - no image bytes are embedded,
+    /// and the library resolves the device-side path (see <see cref="DeviceIcons.PathOf"/>).
+    /// Use <see cref="Icon"/> for your own image instead.
+    /// </summary>
+    public KeyItemBuilder IconDevice(DeviceIcon icon) => IconAssetPath(DeviceIcons.PathOf(icon));
+
+    /// <summary>
+    /// Sets this key's icon to an already-registered asset path (e.g. shared across multiple
+    /// keys, or one read back from an existing theme). For the device's built-in artwork
+    /// prefer <see cref="IconDevice"/>, which spells the path for you.
+    /// </summary>
     public KeyItemBuilder IconAssetPath(string assetPath)
     {
         _iconAssetPath = assetPath;

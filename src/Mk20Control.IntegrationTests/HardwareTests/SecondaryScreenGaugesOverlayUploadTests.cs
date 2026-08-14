@@ -9,8 +9,8 @@ namespace Mk20Control.IntegrationTests.HardwareTests;
 /// <see cref="SecondaryScreenGaugesOverlayThemeTests"/>), then pumps random CPU/RAM/GPU
 /// Usage telemetry for a fixed window so the overlay's live rendering over the animated GIF
 /// can be visually confirmed. Uploads to the fixed self-contained path
-/// <see cref="DevicePaths.SecondaryScreenGaugesOverlay"/> by default (override via
-/// <c>MK20_UPLOAD_DEVICE_PATH</c>); optionally set <c>MK20_PUMP_SECONDS</c> (default 15).
+/// <see cref="DeviceThemeNames.SecondaryScreenGaugesOverlay"/> by default (override via
+/// <c>MK20_UPLOAD_THEME_NAME</c>); optionally set <c>MK20_PUMP_SECONDS</c> (default 15).
 /// Requires <c>MK20_COM_PORT</c> - see <see cref="HardwareConnection"/>. Formerly
 /// <c>Mk20Control.App</c> menu option 17.
 /// </summary>
@@ -19,13 +19,13 @@ public class SecondaryScreenGaugesOverlayUploadTests
     [Test]
     public async Task BuildUploadAndPump_AnimatesOverlaidGauges()
     {
-        string devicePath = DevicePaths.Resolve(DevicePaths.SecondaryScreenGaugesOverlay);
+        string themeName = DeviceThemeNames.Resolve(DeviceThemeNames.SecondaryScreenGaugesOverlay);
 
         byte[] encoded = SecondaryScreenGaugesOverlayThemeTests.BuildTheme();
 
         await using var client = await HardwareConnection.OpenAsync();
-        TestContext.WriteLine($"Uploading {encoded.Length} bytes to {devicePath}...");
-        await client.UploadThemeFileAsync(devicePath, encoded, TimeSpan.FromSeconds(30));
+        TestContext.WriteLine($"Uploading {encoded.Length} bytes to {themeName}...");
+        await client.UploadThemeAsync(themeName, encoded, TimeSpan.FromSeconds(30));
         TestContext.WriteLine("Upload complete and theme activated.");
 
         int seconds = int.TryParse(Environment.GetEnvironmentVariable("MK20_PUMP_SECONDS"), out int s) ? s : 15;

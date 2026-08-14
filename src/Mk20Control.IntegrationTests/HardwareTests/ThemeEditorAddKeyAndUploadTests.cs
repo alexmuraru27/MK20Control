@@ -10,8 +10,8 @@ namespace Mk20Control.IntegrationTests.HardwareTests;
 /// self-contained by default: if <c>MK20_EDIT_LOCAL_THEME_PATH</c> isn't set, edits the
 /// theme built by <see cref="FiveKeyTestThemeTests.BuildFiveKeyTestTheme"/> instead of
 /// requiring an existing file on disk; uploads to the fixed self-contained path
-/// <see cref="DevicePaths.ThemeEditorAddKey"/> unless overridden via
-/// <c>MK20_UPLOAD_DEVICE_PATH</c>. Optional overrides: <c>MK20_EDIT_ROW</c>/
+/// <see cref="DeviceThemeNames.ThemeEditorAddKey"/> unless overridden via
+/// <c>MK20_UPLOAD_THEME_NAME</c>. Optional overrides: <c>MK20_EDIT_ROW</c>/
 /// <c>MK20_EDIT_COL</c> (default 1,0 - free in the base 5-key theme),
 /// <c>MK20_EDIT_ICON_FILE</c> (default "icon_07.png"), <c>MK20_EDIT_KEYCODE</c> (default
 /// 0x24 = '7'), <c>MK20_EDIT_KEY_LABEL</c> (default "7"). Requires <c>MK20_COM_PORT</c> -
@@ -23,7 +23,7 @@ public class ThemeEditorAddKeyAndUploadTests
     public async Task AddKeyAndUpload_ActivatesEditedTheme()
     {
         string? localPath = Environment.GetEnvironmentVariable("MK20_EDIT_LOCAL_THEME_PATH");
-        string devicePath = DevicePaths.Resolve(DevicePaths.ThemeEditorAddKey);
+        string themeName = DeviceThemeNames.Resolve(DeviceThemeNames.ThemeEditorAddKey);
         string iconFileName = Environment.GetEnvironmentVariable("MK20_EDIT_ICON_FILE") is { Length: > 0 } icon ? icon : "icon_07.png";
         string keyLabel = Environment.GetEnvironmentVariable("MK20_EDIT_KEY_LABEL") is { Length: > 0 } label ? label : "7";
         int row = int.TryParse(Environment.GetEnvironmentVariable("MK20_EDIT_ROW"), out int r) ? r : 1;
@@ -45,8 +45,8 @@ public class ThemeEditorAddKeyAndUploadTests
         byte[] edited = ThemeEditorAddKeyTests.AddKeyToTheme(original, row, col, iconFileName, keycode, keyLabel);
 
         await using var client = await HardwareConnection.OpenAsync();
-        TestContext.WriteLine($"Uploading {edited.Length} bytes to {devicePath}...");
-        await client.UploadThemeFileAsync(devicePath, edited, TimeSpan.FromSeconds(30));
+        TestContext.WriteLine($"Uploading {edited.Length} bytes to {themeName}...");
+        await client.UploadThemeAsync(themeName, edited, TimeSpan.FromSeconds(30));
 
         TestContext.WriteLine("Upload complete and theme activated.");
     }

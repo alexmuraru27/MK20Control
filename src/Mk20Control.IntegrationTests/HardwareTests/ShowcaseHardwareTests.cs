@@ -24,12 +24,12 @@ public class ShowcaseHardwareTests
     [Test]
     public async Task UploadShowcase_AndRunMyOwnCodeForEveryControl()
     {
-        string devicePath = DevicePaths.Resolve(DevicePaths.Showcase);
+        string themeName = DeviceThemeNames.Resolve(DeviceThemeNames.Showcase);
         byte[] encoded = ShowcaseThemeTests.BuildShowcaseTheme();
 
         await using var client = await HardwareConnection.OpenAsync();
-        TestContext.WriteLine($"Uploading {encoded.Length} bytes to {devicePath}...");
-        await client.UploadThemeFileAsync(devicePath, encoded, TimeSpan.FromSeconds(60));
+        TestContext.WriteLine($"Uploading {encoded.Length} bytes to {themeName}...");
+        await client.UploadThemeAsync(themeName, encoded, TimeSpan.FromSeconds(60));
         TestContext.WriteLine("Uploaded and activated.");
 
         var fired = new List<string>();

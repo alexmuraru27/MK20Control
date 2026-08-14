@@ -79,7 +79,7 @@ public class NestedFolderThemeBuilderTests
             {
                 ThemePageBuilder child = pages[level + 1];
                 page.AddKey(0, 1, key => key
-                    .IconAssetPath(SystemIconPaths.CreateFolder)
+                    .IconDevice(DeviceIcon.OpenFolder)
                     .Title("OPEN")
                     .Action(KeyActions.OpenPage(child.PageId)));
             }
@@ -87,7 +87,7 @@ public class NestedFolderThemeBuilderTests
             if (level > 0)
             {
                 page.AddKey(Rows - 1, Cols - 1, key => key
-                    .IconAssetPath(SystemIconPaths.OneLevelUp)
+                    .IconDevice(DeviceIcon.OneLevelUp)
                     .Title("BACK")
                     .Action(KeyActions.OneLevelUp()));
             }

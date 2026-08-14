@@ -76,8 +76,7 @@ var theme = new ThemeBuilder()
             .Action(KeyActions.Command("build.start"))))
     .Build();
 
-await client.UploadThemeFileAsync(
-    "/data/theme/MK20/MyApp/MyApp.Theme", ThemeFileCodec.Encode(theme));
+await client.UploadThemeAsync("MyApp", theme);
 
 // Run your own code when that key is pressed.
 using var buttons = new KeyBindings(client);

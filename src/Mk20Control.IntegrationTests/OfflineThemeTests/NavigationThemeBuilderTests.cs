@@ -86,7 +86,7 @@ public class NavigationThemeBuilderTests
             .Title("PAGE 2")
             .Action(KeyActions.JumpToPage(RingBPageIndex)));
         hub.AddKey(0, 2, key => key
-            .IconAssetPath(SystemIconPaths.CreateFolder)
+            .IconDevice(DeviceIcon.OpenFolder)
             .Title("FOLDER")
             .Action(KeyActions.OpenPage(folder.PageId)));
 
@@ -98,15 +98,15 @@ public class NavigationThemeBuilderTests
                 .Title(label)
                 .Action(KeyActions.Keyboard(HidKey.A, "A")));
             page.AddKey(0, 4, key => key
-                .IconAssetPath(SystemIconPaths.PageSwitch)
+                .IconDevice(DeviceIcon.PageSwitch)
                 .Title("HOME")
                 .Action(KeyActions.JumpToPage(HubPageIndex)));
             page.AddKey(Rows - 1, 0, key => key
-                .IconAssetPath(SystemIconPaths.PageSwitch)
+                .IconDevice(DeviceIcon.PageSwitch)
                 .Title("PREV")
                 .Action(KeyActions.PreviousPage()));
             page.AddKey(Rows - 1, Cols - 1, key => key
-                .IconAssetPath(SystemIconPaths.PageSwitch)
+                .IconDevice(DeviceIcon.PageSwitch)
                 .Title("NEXT")
                 .Action(KeyActions.NextPage()));
         }
@@ -117,7 +117,7 @@ public class NavigationThemeBuilderTests
             .Title("IN FOLDER")
             .Action(KeyActions.Keyboard(HidKey.B, "B")));
         folder.AddKey(Rows - 1, Cols - 1, key => key
-            .IconAssetPath(SystemIconPaths.OneLevelUp)
+            .IconDevice(DeviceIcon.OneLevelUp)
             .Title("BACK")
             .Action(KeyActions.OneLevelUp()));
 

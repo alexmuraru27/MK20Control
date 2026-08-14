@@ -30,7 +30,7 @@ namespace Mk20Control.Examples.SystemMonitor
     /// </summary>
     internal static class Program
     {
-        private const string DevicePath = "/data/theme/MK20/example-monitor/example-monitor.Theme";
+        private const string ThemeName = "example-monitor";
 
         // The names that tie a widget to a pushed value. Declared once so the theme and
         // the update loop always agree.
@@ -76,8 +76,8 @@ namespace Mk20Control.Examples.SystemMonitor
             await using Mk20DeviceClient client = Mk20DeviceClient.CreateForSerialPort(port);
             await client.ConnectAsync();
 
-            Console.WriteLine($"Uploading dashboard to {DevicePath} ...");
-            await client.UploadThemeFileAsync(DevicePath, ThemeFileCodec.Encode(theme));
+            Console.WriteLine($"Uploading dashboard '{ThemeName}' ...");
+            await client.UploadThemeAsync(ThemeName, theme);
             Console.WriteLine("Uploaded and activated.");
 
             Console.WriteLine();

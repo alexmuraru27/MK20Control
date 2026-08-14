@@ -79,7 +79,7 @@ public sealed class ThemeBuilder : IThemeAssetRegistry
     /// (e.g. <c>KeyItem.IconAssetPath</c>). If the same (path, bytes) pair is registered
     /// twice, the existing path is reused rather than duplicating the asset.
     /// </summary>
-    public string RegisterAsset(string suggestedFileName, byte[] data)
+    internal string RegisterAsset(string suggestedFileName, byte[] data)
     {
         // Confirmed via a real ScreenKeyWindows-created reference theme
         // (customTheme7buttonsSoftware.Theme, built entirely through their own UI): new icon
@@ -100,13 +100,20 @@ public sealed class ThemeBuilder : IThemeAssetRegistry
     }
 
     /// <summary>See <see cref="IThemeAssetRegistry.RegisterAssetAtPath"/>.</summary>
-    public string RegisterAssetAtPath(string fullPath, byte[] data)
+    internal string RegisterAssetAtPath(string fullPath, byte[] data)
     {
         _assets[fullPath] = new ThemeAsset { Path = fullPath, Data = data };
         return fullPath;
     }
 
-    public string AllocateItemId() => (_nextItemId++).ToString();
+    internal string AllocateItemId() => (_nextItemId++).ToString();
+
+    // Explicit implementations: the interface is internal plumbing for the item builders, so
+    // these stay off ThemeBuilder's own surface. Callers describe what they are adding and the
+    // matching builder chooses the asset namespace.
+    string IThemeAssetRegistry.RegisterAsset(string suggestedFileName, byte[] data) => RegisterAsset(suggestedFileName, data);
+    string IThemeAssetRegistry.RegisterAssetAtPath(string fullPath, byte[] data) => RegisterAssetAtPath(fullPath, data);
+    string IThemeAssetRegistry.AllocateItemId() => AllocateItemId();
 
     /// <summary>Builds the immutable <see cref="ThemeFile"/>. The first added page becomes <see cref="ThemeFile.CurrentPageId"/>.</summary>
     public ThemeFile Build()

@@ -19,8 +19,8 @@ namespace Mk20Control.IntegrationTests.HardwareTests;
 /// <item>Hub "FOLDER" enters the folder page; its bottom-right "BACK" returns to the hub.</item>
 /// </list>
 ///
-/// Uploads to the fixed self-contained path <see cref="DevicePaths.Navigation"/> by default
-/// (override via <c>MK20_UPLOAD_DEVICE_PATH</c>). Requires <c>MK20_COM_PORT</c> - see
+/// Uploads to the fixed self-contained path <see cref="DeviceThemeNames.Navigation"/> by default
+/// (override via <c>MK20_UPLOAD_THEME_NAME</c>). Requires <c>MK20_COM_PORT</c> - see
 /// <see cref="HardwareConnection"/>.
 /// </summary>
 public class NavigationThemeUploadTests
@@ -28,13 +28,13 @@ public class NavigationThemeUploadTests
     [Test]
     public async Task BuildAndUpload_ActivatesNavigationTheme()
     {
-        string devicePath = DevicePaths.Resolve(DevicePaths.Navigation);
+        string themeName = DeviceThemeNames.Resolve(DeviceThemeNames.Navigation);
 
         byte[] encoded = NavigationThemeBuilderTests.BuildNavigationTheme();
 
         await using var client = await HardwareConnection.OpenAsync();
-        TestContext.WriteLine($"Uploading {encoded.Length} bytes to {devicePath}...");
-        await client.UploadThemeFileAsync(devicePath, encoded, TimeSpan.FromSeconds(30));
+        TestContext.WriteLine($"Uploading {encoded.Length} bytes to {themeName}...");
+        await client.UploadThemeAsync(themeName, encoded, TimeSpan.FromSeconds(30));
 
         TestContext.WriteLine(
             "Upload complete and theme activated. Page 1 is the hub: 'PAGE 1'/'PAGE 2' jump " +

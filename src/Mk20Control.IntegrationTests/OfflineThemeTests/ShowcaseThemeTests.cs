@@ -100,12 +100,12 @@ public class ShowcaseThemeTests
             // Both encoders routed to our own C# rather than a built-in function. They are
             // invisible by convention (opacity 0) - the binding does not depend on artwork.
             page.AddEncoder(EncoderSide.Left, key => key
-                .IconAssetPath(EncoderPositions.SystemVolumeIcon)
+                .IconDevice(DeviceIcon.EncoderSystemVolume)
                 .Opacity(0)
                 .Action(KeyActions.Command(LeftEncoderId)));
 
             page.AddEncoder(EncoderSide.Right, key => key
-                .IconAssetPath(EncoderPositions.DeviceBrightnessIcon)
+                .IconDevice(DeviceIcon.EncoderDeviceBrightness)
                 .Opacity(0)
                 .Action(KeyActions.Command(RightEncoderId)));
         });

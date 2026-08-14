@@ -57,7 +57,7 @@ public sealed class ThemeEditor : IThemeAssetRegistry
     public PageEditor? PageById(string pageId) => _pages.FirstOrDefault(p => p.PageId == pageId);
 
     /// <summary>Registers a new asset (or reuses an identical existing one by path+bytes) and returns its virtual path.</summary>
-    public string RegisterAsset(string suggestedFileName, byte[] data)
+    internal string RegisterAsset(string suggestedFileName, byte[] data)
     {
         // Confirmed via a real ScreenKeyWindows-created reference theme
         // (customTheme7buttonsSoftware.Theme, built entirely through their own UI): new icon
@@ -81,14 +81,19 @@ public sealed class ThemeEditor : IThemeAssetRegistry
     }
 
     /// <summary>See <see cref="IThemeAssetRegistry.RegisterAssetAtPath"/>.</summary>
-    public string RegisterAssetAtPath(string fullPath, byte[] data)
+    internal string RegisterAssetAtPath(string fullPath, byte[] data)
     {
         _assets[fullPath] = new ThemeAsset { Path = fullPath, Data = data };
         return fullPath;
     }
 
     /// <summary>Allocates a new unique item id string, starting from a high number to avoid colliding with the source theme's existing item ids.</summary>
-    public string AllocateItemId() => (_nextItemId++).ToString();
+    internal string AllocateItemId() => (_nextItemId++).ToString();
+
+    // Explicit implementations - see the note on ThemeBuilder's equivalents.
+    string IThemeAssetRegistry.RegisterAsset(string suggestedFileName, byte[] data) => RegisterAsset(suggestedFileName, data);
+    string IThemeAssetRegistry.RegisterAssetAtPath(string fullPath, byte[] data) => RegisterAssetAtPath(fullPath, data);
+    string IThemeAssetRegistry.AllocateItemId() => AllocateItemId();
 
     /// <summary>Removes an asset by its virtual path (does not automatically clear item references to it - update those first).</summary>
     public bool RemoveAsset(string assetPath) => _assets.Remove(assetPath);

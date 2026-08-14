@@ -62,19 +62,19 @@ public class CommandThemeBuilderTests
 
         // Navigation, executed by the device itself - these carry no command id.
         home.AddKey(Rows - 1, 0, key => key
-            .IconAssetPath(SystemIconPaths.PageSwitch).Title("PREV").Action(KeyActions.PreviousPage()));
+            .IconDevice(DeviceIcon.PageSwitch).Title("PREV").Action(KeyActions.PreviousPage()));
         home.AddKey(Rows - 1, Cols - 1, key => key
-            .IconAssetPath(SystemIconPaths.PageSwitch).Title("NEXT").Action(KeyActions.NextPage()));
+            .IconDevice(DeviceIcon.PageSwitch).Title("NEXT").Action(KeyActions.NextPage()));
         home.AddKey(Rows - 1, 2, key => key
-            .IconAssetPath(SystemIconPaths.CreateFolder).Title("FOLDER").Action(KeyActions.OpenPage(folder.PageId)));
+            .IconDevice(DeviceIcon.OpenFolder).Title("FOLDER").Action(KeyActions.OpenPage(folder.PageId)));
 
         second.AddKey(Rows - 1, 0, key => key
-            .IconAssetPath(SystemIconPaths.PageSwitch).Title("PREV").Action(KeyActions.PreviousPage()));
+            .IconDevice(DeviceIcon.PageSwitch).Title("PREV").Action(KeyActions.PreviousPage()));
         second.AddKey(Rows - 1, Cols - 1, key => key
-            .IconAssetPath(SystemIconPaths.PageSwitch).Title("NEXT").Action(KeyActions.NextPage()));
+            .IconDevice(DeviceIcon.PageSwitch).Title("NEXT").Action(KeyActions.NextPage()));
 
         folder.AddKey(Rows - 1, Cols - 1, key => key
-            .IconAssetPath(SystemIconPaths.OneLevelUp).Title("BACK").Action(KeyActions.OneLevelUp()));
+            .IconDevice(DeviceIcon.OneLevelUp).Title("BACK").Action(KeyActions.OneLevelUp()));
 
         return ThemeFileCodec.Encode(builder.Build());
     }

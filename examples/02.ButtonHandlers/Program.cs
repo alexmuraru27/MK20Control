@@ -25,7 +25,7 @@ namespace Mk20Control.Examples.ButtonHandlers
     /// </summary>
     internal static class Program
     {
-        private const string DevicePath = "/data/theme/MK20/example-buttons/example-buttons.Theme";
+        private const string ThemeName = "example-buttons";
 
         private static async Task<int> Main(string[] args)
         {
@@ -52,8 +52,8 @@ namespace Mk20Control.Examples.ButtonHandlers
             await using Mk20DeviceClient client = Mk20DeviceClient.CreateForSerialPort(port);
             await client.ConnectAsync();
 
-            Console.WriteLine($"Uploading theme to {DevicePath} ...");
-            await client.UploadThemeFileAsync(DevicePath, ThemeFileCodec.Encode(theme));
+            Console.WriteLine($"Uploading theme '{ThemeName}' ...");
+            await client.UploadThemeAsync(ThemeName, theme);
             Console.WriteLine("Uploaded and activated.");
 
             using KeyBindings bindings = new(client);

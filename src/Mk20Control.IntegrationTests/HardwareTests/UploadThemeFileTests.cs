@@ -9,7 +9,7 @@ namespace Mk20Control.IntegrationTests.HardwareTests;
 /// <c>MK20_UPLOAD_LOCAL_PATH</c> to the local file - the test is skipped if it isn't set
 /// (there's no self-contained default here since the whole point is uploading an arbitrary
 /// caller-supplied file). Uploads to the fixed self-contained path
-/// <see cref="DevicePaths.FiveKeyTest"/> unless overridden via <c>MK20_UPLOAD_DEVICE_PATH</c>
+/// <see cref="DeviceThemeNames.FiveKeyTest"/> unless overridden via <c>MK20_UPLOAD_THEME_NAME</c>
 /// - reused across scenarios so a stray/leftover run doesn't grow the SD card's used space.
 /// Requires <c>MK20_COM_PORT</c> - see <see cref="HardwareConnection"/>. Formerly
 /// <c>Mk20Control.App</c> menu option 13.
@@ -25,13 +25,13 @@ public class UploadThemeFileTests
         if (!File.Exists(localPath))
             Assert.Fail($"File not found: {localPath}");
 
-        string devicePath = DevicePaths.Resolve(DevicePaths.FiveKeyTest);
+        string themeName = DeviceThemeNames.Resolve(DeviceThemeNames.FiveKeyTest);
 
         await using var client = await HardwareConnection.OpenAsync();
 
         byte[] bytes = File.ReadAllBytes(localPath);
-        TestContext.WriteLine($"Uploading {bytes.Length} bytes to {devicePath}...");
-        await client.UploadThemeFileAsync(devicePath, bytes, TimeSpan.FromSeconds(30));
+        TestContext.WriteLine($"Uploading {bytes.Length} bytes to {themeName}...");
+        await client.UploadThemeAsync(themeName, bytes, TimeSpan.FromSeconds(30));
 
         TestContext.WriteLine("Upload complete and theme activated.");
     }

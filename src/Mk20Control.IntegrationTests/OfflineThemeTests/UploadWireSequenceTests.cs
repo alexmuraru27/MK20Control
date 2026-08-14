@@ -29,7 +29,8 @@ namespace Mk20Control.IntegrationTests.OfflineThemeTests;
 /// </summary>
 public class UploadWireSequenceTests
 {
-    private const string DevicePath = "/data/theme/MK20/seqtest/seqtest.Theme";
+    private const string ThemeName = "seqtest";
+    private static readonly string DeviceThemeFilePath = DeviceThemePath.ForTheme(ThemeName);
 
     /// <summary>
     /// Minimal stand-in for the device: records every host write as a decoded message name and
@@ -158,7 +159,7 @@ public class UploadWireSequenceTests
                     _pendingFileEndPayload = SimpleStringMapCodec.Encode(new[]
                     {
                         new KeyValuePair<string, string>("res", "1"),
-                        new KeyValuePair<string, string>("fileName", DevicePath),
+                        new KeyValuePair<string, string>("fileName", DeviceThemeFilePath),
                     });
                     break;
 
@@ -197,7 +198,7 @@ public class UploadWireSequenceTests
         await using var client = new Mk20DeviceClient(transport);
         await client.ConnectAsync();
 
-        await client.UploadThemeFileAsync(DevicePath, themeBytes, TimeSpan.FromSeconds(10));
+        await client.UploadThemeAsync(ThemeName, themeBytes, TimeSpan.FromSeconds(10));
 
         Assert.Multiple(() =>
         {

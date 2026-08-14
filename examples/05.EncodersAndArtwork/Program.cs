@@ -3,7 +3,6 @@ using System.IO;
 using System.IO.Ports;
 using System.Threading.Tasks;
 using Mk20Control.Protocol.Client;
-using Mk20Control.Protocol.Codecs;
 using Mk20Control.Protocol.Host;
 using Mk20Control.Protocol.Theme;
 using Mk20Control.Protocol.Theme.Building;
@@ -28,7 +27,7 @@ namespace Mk20Control.Examples.EncodersAndArtwork
     /// </summary>
     internal static class Program
     {
-        private const string DevicePath = "/data/theme/MK20/example-artwork/example-artwork.Theme";
+        private const string ThemeName = "example-artwork";
 
         private static async Task<int> Main(string[] args)
         {
@@ -45,8 +44,8 @@ namespace Mk20Control.Examples.EncodersAndArtwork
             await using Mk20DeviceClient client = Mk20DeviceClient.CreateForSerialPort(port);
             await client.ConnectAsync();
 
-            Console.WriteLine($"Uploading artwork demo to {DevicePath} ...");
-            await client.UploadThemeFileAsync(DevicePath, ThemeFileCodec.Encode(theme), TimeSpan.FromSeconds(60));
+            Console.WriteLine($"Uploading artwork demo '{ThemeName}' ...");
+            await client.UploadThemeAsync(ThemeName, theme, TimeSpan.FromSeconds(60));
             Console.WriteLine("Uploaded and activated.");
 
             Console.WriteLine();
@@ -226,12 +225,12 @@ namespace Mk20Control.Examples.EncodersAndArtwork
                 // working with this program closed. They are invisible: a built-in icon at
                 // opacity 0, because the binding works regardless of what is drawn.
                 page.AddEncoder(EncoderSide.Left, key => key
-                    .IconAssetPath(EncoderPositions.SystemVolumeIcon)
+                    .IconDevice(DeviceIcon.EncoderSystemVolume)
                     .Opacity(0)
                     .Action(KeyActions.EncoderFunction(EncoderFunctionType.SystemVolume)));
 
                 page.AddEncoder(EncoderSide.Right, key => key
-                    .IconAssetPath(EncoderPositions.DeviceBrightnessIcon)
+                    .IconDevice(DeviceIcon.EncoderDeviceBrightness)
                     .Opacity(0)
                     .Action(KeyActions.EncoderFunction(EncoderFunctionType.DeviceBrightness)));
             });
