@@ -1,6 +1,8 @@
 <div align="center">
 
-<img src="waveshare_mk20_logo.png" alt="MK20 Control — a playful Waveshare MK20 button-box mascot" width="360">
+<a href="https://www.waveshare.com/mk20-b.htm?sku=32843">
+  <img src="waveshare_mk20_logo.png" alt="MK20 Control — a playful Waveshare MK20 button-box mascot" width="360">
+</a>
 
 # MK20 Control
 
@@ -15,7 +17,7 @@ No vendor software required.
 [![Examples](https://img.shields.io/badge/examples-5-8A2BE2)](./examples)
 [![Status](https://img.shields.io/badge/status-experimental-orange)](#project-status)
 
-[Quick start](#quick-start) · [Features](#features) · [Examples](./examples) · [Documentation](#documentation) · [Testing](#testing)
+[Quick start](#quick-start) · [Features](#features) · [Examples](./examples) · [Documentation](#documentation) · [Testing](#testing) · [Waveshare product page](https://www.waveshare.com/mk20-b.htm?sku=32843)
 
 </div>
 
