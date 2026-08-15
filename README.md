@@ -23,6 +23,8 @@ No vendor software required.
 
 ---
 
+> **⚠️ Important:** Working with MK20 firmware `V2.32`.
+
 ## What is this?
 
 The Waveshare MK20 is a 20-key macro keypad with an LCD under every key, a secondary
