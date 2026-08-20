@@ -3,6 +3,8 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Codecs;
 
 /// <summary>
@@ -40,7 +42,7 @@ public static class SimpleStringMapCodec
     /// <exception cref="InvalidDataException">Thrown for truncated or implausible data.</exception>
     public static List<KeyValuePair<string, string>> Decode(byte[] payload)
     {
-        ArgumentNullException.ThrowIfNull(payload);
+        Guard.NotNull(payload);
         var result = new List<KeyValuePair<string, string>>();
         int pos = 0;
         if (payload.Length < 4) return result;
@@ -63,7 +65,7 @@ public static class SimpleStringMapCodec
     /// </summary>
     public static bool TryDecode(byte[] payload, out List<KeyValuePair<string, string>> result)
     {
-        ArgumentNullException.ThrowIfNull(payload);
+        Guard.NotNull(payload);
         result = new List<KeyValuePair<string, string>>();
         try
         {
@@ -90,7 +92,7 @@ public static class SimpleStringMapCodec
     /// <summary>Encodes a simple string/string map payload (byte-exact inverse of <see cref="Decode"/>).</summary>
     public static byte[] Encode(IReadOnlyCollection<KeyValuePair<string, string>> values)
     {
-        ArgumentNullException.ThrowIfNull(values);
+        Guard.NotNull(values);
         using var stream = new MemoryStream();
         WriteUInt32(stream, (uint)values.Count);
         foreach (var (key, value) in values)

@@ -54,7 +54,7 @@ public class UploadWireSequenceTests
         public bool IsOpen { get; private set; }
         public Task OpenAsync(CancellationToken cancellationToken = default) { IsOpen = true; return Task.CompletedTask; }
         public Task CloseAsync(CancellationToken cancellationToken = default) { IsOpen = false; return Task.CompletedTask; }
-        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+        public ValueTask DisposeAsync() => default;
 
         public Task WriteAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
         {

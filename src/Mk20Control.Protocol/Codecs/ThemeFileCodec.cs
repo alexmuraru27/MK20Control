@@ -11,6 +11,8 @@ using Mk20Control.Protocol.Theme.Actions;
 using Mk20Control.Protocol.Theme.Items;
 using Mk20Control.Protocol.Theme.Items.Widgets;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Codecs;
 
 /// <summary>
@@ -49,7 +51,7 @@ public static class ThemeFileCodec
     /// <exception cref="InvalidDataException">Thrown if the bytes do not match the confirmed .Theme layout.</exception>
     public static ThemeFile Decode(byte[] fileBytes)
     {
-        ArgumentNullException.ThrowIfNull(fileBytes);
+        Guard.NotNull(fileBytes);
         if (fileBytes.Length < 4)
             throw new InvalidDataException("File is too short to contain a theme header map.");
 
@@ -329,7 +331,7 @@ public static class ThemeFileCodec
                 KeyAction? action = null;
                 if (!string.IsNullOrEmpty(controlDataB64))
                 {
-                    action = TryDecodeKeyAction(controlDataB64);
+                    action = TryDecodeKeyAction(controlDataB64!);
                 }
                 return new KeyItem
                 {
@@ -383,8 +385,9 @@ public static class ThemeFileCodec
     /// </summary>
     public static KeyAction? DecodeKeyAction(IReadOnlyDictionary<string, TaggedValue> decodedFields)
     {
-        ArgumentNullException.ThrowIfNull(decodedFields);
-        var fields = decodedFields as Dictionary<string, TaggedValue> ?? new Dictionary<string, TaggedValue>(decodedFields);
+        Guard.NotNull(decodedFields);
+        var fields = decodedFields as Dictionary<string, TaggedValue>
+            ?? decodedFields.ToDictionary(pair => pair.Key, pair => pair.Value);
 
         string rawType = fields.TryGetValue("type", out var t) && t.AsString is { } ts ? ts : "";
         string? description = GetString(fields, "description");
@@ -467,7 +470,7 @@ public static class ThemeFileCodec
     /// </summary>
     public static byte[] Encode(ThemeFile theme)
     {
-        ArgumentNullException.ThrowIfNull(theme);
+        Guard.NotNull(theme);
         using var stream = new MemoryStream();
 
         var header = new Dictionary<string, TaggedValue>
@@ -765,7 +768,7 @@ public static class ThemeFileCodec
     /// <summary>Encodes a <see cref="KeyAction"/> back to its base64 tagged-value "controlData" representation.</summary>
     public static byte[] EncodeKeyAction(KeyAction action)
     {
-        ArgumentNullException.ThrowIfNull(action);
+        Guard.NotNull(action);
 
         // Confirmed via a real ScreenKeyWindows-created reference theme
         // (customTheme7buttonsSoftware.Theme): a real KeyboardAction's controlData map has
@@ -791,10 +794,8 @@ public static class ThemeFileCodec
 
         // Start from the action's original decoded fields so any unmodeled fields survive,
         // then overwrite every field this library models.
-        var fields = new Dictionary<string, TaggedValue>(action.RawFields)
-        {
-            ["type"] = TaggedValue.Of(action.RawType),
-        };
+        var fields = action.RawFields.ToDictionary(pair => pair.Key, pair => pair.Value);
+        fields["type"] = TaggedValue.Of(action.RawType);
         SetIfNotNull(fields, "description", action.Description);
         SetIfNotNull(fields, "parentDescription", action.ParentDescription);
         SetIfNotNull(fields, "iconPath", action.IconPath);

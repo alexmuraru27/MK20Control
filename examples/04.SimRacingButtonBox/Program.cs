@@ -105,12 +105,12 @@ namespace Mk20Control.Examples.SimRacingButtonBox
         /// </summary>
         private static async Task PumpClockAsync(Mk20DeviceClient client, CancellationToken token)
         {
-            using PeriodicTimer timer = new(TimeSpan.FromSeconds(1));
-
             try
             {
-                while (await timer.WaitForNextTickAsync(token))
+                while (!token.IsCancellationRequested)
                 {
+                    await Task.Delay(TimeSpan.FromSeconds(1), token);
+
                     DateTime now = DateTime.Now;
 
                     await client.PushSystemDataAsync(new Dictionary<string, string>

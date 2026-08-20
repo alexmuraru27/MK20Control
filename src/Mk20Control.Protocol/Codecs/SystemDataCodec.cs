@@ -2,6 +2,8 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Codecs;
 
 /// <summary>
@@ -16,7 +18,7 @@ public static class SystemDataCodec
     /// <summary>Decodes a SEND_SYSTEM_DATA_TO_DEVICE payload into an ordered key/value sequence.</summary>
     public static IReadOnlyList<KeyValuePair<string, string>> Decode(byte[] payload)
     {
-        ArgumentNullException.ThrowIfNull(payload);
+        Guard.NotNull(payload);
 
         var result = new List<KeyValuePair<string, string>>();
         int pos = 0;
@@ -44,7 +46,7 @@ public static class SystemDataCodec
     /// </summary>
     public static byte[] Encode(IReadOnlyCollection<KeyValuePair<string, string>> values)
     {
-        ArgumentNullException.ThrowIfNull(values);
+        Guard.NotNull(values);
 
         using var stream = new System.IO.MemoryStream();
         Span<byte> countBuffer = stackalloc byte[4];

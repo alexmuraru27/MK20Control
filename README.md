@@ -11,7 +11,7 @@
 Build themes, drive both screens, and run your own C# when a key is pressed.
 No vendor software required.
 
-[![.NET](https://img.shields.io/badge/.NET-9.0-512BD4)](https://dotnet.microsoft.com/)
+[![.NET](https://img.shields.io/badge/.NET%20Framework-4.8-512BD4)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue)](./LICENSE)
 [![Tests](https://img.shields.io/badge/tests-88%20passing-brightgreen)](#testing)
 [![Examples](https://img.shields.io/badge/examples-5-8A2BE2)](./examples)
@@ -33,6 +33,8 @@ undocumented USB protocol.
 
 This project documents that protocol and implements it as a reusable .NET library, so any
 application can drive the device directly.
+
+The library targets **.NET Framework 4.8** (`net48`).
 
 ```
 ┌───────────────────────────────────────┐
@@ -131,7 +133,6 @@ src/
     Codecs/ Framing/ Transport/  wire format, framing and serial transport
   Mk20Control.IntegrationTests/  NUnit tests - offline (always run) + hardware (opt-in)
 tools/
-  AssetGenerator/                generates the test icons and backgrounds
   CaptureAnalyzer/               decodes a USB capture, or a .Theme file, from the CLI
 assets/                          icons, backgrounds and GIFs used by the tests
 ```
@@ -168,9 +169,6 @@ dotnet run --project tools/CaptureAnalyzer -- --selftest
 # Decode a .Theme file, or a USB capture
 dotnet run --project tools/CaptureAnalyzer -- --theme path/to/file.Theme
 dotnet run --project tools/CaptureAnalyzer -- capture.pcapng
-
-# Regenerate the test icons/backgrounds in assets/
-dotnet run --project tools/AssetGenerator
 ```
 
 `tools/Captures/` holds the USB captures behind the protocol findings, alongside
@@ -193,7 +191,8 @@ Three constraints are inherited from the device itself:
 
 ## Requirements
 
-- .NET 9 SDK
+- .NET SDK 8.0 or newer, and the .NET Framework 4.8 targeting pack (the library targets
+  `net48`)
 - Windows for the serial transport (`System.IO.Ports`) and hardware tests
 - A Waveshare MK20 — only for the hardware tests; everything else runs offline
 

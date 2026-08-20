@@ -110,7 +110,7 @@ public class VendorThemeRoundTripTests
             .Select(k => k.Action)
             .Select(a => a is null
                 ? "(no action)"
-                : $"{a.RawType}:{Convert.ToHexString(VariantMapCodec.EncodeMap(a.RawFields))}");
+                : $"{a.RawType}:{BitConverter.ToString(VariantMapCodec.EncodeMap(a.RawFields)).Replace("-", "")}");
 
     [Test]
     public void UnmodelledVendorActions_KeepAllTheirFields()

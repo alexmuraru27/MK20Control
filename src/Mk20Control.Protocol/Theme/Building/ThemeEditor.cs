@@ -4,6 +4,8 @@ using System.Linq;
 using Mk20Control.Protocol.Theme.Actions;
 using Mk20Control.Protocol.Theme.Items;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Theme.Building;
 
 /// <summary>
@@ -37,7 +39,7 @@ public sealed class ThemeEditor : IThemeAssetRegistry
 
     public ThemeEditor(ThemeFile source)
     {
-        ArgumentNullException.ThrowIfNull(source);
+        Guard.NotNull(source);
         _language = source.Language;
         _keyMacroValue = source.KeyMacroValue;
         _keyMacro = source.KeyMacro;
@@ -188,7 +190,7 @@ public sealed class ThemeEditor : IThemeAssetRegistry
         /// <summary>Adds a brand-new key at the given position - use when a theme needs more keys than it originally had (e.g. converting a smaller layout).</summary>
         public PageEditor AddKey(int row, int column, Action<KeyItemBuilder> configure)
         {
-            ArgumentNullException.ThrowIfNull(configure);
+            Guard.NotNull(configure);
             var b = new KeyItemBuilder(_owner, row, column, _canvas.Width ?? 640, _canvas.Height ?? 656);
             configure(b);
             _items.Add(b.Build());

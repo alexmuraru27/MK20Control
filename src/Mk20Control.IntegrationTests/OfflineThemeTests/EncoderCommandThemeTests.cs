@@ -37,10 +37,8 @@ public class EncoderCommandThemeTests
     public static TextInputAction EncoderCommand(string commandId)
     {
         var baseAction = KeyActions.Command(commandId);
-        var fields = new Dictionary<string, TaggedValue>(baseAction.RawFields)
-        {
-            ["category"] = TaggedValue.Of("encoder"),
-        };
+        var fields = baseAction.RawFields.ToDictionary(pair => pair.Key, pair => pair.Value);
+        fields["category"] = TaggedValue.Of("encoder");
         return baseAction with { RawFields = fields };
     }
 

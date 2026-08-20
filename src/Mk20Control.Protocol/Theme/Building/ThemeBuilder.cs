@@ -4,6 +4,8 @@ using System.Linq;
 using Mk20Control.Protocol.Theme.Actions;
 using Mk20Control.Protocol.Theme.Items;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Theme.Building;
 
 /// <summary>
@@ -58,7 +60,7 @@ public sealed class ThemeBuilder : IThemeAssetRegistry
     /// <summary>Adds a new page, configured via <paramref name="configure"/>, and returns this builder for chaining.</summary>
     public ThemeBuilder AddPage(Action<ThemePageBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        Guard.NotNull(configure);
         var page = new ThemePageBuilder(this);
         configure(page);
         _pages.Add(page);

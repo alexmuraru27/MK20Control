@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Transport;
 
 /// <summary>
@@ -28,7 +30,7 @@ public sealed class SerialPortTransport : ISerialTransport
     /// <param name="logger">Optional logger; defaults to a no-op logger if not supplied.</param>
     public SerialPortTransport(string portName, int baudRate = 115200, ILogger<SerialPortTransport>? logger = null)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(portName);
+        Guard.NotNullOrWhiteSpace(portName);
         _logger = logger ?? NullLogger<SerialPortTransport>.Instance;
         _port = new SerialPort(portName, baudRate, Parity.None, 8, StopBits.One)
         {
@@ -51,7 +53,7 @@ public sealed class SerialPortTransport : ISerialTransport
 
     public Task OpenAsync(CancellationToken cancellationToken = default)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        Guard.NotDisposed(_disposed, this);
         if (_port.IsOpen) return Task.CompletedTask;
 
         _logger.LogInformation("Opening serial port {PortName} at {BaudRate} baud (8N1, no flow control).", _port.PortName, _port.BaudRate);
@@ -78,7 +80,7 @@ public sealed class SerialPortTransport : ISerialTransport
 
     public Task WriteAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        Guard.NotDisposed(_disposed, this);
         if (!_port.IsOpen)
             throw new InvalidOperationException("Cannot write: the serial port is not open. Call OpenAsync first.");
 

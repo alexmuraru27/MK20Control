@@ -1,6 +1,6 @@
 # Mk20Control.Protocol — API Reference
 
-**Target framework:** .NET 9
+**Target framework:** .NET Framework 4.8
 **Assembly:** `Mk20Control.Protocol` (project reference or build+reference the DLL)
 **Purpose:** reusable client library for the Waveshare MK20 programmable keypad — connect
 to the device, read/build/edit `.Theme` files, and drive its display and telemetry

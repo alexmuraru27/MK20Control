@@ -101,13 +101,14 @@ namespace Mk20Control.Examples.EveryBuildingBlock
         /// </summary>
         private static async Task PumpAsync(Mk20DeviceClient client, CancellationToken token)
         {
-            using PeriodicTimer timer = new(TimeSpan.FromSeconds(1));
             int tick = 0;
 
             try
             {
-                while (await timer.WaitForNextTickAsync(token))
+                while (!token.IsCancellationRequested)
                 {
+                    await Task.Delay(TimeSpan.FromSeconds(1), token);
+
                     tick++;
 
                     // Three different shapes so each gauge visibly moves on its own.

@@ -3,6 +3,8 @@ using System.Buffers.Binary;
 using System.Text;
 using Mk20Control.Protocol.Checksums;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Framing;
 
 /// <summary>
@@ -81,7 +83,7 @@ public sealed record DeviceFrame(uint PacketType, uint CommandId, byte[] Payload
     /// <summary>Constructs a well-formed request frame (packetType=0) ready to encode and send to the device.</summary>
     public static DeviceFrame CreateRequest(uint commandId, byte[] payload)
     {
-        ArgumentNullException.ThrowIfNull(payload);
+        Guard.NotNull(payload);
         uint crc = Crc32.Compute(payload);
         return new DeviceFrame(PacketType: 0, commandId, payload, crc, IsChecksumValid: true);
     }

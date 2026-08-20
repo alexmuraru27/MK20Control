@@ -4,6 +4,8 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Transport;
 
 /// <summary>
@@ -32,8 +34,8 @@ public sealed class WireLoggingTransport : ISerialTransport
 
     public WireLoggingTransport(ISerialTransport inner, string logFilePath)
     {
-        ArgumentNullException.ThrowIfNull(inner);
-        ArgumentException.ThrowIfNullOrWhiteSpace(logFilePath);
+        Guard.NotNull(inner);
+        Guard.NotNullOrWhiteSpace(logFilePath);
         _inner = inner;
         _log = new StreamWriter(logFilePath, append: false) { AutoFlush = true };
         _inner.DataReceived += OnInnerDataReceived;
@@ -69,7 +71,7 @@ public sealed class WireLoggingTransport : ISerialTransport
 
     private void LogLine(string direction, ReadOnlySpan<byte> data, double t)
     {
-        string hex = Convert.ToHexString(data);
+        string hex = BinaryCompat.ToHexString(data);
         lock (_logLock)
         {
             _log.WriteLine($"{t:F6}\t{direction}\t{hex}");

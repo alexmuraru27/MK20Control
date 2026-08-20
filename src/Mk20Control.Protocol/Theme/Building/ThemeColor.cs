@@ -1,6 +1,8 @@
 using System;
 using System.Globalization;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Theme.Building;
 
 /// <summary>
@@ -74,7 +76,7 @@ public readonly struct ThemeColor : IEquatable<ThemeColor>
     /// <exception cref="FormatException">The text matches neither form.</exception>
     public static ThemeColor Parse(string text)
     {
-        ArgumentNullException.ThrowIfNull(text);
+        Guard.NotNull(text);
         return TryParse(text, out var colour)
             ? colour
             : throw new FormatException(
@@ -87,7 +89,7 @@ public readonly struct ThemeColor : IEquatable<ThemeColor>
         colour = default;
         if (string.IsNullOrWhiteSpace(text)) return false;
 
-        string value = text.Trim();
+        string value = text!.Trim();
 
         if (value.StartsWith('#') || IsHexOnly(value))
             return TryParseHex(value, out colour);
@@ -151,12 +153,12 @@ public readonly struct ThemeColor : IEquatable<ThemeColor>
     /// <c>"r=…,g=…,b=…,a=…"</c>.
     /// </summary>
     public string ToWireString() =>
-        _sourceText ?? string.Create(CultureInfo.InvariantCulture, $"r={R},g={G},b={B},a={A}");
+        _sourceText ?? FormattableString.Invariant($"r={R},g={G},b={B},a={A}");
 
     /// <summary>The <c>"#rrggbb"</c> form used by a key's title colour, or <c>"#rrggbbaa"</c> when not fully opaque.</summary>
     public string ToHexString() => A == 255
-        ? string.Create(CultureInfo.InvariantCulture, $"#{R:x2}{G:x2}{B:x2}")
-        : string.Create(CultureInfo.InvariantCulture, $"#{R:x2}{G:x2}{B:x2}{A:x2}");
+        ? FormattableString.Invariant($"#{R:x2}{G:x2}{B:x2}")
+        : FormattableString.Invariant($"#{R:x2}{G:x2}{B:x2}{A:x2}");
 
     /// <summary>Returns <see cref="ToWireString"/>.</summary>
     public override string ToString() => ToWireString();

@@ -136,7 +136,7 @@ public class TextMacroThemeBuilderTests
         byte[] encoded = BuildTextMacroTheme();
 
         Assert.That(encoded.Length, Is.GreaterThan(4));
-        Assert.That(encoded[^4..], Is.EqualTo(new byte[] { 0, 0, 0, 0 }));
+        Assert.That(encoded.Skip(encoded.Length - 4).ToArray(), Is.EqualTo(new byte[] { 0, 0, 0, 0 }));
     }
 
     [Test]

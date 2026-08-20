@@ -1,3 +1,5 @@
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Theme.Building;
 
 /// <summary>
@@ -92,10 +94,10 @@ public static class ScreenLayout
     /// <exception cref="ArgumentOutOfRangeException">Thrown if the row or column is outside the 4x5 grid.</exception>
     public static LayoutRect KeyCell(int row, int column)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(row);
-        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(row, KeyRows);
-        ArgumentOutOfRangeException.ThrowIfNegative(column);
-        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(column, KeyColumns);
+        Guard.NotNegative(row);
+        Guard.LessThan(row, KeyRows);
+        Guard.NotNegative(column);
+        Guard.LessThan(column, KeyColumns);
 
         return new LayoutRect(
             column * KeyCellSize,

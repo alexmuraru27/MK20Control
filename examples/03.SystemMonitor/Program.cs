@@ -206,13 +206,14 @@ namespace Mk20Control.Examples.SystemMonitor
 
         private static async Task PushValuesUntilCancelledAsync(Mk20DeviceClient client, CancellationToken token)
         {
-            using PeriodicTimer timer = new(UpdateInterval);
             DateTime startedAt = DateTime.Now;
 
             try
             {
-                while (await timer.WaitForNextTickAsync(token))
+                while (!token.IsCancellationRequested)
                 {
+                    await Task.Delay(UpdateInterval, token);
+
                     double cpu = ReadCpuUsagePercent();
                     double memory = ReadMemoryUsagePercent();
                     TimeSpan uptime = DateTime.Now - startedAt;
@@ -253,7 +254,7 @@ namespace Mk20Control.Examples.SystemMonitor
         /// </summary>
         private static double ReadCpuUsagePercent()
         {
-            if (OperatingSystem.IsWindows() &&
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
                 NativeMethods.GetSystemTimes(out long idle, out long kernel, out long user))
             {
                 long idleDelta = idle - _lastIdle;
@@ -265,7 +266,7 @@ namespace Mk20Control.Examples.SystemMonitor
 
                 // kernelTime already includes idle time, so total == kernel + user.
                 return busyDelta > 0
-                    ? Math.Clamp(100.0 * (busyDelta - idleDelta) / busyDelta, 0, 100)
+                    ? Clamp(100.0 * (busyDelta - idleDelta) / busyDelta, 0, 100)
                     : 0;
             }
 
@@ -292,7 +293,7 @@ namespace Mk20Control.Examples.SystemMonitor
             }
 
             double percent = usedMs / (elapsedMs * Environment.ProcessorCount) * 100.0;
-            return Math.Clamp(percent, 0, 100);
+            return Clamp(percent, 0, 100);
         }
 
         /// <summary>
@@ -303,19 +304,23 @@ namespace Mk20Control.Examples.SystemMonitor
         /// </summary>
         private static double ReadMemoryUsagePercent()
         {
-            if (OperatingSystem.IsWindows())
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 NativeMethods.MemoryStatusEx status = new() { Length = (uint)Marshal.SizeOf<NativeMethods.MemoryStatusEx>() };
                 if (NativeMethods.GlobalMemoryStatusEx(ref status))
                 {
-                    return Math.Clamp(status.MemoryLoad, 0, 100);
+                    return Clamp(status.MemoryLoad, 0, 100);
                 }
             }
 
-            GCMemoryInfo info = GC.GetGCMemoryInfo();
-            long total = info.TotalAvailableMemoryBytes;
-            return total > 0 ? Math.Clamp(info.MemoryLoadBytes * 100.0 / total, 0, 100) : 0;
+            // GC.GetGCMemoryInfo is .NET Core only; on .NET Framework (Windows-only) the
+            // GlobalMemoryStatusEx path above always applies.
+            return 0;
         }
+
+        /// <summary>Math.Clamp is .NET Core only.</summary>
+        private static double Clamp(double value, double min, double max) =>
+            value < min ? min : value > max ? max : value;
 
         /// <summary>The two Win32 counters used above; both are in kernel32 and need no package.</summary>
         private static class NativeMethods

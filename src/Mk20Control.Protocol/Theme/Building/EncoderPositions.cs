@@ -1,3 +1,5 @@
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Theme.Building;
 
 /// <summary>
@@ -65,7 +67,7 @@ public static class EncoderPositions
     /// <param name="type">Which built-in function the encoder is bound to.</param>
     public static string RelatedThemePath(string screenKeyWindowsRoot, EncoderFunctionType type)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(screenKeyWindowsRoot);
+        Guard.NotNullOrWhiteSpace(screenKeyWindowsRoot);
         string fileName = type switch
         {
             EncoderFunctionType.SystemVolume => "system_volume",

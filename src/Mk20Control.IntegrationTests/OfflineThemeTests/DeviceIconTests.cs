@@ -15,7 +15,7 @@ public class DeviceIconTests
     [Test]
     public void Values_AreSequentialFromZero()
     {
-        int[] values = Enum.GetValues<DeviceIcon>().Cast<int>().ToArray();
+        int[] values = ((DeviceIcon[])Enum.GetValues(typeof(DeviceIcon))).Cast<int>().ToArray();
 
         Assert.That(values, Is.EqualTo(Enumerable.Range(0, values.Length).ToArray()),
             "the enum is part of the public API, so its values stay 0,1,2,... with no gaps");
@@ -24,7 +24,7 @@ public class DeviceIconTests
     [Test]
     public void EveryIcon_ResolvesToAConfirmedDevicePath()
     {
-        foreach (DeviceIcon icon in Enum.GetValues<DeviceIcon>())
+        foreach (DeviceIcon icon in (DeviceIcon[])Enum.GetValues(typeof(DeviceIcon)))
         {
             string path = DeviceIcons.PathOf(icon);
 
@@ -36,7 +36,7 @@ public class DeviceIconTests
     [Test]
     public void EveryIcon_ResolvesToADistinctPath()
     {
-        string[] paths = Enum.GetValues<DeviceIcon>().Select(DeviceIcons.PathOf).ToArray();
+        string[] paths = ((DeviceIcon[])Enum.GetValues(typeof(DeviceIcon))).Select(DeviceIcons.PathOf).ToArray();
 
         Assert.That(paths, Is.Unique, "two icons resolving to the same artwork would make one of them pointless");
     }

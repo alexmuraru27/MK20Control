@@ -7,6 +7,8 @@ using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Theme.Building;
 
 /// <summary>
@@ -42,7 +44,7 @@ internal static class IconImageNormalizer
     /// </summary>
     public static byte[] NormalizeToKeyIcon(byte[] pngOrOtherImageBytes)
     {
-        ArgumentNullException.ThrowIfNull(pngOrOtherImageBytes);
+        Guard.NotNull(pngOrOtherImageBytes);
         using var image = Image.Load<Rgb24>(pngOrOtherImageBytes);
 
         // Composite onto an opaque black background first (in case the source has
@@ -74,7 +76,7 @@ internal static class IconImageNormalizer
     /// </summary>
     public static byte[] NormalizeToKeyIconPreservingAlpha(byte[] pngOrOtherImageBytes)
     {
-        ArgumentNullException.ThrowIfNull(pngOrOtherImageBytes);
+        Guard.NotNull(pngOrOtherImageBytes);
         using var image = Image.Load<Rgba32>(pngOrOtherImageBytes);
 
         image.Mutate(ctx => ctx.Resize(new ResizeOptions
@@ -107,8 +109,8 @@ internal static class IconImageNormalizer
     public static (string FolderPath, string FrameDelaysCsv) RegisterAnimatedIcon(
         IThemeAssetRegistry registry, string suggestedFolderName, byte[] animatedImageBytes)
     {
-        ArgumentNullException.ThrowIfNull(registry);
-        ArgumentNullException.ThrowIfNull(animatedImageBytes);
+        Guard.NotNull(registry);
+        Guard.NotNull(animatedImageBytes);
 
         using var image = Image.Load<Rgba32>(animatedImageBytes);
         string folderName = System.IO.Path.GetFileNameWithoutExtension(suggestedFolderName);

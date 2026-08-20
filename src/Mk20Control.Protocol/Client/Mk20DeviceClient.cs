@@ -15,6 +15,8 @@ using Mk20Control.Protocol.Model;
 using Mk20Control.Protocol.Theme;
 using Mk20Control.Protocol.Transport;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Client;
 
 /// <summary>
@@ -116,7 +118,7 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
 
     public Mk20DeviceClient(ISerialTransport transport, Mk20DeviceClientOptions? options = null, ILogger<Mk20DeviceClient>? logger = null)
     {
-        ArgumentNullException.ThrowIfNull(transport);
+        Guard.NotNull(transport);
         _transport = transport;
         _options = options ?? new Mk20DeviceClientOptions();
         _logger = logger ?? NullLogger<Mk20DeviceClient>.Instance;
@@ -130,7 +132,7 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
         Mk20DeviceClientOptions? options = null,
         ILoggerFactory? loggerFactory = null)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(portName);
+        Guard.NotNullOrWhiteSpace(portName);
         var factory = loggerFactory ?? NullLoggerFactory.Instance;
         var resolvedOptions = options ?? new Mk20DeviceClientOptions();
         var transport = new SerialPortTransport(portName, resolvedOptions.BaudRate, factory.CreateLogger<SerialPortTransport>());
@@ -178,11 +180,11 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
         }
         catch (Exception ex) when (ex is System.IO.InvalidDataException)
         {
-            _logger.LogWarning(ex, "TryPingAsync: received a FIND_DEVICE payload that could not be decoded as a simple string map. Hex: {Hex}", Convert.ToHexString(frame.Payload));
+            _logger.LogWarning(ex, "TryPingAsync: received a FIND_DEVICE payload that could not be decoded as a simple string map. Hex: {Hex}", BinaryCompat.ToHexString(frame.Payload));
             return null;
         }
 
-        var fieldMap = new Dictionary<string, string>(fields);
+        var fieldMap = fields.ToDictionary(pair => pair.Key, pair => pair.Value);
         return new DeviceIdentity
         {
             Version = GetString(fieldMap, "version"),
@@ -221,7 +223,7 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
     /// </summary>
     public Task PushSystemDataAsync(IReadOnlyDictionary<string, string> values, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(values);
+        Guard.NotNull(values);
         byte[] payload = SystemDataCodec.Encode(values.ToList());
         _logger.LogDebug("Pushing {Count} system-data value(s): {Keys}", values.Count, string.Join(", ", values.Keys));
         return SendRequestAsync(CommandId.SendSystemDataToDevice, payload, cancellationToken);
@@ -274,7 +276,7 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
     /// <param name="themeName">The theme's name, e.g. "example-monitor" - not a path.</param>
     public Task UploadThemeAsync(string themeName, ThemeFile theme, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(theme);
+        Guard.NotNull(theme);
         return UploadThemeAsync(themeName, ThemeFileCodec.Encode(theme), timeout, cancellationToken);
     }
 
@@ -429,7 +431,7 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
     public async Task UploadThemeAsync(string themeName, byte[] themeFileBytes, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
     {
         string deviceThemePath = DeviceThemePath.ForTheme(themeName);
-        ArgumentNullException.ThrowIfNull(themeFileBytes);
+        Guard.NotNull(themeFileBytes);
 
         // The device resumes on whichever page the layout JSON's "main.currentPage" names -
         // this is NOT necessarily the first page in the "pages" array (e.g. it drifts to
@@ -608,7 +610,7 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
     /// </summary>
     public Task SendJsonAsync(string json, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(json);
+        Guard.NotNullOrWhiteSpace(json);
         return SendRequestAsync(CommandId.SendJson, Encoding.UTF8.GetBytes(json), cancellationToken);
     }
 
@@ -626,7 +628,7 @@ public sealed class Mk20DeviceClient : IAsyncDisposable
         TimeSpan? timeout = null,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(payload);
+        Guard.NotNull(payload);
         if (!ConfirmedCommands.Contains(command))
         {
             _logger.LogWarning(

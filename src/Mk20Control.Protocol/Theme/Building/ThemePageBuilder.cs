@@ -4,6 +4,8 @@ using System.Linq;
 using Mk20Control.Protocol.Theme.Items;
 using Mk20Control.Protocol.Theme.Building.Widgets;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Theme.Building;
 
 /// <summary>
@@ -46,14 +48,14 @@ public sealed class ThemePageBuilder
     /// </summary>
     public ThemePageBuilder AsFolderOf(ThemePageBuilder parentPage)
     {
-        ArgumentNullException.ThrowIfNull(parentPage);
+        Guard.NotNull(parentPage);
         return AsFolderOf(parentPage.PageId);
     }
 
     /// <summary>Marks this page as a "folder" whose parent has the given page id - see <see cref="AsFolderOf(ThemePageBuilder)"/>.</summary>
     public ThemePageBuilder AsFolderOf(string parentPageId)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(parentPageId);
+        Guard.NotNullOrWhiteSpace(parentPageId);
         if (parentPageId == PageId)
             throw new ArgumentException("A folder page cannot be its own parent.", nameof(parentPageId));
 
@@ -73,7 +75,7 @@ public sealed class ThemePageBuilder
     /// <summary>Adds a background item (type 100), configured via <paramref name="configure"/>.</summary>
     public ThemePageBuilder AddBackground(Action<BackgroundItemBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        Guard.NotNull(configure);
         var b = new BackgroundItemBuilder(_owner, _canvasWidth, _canvasHeight);
         configure(b);
         _items.Add(b.Build());
@@ -88,7 +90,7 @@ public sealed class ThemePageBuilder
     /// </summary>
     public ThemePageBuilder AddKey(int row, int column, Action<KeyItemBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        Guard.NotNull(configure);
         var b = new KeyItemBuilder(_owner, row, column, _canvasWidth, _canvasHeight);
         configure(b);
         _items.Add(b.Build());
@@ -115,7 +117,7 @@ public sealed class ThemePageBuilder
     /// </summary>
     public ThemePageBuilder AddEncoder(EncoderSide side, Action<KeyItemBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        Guard.NotNull(configure);
         var (x, y) = EncoderPositions.PositionOf(side);
         var b = new KeyItemBuilder(_owner, 0, 0, _canvasWidth, _canvasHeight);
         b.At(x, y);
@@ -127,7 +129,7 @@ public sealed class ThemePageBuilder
     /// <summary>Adds a static or data-bound text item (type 113).</summary>
     public ThemePageBuilder AddText(Action<TextItemBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        Guard.NotNull(configure);
         var b = new TextItemBuilder(_owner);
         configure(b);
         _items.Add(b.Build());
@@ -137,7 +139,7 @@ public sealed class ThemePageBuilder
     /// <summary>Adds a data-bound progress bar item (type 102) - the ROUNDED horizontal bar, with a corner radius and optional linear-gradient fill. Use <see cref="AddLinearGauge"/> for the editor's rectangular "seg-hor" bar.</summary>
     public ThemePageBuilder AddProgressBar(Action<ProgressBarItemBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        Guard.NotNull(configure);
         var b = new ProgressBarItemBuilder(_owner);
         configure(b);
         _items.Add(b.Build());
@@ -147,7 +149,7 @@ public sealed class ThemePageBuilder
     /// <summary>Adds a data-bound linear gauge item (type 103) - the rectangular/segmented horizontal bar the ScreenKeyWindows editor calls "seg-hor". Unlike <see cref="AddProgressBar"/> it has no corner radius and no gradient fill; confirmed by authoring one in the vendor editor and round-tripping it byte-identically.</summary>
     public ThemePageBuilder AddLinearGauge(Action<LinearGaugeItemBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        Guard.NotNull(configure);
         var b = new LinearGaugeItemBuilder(_owner);
         configure(b);
         _items.Add(b.Build());
@@ -157,7 +159,7 @@ public sealed class ThemePageBuilder
     /// <summary>Adds a data-bound radial/arc gauge item (type 109).</summary>
     public ThemePageBuilder AddRadialGauge(Action<RadialGaugeItemBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        Guard.NotNull(configure);
         var b = new RadialGaugeItemBuilder(_owner);
         configure(b);
         _items.Add(b.Build());
@@ -167,7 +169,7 @@ public sealed class ThemePageBuilder
     /// <summary>Adds a data-bound plain circular gauge item (type 101, solid ring, no gradient/angle range).</summary>
     public ThemePageBuilder AddCircularGauge(Action<CircularGaugeItemBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        Guard.NotNull(configure);
         var b = new CircularGaugeItemBuilder(_owner, segmented: false);
         configure(b);
         _items.Add(b.Build());
@@ -177,7 +179,7 @@ public sealed class ThemePageBuilder
     /// <summary>Adds a data-bound segmented/notched circular gauge item (type 104, "seg-circular" - same fields as <see cref="AddCircularGauge"/>, different render style).</summary>
     public ThemePageBuilder AddSegmentedCircularGauge(Action<CircularGaugeItemBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        Guard.NotNull(configure);
         var b = new CircularGaugeItemBuilder(_owner, segmented: true);
         configure(b);
         _items.Add(b.Build());
@@ -187,7 +189,7 @@ public sealed class ThemePageBuilder
     /// <summary>Adds a data-bound "light-shadow" ring gauge item (type 110, arc stroke + glow highlight).</summary>
     public ThemePageBuilder AddLightShadowGauge(Action<LightShadowGaugeItemBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        Guard.NotNull(configure);
         var b = new LightShadowGaugeItemBuilder(_owner);
         configure(b);
         _items.Add(b.Build());
@@ -197,7 +199,7 @@ public sealed class ThemePageBuilder
     /// <summary>Adds a static or data-bound multi-line (wrapping) text item (type 116).</summary>
     public ThemePageBuilder AddMultilineText(Action<MultilineTextItemBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        Guard.NotNull(configure);
         var b = new MultilineTextItemBuilder(_owner);
         configure(b);
         _items.Add(b.Build());
@@ -207,7 +209,7 @@ public sealed class ThemePageBuilder
     /// <summary>Adds a static or data-bound drop-shadow text item (type 117, border stroke + shadow).</summary>
     public ThemePageBuilder AddShadowText(Action<ShadowTextItemBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        Guard.NotNull(configure);
         var b = new ShadowTextItemBuilder(_owner);
         configure(b);
         _items.Add(b.Build());
@@ -217,7 +219,7 @@ public sealed class ThemePageBuilder
     /// <summary>Adds one digital-clock field item (type 111) - "hour"/"minute"/"second"; combine 2-3 adjacent items for a full clock, matching the observed real-theme pattern.</summary>
     public ThemePageBuilder AddDigitalClockField(Action<DigitalClockItemBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        Guard.NotNull(configure);
         var b = new DigitalClockItemBuilder(_owner);
         configure(b);
         _items.Add(b.Build());
@@ -227,7 +229,7 @@ public sealed class ThemePageBuilder
     /// <summary>Adds an animated GIF item (type 114).</summary>
     public ThemePageBuilder AddDynamicImage(Action<DynamicImageItemBuilder> configure)
     {
-        ArgumentNullException.ThrowIfNull(configure);
+        Guard.NotNull(configure);
         var b = new DynamicImageItemBuilder(_owner, _canvasWidth, _canvasHeight);
         configure(b);
         _items.Add(b.Build());

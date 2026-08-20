@@ -6,6 +6,8 @@ using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Theme.Building;
 
 /// <summary>
@@ -36,7 +38,7 @@ public static class BackgroundImageNormalizer
     /// </summary>
     public static byte[] ResizeToFill(byte[] imageOrGifBytes, int targetWidth, int targetHeight, double offsetXPercent = 0, double offsetYPercent = 0)
     {
-        ArgumentNullException.ThrowIfNull(imageOrGifBytes);
+        Guard.NotNull(imageOrGifBytes);
         if (targetWidth <= 0) throw new ArgumentOutOfRangeException(nameof(targetWidth));
         if (targetHeight <= 0) throw new ArgumentOutOfRangeException(nameof(targetHeight));
         if (offsetXPercent is < -1 or > 1) throw new ArgumentOutOfRangeException(nameof(offsetXPercent), "Must be in [-1, 1].");

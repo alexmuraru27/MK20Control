@@ -43,7 +43,7 @@ public class KeyBindingsReplayTests
         public Task OpenAsync(CancellationToken cancellationToken = default) { IsOpen = true; return Task.CompletedTask; }
         public Task CloseAsync(CancellationToken cancellationToken = default) { IsOpen = false; return Task.CompletedTask; }
         public Task WriteAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default) => Task.CompletedTask;
-        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+        public ValueTask DisposeAsync() => default;
 
         /// <summary>Wraps a captured payload in the real frame header and delivers it.</summary>
         public void Deliver(string payloadBase64)

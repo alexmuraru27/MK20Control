@@ -8,6 +8,8 @@ using Mk20Control.Protocol.Client;
 using Mk20Control.Protocol.Model;
 using Mk20Control.Protocol.Theme.Actions;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Host;
 
 /// <summary>
@@ -47,7 +49,7 @@ public sealed class KeyBindings : IDisposable
 
     public KeyBindings(Mk20DeviceClient client, ILogger<KeyBindings>? logger = null)
     {
-        ArgumentNullException.ThrowIfNull(client);
+        Guard.NotNull(client);
         _client = client;
         _logger = (ILogger?)logger ?? NullLogger.Instance;
         _client.NotificationReceived += OnNotification;
@@ -56,15 +58,15 @@ public sealed class KeyBindings : IDisposable
     /// <summary>Runs <paramref name="handler"/> when the button carrying <paramref name="commandId"/> is pressed, wherever it lives.</summary>
     public KeyBindings OnCommand(string commandId, Action handler)
     {
-        ArgumentNullException.ThrowIfNull(handler);
+        Guard.NotNull(handler);
         return OnCommand(commandId, _ => handler());
     }
 
     /// <summary>Runs <paramref name="handler"/> on press, passing the event's details.</summary>
     public KeyBindings OnCommand(string commandId, Action<KeyEventContext> handler)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(commandId);
-        ArgumentNullException.ThrowIfNull(handler);
+        Guard.NotNullOrWhiteSpace(commandId);
+        Guard.NotNull(handler);
         _handlers[(commandId, true)] = handler;
         return this;
     }
@@ -72,15 +74,15 @@ public sealed class KeyBindings : IDisposable
     /// <summary>Runs <paramref name="handler"/> when the button carrying <paramref name="commandId"/> is released.</summary>
     public KeyBindings OnCommandRelease(string commandId, Action handler)
     {
-        ArgumentNullException.ThrowIfNull(handler);
+        Guard.NotNull(handler);
         return OnCommandRelease(commandId, _ => handler());
     }
 
     /// <summary>Runs <paramref name="handler"/> on release, passing the event's details.</summary>
     public KeyBindings OnCommandRelease(string commandId, Action<KeyEventContext> handler)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(commandId);
-        ArgumentNullException.ThrowIfNull(handler);
+        Guard.NotNullOrWhiteSpace(commandId);
+        Guard.NotNull(handler);
         _handlers[(commandId, false)] = handler;
         return this;
     }

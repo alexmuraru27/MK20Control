@@ -73,7 +73,7 @@ public static class DeviceThemePath
         }
 
         string prefix = Root + "/";
-        if (!deviceThemePath.StartsWith(prefix, StringComparison.Ordinal))
+        if (!deviceThemePath!.StartsWith(prefix, StringComparison.Ordinal))
         {
             return false;
         }
@@ -96,7 +96,7 @@ public static class DeviceThemePath
             return false;
         }
 
-        if (themeName.Length > MaxThemeNameLength)
+        if (themeName!.Length > MaxThemeNameLength)
         {
             problem = $"it is longer than {MaxThemeNameLength} characters.";
             return false;

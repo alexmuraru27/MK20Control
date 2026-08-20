@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using Mk20Control.Protocol.Codecs;
 using Mk20Control.Protocol.Theme.Actions;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Theme.Building;
 
 /// <summary>
@@ -214,7 +216,7 @@ public static class KeyActions
     /// <param name="description">An optional label echoed back on every press, so a handler or log can report the button's name rather than its grid position. Purely informational - NOT used for routing, and it does NOT change what the device draws (that is the key's own Title). Conventionally set to the same text as the title. Defaults to "Text", matching a vendor-written text key.</param>
     public static TextInputAction Command(string commandId, string? description = null)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(commandId);
+        Guard.NotNullOrWhiteSpace(commandId);
         return TypeText(commandId, pressEnterAfter: false, useCopyPaste: false, description: description);
     }
 
@@ -346,7 +348,7 @@ public static class KeyActions
     private static string DescribeEncoderCombo(KeyModifiers modifiers, HidKey key)
     {
         var parts = new List<string>();
-        foreach (KeyModifiers flag in Enum.GetValues<KeyModifiers>())
+        foreach (KeyModifiers flag in (KeyModifiers[])Enum.GetValues(typeof(KeyModifiers)))
         {
             if (flag == KeyModifiers.None || !modifiers.HasFlag(flag)) continue;
             parts.Add(flag switch

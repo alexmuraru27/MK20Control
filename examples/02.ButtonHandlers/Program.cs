@@ -57,7 +57,7 @@ namespace Mk20Control.Examples.ButtonHandlers
             Console.WriteLine("Uploaded and activated.");
 
             using KeyBindings bindings = new(client);
-            TaskCompletionSource quitRequested = new();
+            TaskCompletionSource<bool> quitRequested = new();
 
             // One binding per button. The id is the only thing that matters - it is
             // page-agnostic, so moving a key to another cell, page or folder keeps working.
@@ -78,7 +78,7 @@ namespace Mk20Control.Examples.ButtonHandlers
             bindings.OnCommand("demo.quit", () =>
             {
                 Console.WriteLine("[press] QUIT  - quitting...");
-                quitRequested.TrySetResult();
+                quitRequested.TrySetResult(true);
             });
 
             // Press and release are bound separately, so a key can act like a momentary

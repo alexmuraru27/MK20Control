@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
+using Mk20Control.Protocol.Compat;
+
 namespace Mk20Control.Protocol.Codecs;
 
 /// <summary>
@@ -83,7 +85,7 @@ public static class VariantMapCodec
     /// </summary>
     public static bool TryDecodeMapArray(byte[] payload, out IReadOnlyList<IReadOnlyDictionary<string, TaggedValue>> maps)
     {
-        ArgumentNullException.ThrowIfNull(payload);
+        Guard.NotNull(payload);
         var result = new List<IReadOnlyDictionary<string, TaggedValue>>();
         maps = result;
         try
@@ -114,7 +116,7 @@ public static class VariantMapCodec
     /// <exception cref="InvalidDataException">Thrown if the data does not match the expected format.</exception>
     public static Dictionary<string, TaggedValue> DecodeMap(byte[] data, ref int pos)
     {
-        ArgumentNullException.ThrowIfNull(data);
+        Guard.NotNull(data);
         uint count = ReadUInt32(data, ref pos);
         if (count > 1000) throw new InvalidDataException($"Implausible map entry count {count} at position {pos}.");
         var map = new Dictionary<string, TaggedValue>((int)count);
@@ -130,7 +132,7 @@ public static class VariantMapCodec
     /// <exception cref="InvalidDataException">Thrown for an unrecognized typeId, or malformed/truncated data.</exception>
     public static TaggedValue DecodeValue(byte[] data, ref int pos)
     {
-        ArgumentNullException.ThrowIfNull(data);
+        Guard.NotNull(data);
         uint typeId = ReadUInt32(data, ref pos);
         RequireBytes(data, pos, 1, "isNull flag");
         bool isNull = data[pos] != 0;
@@ -141,7 +143,7 @@ public static class VariantMapCodec
         {
             1 => TaggedValue.Of(ReadBytes(data, ref pos, 1)[0] != 0),
             2 => TaggedValue.Of(BinaryPrimitives.ReadInt32BigEndian(ReadBytes(data, ref pos, 4))),
-            6 => TaggedValue.Of(BinaryPrimitives.ReadDoubleBigEndian(ReadBytes(data, ref pos, 8))),
+            6 => TaggedValue.Of(BinaryCompat.ReadDoubleBigEndian(ReadBytes(data, ref pos, 8))),
             8 => TaggedValue.Of(DecodeMap(data, ref pos)),
             9 => TaggedValue.Of(DecodeList(data, ref pos)),
             10 => DecodeString(data, ref pos) is { } s ? TaggedValue.Of(s) : TaggedValue.Null(10),
@@ -155,7 +157,7 @@ public static class VariantMapCodec
     /// <summary>Decodes a list (count-prefixed sequence of tagged values) starting at <paramref name="pos"/>.</summary>
     public static List<TaggedValue> DecodeList(byte[] data, ref int pos)
     {
-        ArgumentNullException.ThrowIfNull(data);
+        Guard.NotNull(data);
         uint count = ReadUInt32(data, ref pos);
         if (count > 10_000) throw new InvalidDataException($"Implausible list entry count {count} at position {pos}.");
         var list = new List<TaggedValue>((int)count);
@@ -169,7 +171,7 @@ public static class VariantMapCodec
     /// </summary>
     public static string? DecodeString(byte[] data, ref int pos)
     {
-        ArgumentNullException.ThrowIfNull(data);
+        Guard.NotNull(data);
         uint byteLen = ReadUInt32(data, ref pos);
         if (byteLen == NullStringOrByteArrayLength) return null;
         if (byteLen == 0) return "";
@@ -192,7 +194,7 @@ public static class VariantMapCodec
     /// </summary>
     public static byte[]? DecodeByteArray(byte[] data, ref int pos)
     {
-        ArgumentNullException.ThrowIfNull(data);
+        Guard.NotNull(data);
         uint byteLen = ReadUInt32(data, ref pos);
         if (byteLen == NullStringOrByteArrayLength) return null;
         const uint maxPlausibleLength = 64 * 1024 * 1024;
@@ -215,8 +217,8 @@ public static class VariantMapCodec
 
     public static void WriteMap(Stream stream, IReadOnlyDictionary<string, TaggedValue> map)
     {
-        ArgumentNullException.ThrowIfNull(stream);
-        ArgumentNullException.ThrowIfNull(map);
+        Guard.NotNull(stream);
+        Guard.NotNull(map);
         WriteUInt32(stream, (uint)map.Count);
         foreach (var (key, value) in map)
         {
@@ -227,7 +229,7 @@ public static class VariantMapCodec
 
     public static void WriteValue(Stream stream, TaggedValue value)
     {
-        ArgumentNullException.ThrowIfNull(stream);
+        Guard.NotNull(stream);
         WriteUInt32(stream, value.TypeId);
 
         // CONFIRMED real-device behavior (observed in a real .Theme file's null "keyMacro"
@@ -277,8 +279,8 @@ public static class VariantMapCodec
 
     public static void WriteList(Stream stream, IReadOnlyCollection<TaggedValue> list)
     {
-        ArgumentNullException.ThrowIfNull(stream);
-        ArgumentNullException.ThrowIfNull(list);
+        Guard.NotNull(stream);
+        Guard.NotNull(list);
         WriteUInt32(stream, (uint)list.Count);
         foreach (var item in list) WriteValue(stream, item);
     }
@@ -286,8 +288,8 @@ public static class VariantMapCodec
     /// <summary>Writes a length-prefixed UTF-16BE string (never null - use <see cref="WriteValue"/> for a nullable tagged string).</summary>
     public static void WriteString(Stream stream, string value)
     {
-        ArgumentNullException.ThrowIfNull(stream);
-        ArgumentNullException.ThrowIfNull(value);
+        Guard.NotNull(stream);
+        Guard.NotNull(value);
         WriteUInt32(stream, (uint)(value.Length * 2));
         foreach (char c in value)
         {
@@ -299,8 +301,8 @@ public static class VariantMapCodec
     /// <summary>Writes a length-prefixed raw byte array (never null - use <see cref="WriteValue"/> for a nullable tagged byte array).</summary>
     public static void WriteByteArray(Stream stream, byte[] value)
     {
-        ArgumentNullException.ThrowIfNull(stream);
-        ArgumentNullException.ThrowIfNull(value);
+        Guard.NotNull(stream);
+        Guard.NotNull(value);
         WriteUInt32(stream, (uint)value.Length);
         stream.Write(value);
     }
@@ -422,7 +424,7 @@ public static class VariantMapCodec
     private static void WriteDouble(Stream stream, double value)
     {
         Span<byte> buffer = stackalloc byte[8];
-        BinaryPrimitives.WriteDoubleBigEndian(buffer, value);
+        BinaryCompat.WriteDoubleBigEndian(buffer, value);
         stream.Write(buffer);
     }
 }

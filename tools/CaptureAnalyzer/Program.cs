@@ -149,8 +149,8 @@ static int FindMk20DeviceAddress(string tsharkPath, string capturePath)
 
     var psi = new ProcessStartInfo(tsharkPath)
     {
-        ArgumentList = { "-r", capturePath, "-Y", "usb.idVendor", "-T", "fields",
-            "-e", "usb.device_address", "-e", "usb.idVendor", "-e", "usb.idProduct" },
+        Arguments = Compat.BuildArguments("-r", capturePath, "-Y", "usb.idVendor", "-T", "fields",
+            "-e", "usb.device_address", "-e", "usb.idVendor", "-e", "usb.idProduct"),
         RedirectStandardOutput = true,
         UseShellExecute = false,
     };
@@ -180,16 +180,14 @@ static List<UsbRow> RunTsharkUsbcom(string tsharkPath, string capturePath, int d
 {
     var psi = new ProcessStartInfo(tsharkPath)
     {
-        ArgumentList =
-        {
+        Arguments = Compat.BuildArguments(
             "-r", capturePath,
             "-Y", $"usb.device_address=={deviceAddress} && (usbcom.data.out_payload || usbcom.data.in_payload)",
             "-T", "fields",
             "-e", "frame.number",
             "-e", "usbcom.data.out_payload",
             "-e", "usbcom.data.in_payload",
-            "-E", "separator=|",
-        },
+            "-E", "separator=|"),
         RedirectStandardOutput = true,
         RedirectStandardError = true,
         UseShellExecute = false,
@@ -252,9 +250,9 @@ static int RunWireLogDecode(string logPath)
         if (line.Length == 0) continue;
         string[] parts = line.Split('\t');
         if (parts.Length < 3) continue;
-        if (!double.TryParse(parts[0], System.Globalization.CultureInfo.InvariantCulture, out double t)) continue;
+        if (!double.TryParse(parts[0], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double t)) continue;
         string direction = parts[1];
-        byte[] data = Convert.FromHexString(parts[2]);
+        byte[] data = Compat.FromHex(parts[2]);
 
         if (direction == "OUT")
         {
@@ -329,7 +327,7 @@ static void PrintFrame(string label, DeviceFrame frame, bool showHex = false)
     if (showHex)
     {
         Console.WriteLine();
-        Console.WriteLine("  wire bytes (full frame): " + Convert.ToHexString(frame.Encode()));
+        Console.WriteLine("  wire bytes (full frame): " + Compat.ToHex(frame.Encode()));
         Console.Write("  decoded: ");
     }
 
@@ -406,7 +404,7 @@ static void PrintFrame(string label, DeviceFrame frame, bool showHex = false)
     }
 
     int previewLen = Math.Min(48, frame.Payload.Length);
-    Console.WriteLine("hex: " + Convert.ToHexString(frame.Payload, 0, previewLen) +
+    Console.WriteLine("hex: " + Compat.ToHex(frame.Payload, 0, previewLen) +
                        (frame.Payload.Length > previewLen ? "..." : ""));
 }
 
@@ -492,23 +490,23 @@ static int RunEmitFrameHex()
         new[] { new KeyValuePair<string, string>(devicePath, totalSize.ToString()) });
     var fileStartFrame = DeviceFrame.CreateRequest((uint)CommandId.FileStart, fileStartPayload);
     Console.WriteLine("[FileStart] our encoding:");
-    Console.WriteLine("  hex: " + Convert.ToHexString(fileStartFrame.Encode()).ToLowerInvariant());
+    Console.WriteLine("  hex: " + Compat.ToHex(fileStartFrame.Encode()).ToLowerInvariant());
     Console.WriteLine();
 
     byte[] fileEndPayload = SimpleStringMapCodec.Encode(
         new[] { new KeyValuePair<string, string>(devicePath, crc.ToString()) });
     var fileEndFrame = DeviceFrame.CreateRequest((uint)CommandId.FileEnd, fileEndPayload);
     Console.WriteLine("[FileEnd] our encoding:");
-    Console.WriteLine("  hex: " + Convert.ToHexString(fileEndFrame.Encode()).ToLowerInvariant());
+    Console.WriteLine("  hex: " + Compat.ToHex(fileEndFrame.Encode()).ToLowerInvariant());
     Console.WriteLine();
 
     var reloadFrame = DeviceFrame.CreateRequest((uint)CommandId.SetDeviceReload, Encoding.UTF8.GetBytes(devicePath));
     Console.WriteLine("[SetDeviceReload] our encoding:");
-    Console.WriteLine("  hex: " + Convert.ToHexString(reloadFrame.Encode()).ToLowerInvariant());
+    Console.WriteLine("  hex: " + Compat.ToHex(reloadFrame.Encode()).ToLowerInvariant());
     Console.WriteLine();
 
     Console.WriteLine("[Abort] our encoding:");
-    Console.WriteLine("  hex: " + Convert.ToHexString(Mk20Control.Protocol.Framing.DeviceFrameHeader.AbortTransferBytes).ToLowerInvariant());
+    Console.WriteLine("  hex: " + Compat.ToHex(Mk20Control.Protocol.Framing.DeviceFrameHeader.AbortTransferBytes).ToLowerInvariant());
 
     return 0;
 }
@@ -614,8 +612,8 @@ static int RunBuilderByteDiff(string themePath)
         Console.WriteLine($"  First differing byte offset: {firstDiff} ({diffCount} differing bytes within the shared {minLen}-byte prefix)");
         int ctx = 24;
         int start = Math.Max(0, firstDiff - ctx);
-        Console.WriteLine("  original @ diff: " + Convert.ToHexString(original, start, Math.Min(ctx * 2, original.Length - start)));
-        Console.WriteLine("  rebuilt  @ diff: " + Convert.ToHexString(rebuilt, start, Math.Min(ctx * 2, rebuilt.Length - start)));
+        Console.WriteLine("  original @ diff: " + Compat.ToHex(original, start, Math.Min(ctx * 2, original.Length - start)));
+        Console.WriteLine("  rebuilt  @ diff: " + Compat.ToHex(rebuilt, start, Math.Min(ctx * 2, rebuilt.Length - start)));
     }
     else
     {
@@ -995,7 +993,7 @@ static bool TestSimpleStringMapRealFindDevice()
         "0069006300650056006F006C0075006D006500000002003700000014006400650076006900" +
         "630065004E0061006D00650000001200530063007200650065006E004B0065007900000010" +
         "0064006500760069006300650042006C0000000400380030";
-    byte[] payload = Convert.FromHexString(realFindDeviceReplyHex);
+    byte[] payload = Compat.FromHex(realFindDeviceReplyHex);
     IReadOnlyList<KeyValuePair<string, string>> fields;
     try
     {
@@ -1006,7 +1004,7 @@ static bool TestSimpleStringMapRealFindDevice()
         return false;
     }
 
-    var map = new Dictionary<string, string>(fields);
+    var map = fields.ToDictionary(pair => pair.Key, pair => pair.Value);
     return map.Count == 8
         && map.GetValueOrDefault("version") == "V2.32"
         && map.GetValueOrDefault("upgradeToLatestMethod") == "1"
@@ -1039,14 +1037,14 @@ static bool TestSimpleStringMapRoundTrip()
 // SimpleStringMapCodec for both the request ({path: ""}) and the reply ({"res":"1"}).
 static bool TestSimpleStringMapRealDeleteTheme()
 {
-    byte[] requestPayload = Convert.FromHexString(
+    byte[] requestPayload = Compat.FromHex(
         "0000000100000038002F0064006100740061002F007400680065006D0065002F004D004B00" +
         "320030002F5B576BCD002F5B576BCD002E005400680065006D006500000000");
-    byte[] replyPayload = Convert.FromHexString(
+    byte[] replyPayload = Compat.FromHex(
         "0000000100000006007200650073000000020031");
 
-    var requestFields = new Dictionary<string, string>(SimpleStringMapCodec.Decode(requestPayload));
-    var replyFields = new Dictionary<string, string>(SimpleStringMapCodec.Decode(replyPayload));
+    var requestFields = SimpleStringMapCodec.Decode(requestPayload).ToDictionary(pair => pair.Key, pair => pair.Value);
+    var replyFields = SimpleStringMapCodec.Decode(replyPayload).ToDictionary(pair => pair.Key, pair => pair.Value);
 
     return requestFields.Count == 1
         && requestFields.GetValueOrDefault("/data/theme/MK20/字母/字母.Theme") == ""
@@ -1251,7 +1249,7 @@ static bool TestAnimatedKeyIcon()
     if (!key.RawJson.TryGetProperty("path", out var pathEl) || pathEl.GetString() != "") return false;
     if (!key.RawJson.TryGetProperty("paths", out var pathsEl)) return false;
     string? pathsValue = pathsEl.GetString();
-    if (string.IsNullOrEmpty(pathsValue) || !pathsValue.StartsWith("/image/MK20/cache/")) return false;
+    if (string.IsNullOrEmpty(pathsValue) || !pathsValue!.StartsWith("/image/MK20/cache/")) return false;
     if (!key.RawJson.TryGetProperty("frameDelays", out var fdEl)) return false;
     string[] delays = (fdEl.GetString() ?? "").Split(',');
     if (delays.Length < 2) return false;
@@ -1339,7 +1337,7 @@ static bool TestSecondaryScreenBackgroundEmbedding()
     //     "/image/640x656/cache/<file>" - a third, different asset namespace from either the
     //     key-icon one or the .mp4-based BackgroundItem one. See
     //     PROTOCOL_WAVESHARE_MK20.md §6.5/§10 Item #14 for the full investigation.
-    byte[] tinyPng = Convert.FromHexString(
+    byte[] tinyPng = Compat.FromHex(
         "89504E470D0A1A0A0000000D49484452000000040000000408020000002620441A" +
         "0000000C4944415478DA636460606000000005000106CDA31F0000000049454E44AE426082");
 
@@ -1663,7 +1661,7 @@ internal sealed class FlakyThenRecoveringTransport : Mk20Control.Protocol.Transp
         DataReceived?.Invoke(this, frame.Encode());
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public ValueTask DisposeAsync() => default;
 }
 
 /// <summary>Fake transport for the "device fully locked up" scenario: FILE_END never acks, AND
@@ -1722,7 +1720,7 @@ internal sealed class FullyDeadTransport : Mk20Control.Protocol.Transport.ISeria
         DataReceived?.Invoke(this, frame.Encode());
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public ValueTask DisposeAsync() => default;
 }
 
 /// <summary>Minimal fake transport for <see cref="TestUploadThemeFileChunking"/>: auto-acks FILE_START/FILE_END and records the exact byte-count of every WriteAsync call made after FILE_START, to verify chunk sizes.</summary>
@@ -1787,7 +1785,7 @@ internal sealed class ChunkCapturingTransport : Mk20Control.Protocol.Transport.I
         DataReceived?.Invoke(this, frame.Encode());
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public ValueTask DisposeAsync() => default;
 }
 
 /// <summary>Fake transport that acks FindDevice/GetDeviceTheme/SetDeviceDeleteTheme/etc. immediately but NEVER acks SetDeviceReload - simulates a device that has stopped responding specifically to reload requests.</summary>
@@ -1823,7 +1821,7 @@ internal sealed class NeverAckTransport : Mk20Control.Protocol.Transport.ISerial
         return Task.CompletedTask;
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public ValueTask DisposeAsync() => default;
 }
 
 /// <summary>Fake transport that acks every command after a fixed delay, recording send/ack timestamps - used to verify theme operations are serialized rather than overlapping.</summary>
@@ -1865,7 +1863,7 @@ internal sealed class SlowAckTransport : Mk20Control.Protocol.Transport.ISerialT
         return Task.CompletedTask;
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public ValueTask DisposeAsync() => default;
 }
 
 internal sealed record UsbRow(int FrameNumber, bool DirectionIn, string CapData);
